@@ -207,7 +207,7 @@ pre-commit:
 
 [group('Setup')]
 install-git-hooks:
-    ln -srf pre-commit.sh .git/hooks/pre-commit
+    ln -srf bin/pre-commit.sh .git/hooks/pre-commit
 
 # Run extended checks that are not part of the normal CI pipeline.
 [group('Code Quality')]
@@ -257,3 +257,6 @@ ensure-command +command:
             exit 1
         fi
     done
+
+benchmark-hot-compilation:
+    bin/benchmark-hot-compilation.sh
