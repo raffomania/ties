@@ -10,7 +10,6 @@ path = [
     "migrations/*.sql",
     "Justfile",
     ".github/**.yml",
-    "pre-commit.sh",
     "Cargo.toml",
     ".rustfmt.toml",
     "Dockerfile",
@@ -23,6 +22,7 @@ path = [
     "tailwind.config.js",
     ".config/*.toml",
     ".cargo/*.toml",
+    "bin/*",
 ]
 SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "AGPL-3.0-only"
