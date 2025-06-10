@@ -1,3 +1,9 @@
+cargo-features = ["codegen-backend"]
+
+# TODO somehow this doesn't get applied in CI
+[profile.dev]
+codegen-backend = "cranelift"
+
 [package]
 name = "ties"
 version = "0.1.0"
