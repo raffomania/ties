@@ -8,5 +8,6 @@ mod index;
 mod lists;
 mod migrations;
 mod response_error;
+mod search;
 mod users;
 mod util;

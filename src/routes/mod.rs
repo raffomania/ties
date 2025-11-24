@@ -5,3 +5,4 @@ pub mod index;
 pub mod links;
 pub mod lists;
 pub mod users;
+pub mod search;
