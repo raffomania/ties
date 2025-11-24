@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select bookmarks.id\n            from bookmarks\n            where (bookmarks.title ilike '%' || $1 || '%')\n                and bookmarks.ap_user_id = $2\n                and ($3::uuid is null or bookmarks.id < $3)\n            order by bookmarks.id desc\n            limit 51\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1976ccb12fde8be0457fa83eceb4d04b35e5203830d8ae5bf8d9a653bbc0b583"
+}

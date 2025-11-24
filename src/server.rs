@@ -59,6 +59,7 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
         .merge(routes::bookmarks::router())
         .merge(routes::links::router())
         .merge(routes::federation::router())
+        .merge(routes::search::router())
         .merge(routes::assets::router().with_state(()))
         // TODO add layer to use the same URL for AP and HTML
         // this should simplify things and be more error tolerant for other services

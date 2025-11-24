@@ -9,6 +9,7 @@ use crate::{
 
 pub struct Template {
     pub authed_info: Option<AuthedInfo>,
+    pub previous_search_input: Option<String>,
 }
 
 impl Template {
@@ -20,18 +21,52 @@ impl Template {
         };
         Ok(Template {
             authed_info: auth_info,
+            previous_search_input: None,
         })
     }
 }
 
 pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> Element {
-    base_document(div(class("flex-row-reverse h-full sm:flex")).with([
-        main_(class("sm:overflow-y-auto sm:grow")).with(children),
-        match &layout.authed_info {
-            Some(info) => sidebar(info),
-            None => fragment(),
-        },
-    ]))
+    base_document(
+        div(class("flex-row-reverse h-full sm:flex")).with([
+            main_(class("sm:overflow-y-auto sm:grow"))
+                .with(match &layout.authed_info {
+                    Some(_info) => search(layout.previous_search_input.as_deref()),
+                    None => fragment(),
+                })
+                .with(children),
+            match &layout.authed_info {
+                Some(info) => sidebar(info),
+                None => fragment(),
+            },
+        ]),
+    )
+}
+
+fn search(previous_input: Option<&str>) -> Element {
+    div(class("p-2 bg-neutral-900")).with(
+        form([
+            action("/search"),
+            method("get"),
+            attr("hx-boost", "true"),
+            class("inline-flex w-full"),
+        ])
+        .with([
+            // TODO: When using tridactyl's "go to input", switching to the button by pressing the
+            // tab key doesn't work
+            input([
+                type_("text"),
+                name("q"),
+                placeholder("Search all bookmarks"),
+                value(previous_input.unwrap_or("")),
+                class("leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700"),
+            ]),
+            button(class(
+                "px-2 text-neutral-400 shrink border-y border-r rounded-r border-neutral-700",
+            ))
+            .with("Search"),
+        ]),
+    )
 }
 
 fn sidebar(authed_info: &AuthedInfo) -> Element {
@@ -50,7 +85,7 @@ fn sidebar(authed_info: &AuthedInfo) -> Element {
         .with([
             a([
                 href(format!("/user/{}", authed_info.username)),
-                class("px-2 font-bold rounded  hover:bg-neutral-800"),
+                class("px-2 font-bold rounded  hover:bg-neutral-800 border border-neutral-900"),
             ])
             .with(&authed_info.username),
             form([action("/logout"), method("post")]).with(

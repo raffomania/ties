@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select count(bookmarks.id) as \"count!\" from bookmarks\n            where (bookmarks.title ilike '%' || $1 || '%')\n                and bookmarks.ap_user_id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e9f1d7af40704978a2a814e5f5307e2d558580b876ab5fcf25078b058faed161"
+}

@@ -86,6 +86,7 @@ test-log = { version = "0.2.19", features = [
     "trace",
 ], default-features = false }
 insta = "1.46.1"
+pretty_assertions = "1.4.1"
 
 [package.metadata.bin]
 just = { version = "1.38.0", locked = true }
