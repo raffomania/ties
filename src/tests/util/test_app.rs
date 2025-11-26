@@ -107,6 +107,7 @@ impl TestApp {
     }
 
     pub async fn login_user(&mut self, username: &str, password: &str) {
+        self.logged_in_cookie = None;
         let login_page = self.req().get("/login").await.test_page().await;
 
         let input = crate::forms::users::Login {
