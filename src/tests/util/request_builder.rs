@@ -10,6 +10,7 @@ use tower::{Service, ServiceExt};
 use visdom::Vis;
 
 use super::dom::assert_form_matches;
+use crate::tests::util::{html_decode::html_decode, test_app::TestApp};
 
 pub struct RequestBuilder {
     router: axum::Router,
@@ -170,5 +171,18 @@ impl TestPage {
     pub fn expect_status(mut self, expected: StatusCode) -> Self {
         self.request_builder = self.request_builder.expect_status(expected);
         self
+    }
+
+    pub async fn visit_link(&self, app: &mut TestApp, text_contains: &str) -> TestPage {
+        let url = self
+            .dom
+            .find("a")
+            .filter_by(|_, a| a.html().contains(text_contains))
+            .attr("href")
+            .unwrap()
+            .to_string();
+        let url = html_decode(&url);
+
+        app.req().get(&url).await.test_page().await
     }
 }
