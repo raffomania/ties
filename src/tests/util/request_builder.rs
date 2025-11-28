@@ -156,6 +156,7 @@ impl TestResponse {
 
 pub struct TestPage {
     pub dom: visdom::types::Elements<'static>,
+    #[expect(dead_code)]
     pub url: String,
     pub request_builder: RequestBuilder,
 }
@@ -163,9 +164,29 @@ pub struct TestPage {
 impl TestPage {
     pub async fn fill_form<I: Serialize>(self, form_selector: &str, input: &I) -> TestResponse {
         let form = self.dom.find(form_selector);
+        let method = form
+            .attr("method")
+            .map_or("post".to_string(), |val| val.to_string())
+            .to_lowercase();
+
+        let action = form
+            .attr("action")
+            .expect("Missing action attribute for form {form:?}")
+            .to_string();
         assert_form_matches(&form, &input);
 
-        self.request_builder.post(&self.url, input).await
+        match method.as_str() {
+            "post" => self.request_builder.post(&action, input).await,
+            "get" => {
+                let queries = serde_qs::to_string(input).expect("Failed to serialize input");
+                let url = format!("{action}?{queries}");
+                self.request_builder.get(&url).await
+            }
+            _ => panic!(
+                "Unsupported method {method} for form with action {:?}",
+                form.attr("action")
+            ),
+        }
     }
 
     pub fn expect_status(mut self, expected: StatusCode) -> Self {
