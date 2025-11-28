@@ -10,7 +10,7 @@ use tower::{Service, ServiceExt};
 use visdom::Vis;
 
 use super::dom::assert_form_matches;
-use crate::tests::util::{html_decode::html_decode, test_app::TestApp};
+use crate::tests::util::html_decode::html_decode;
 
 pub struct RequestBuilder {
     router: axum::Router,
@@ -18,14 +18,16 @@ pub struct RequestBuilder {
     /// If it returns a different status, we'll panic.
     expected_status: StatusCode,
     request: request::Builder,
+    logged_in_cookie: Option<String>,
 }
 
 impl RequestBuilder {
-    pub fn new(router: &Router) -> Self {
+    pub fn new(router: &Router, logged_in_cookie: Option<String>) -> Self {
         RequestBuilder {
             router: router.clone(),
             expected_status: StatusCode::OK,
             request: Request::builder(),
+            logged_in_cookie,
         }
     }
 
@@ -47,6 +49,10 @@ impl RequestBuilder {
     where
         Input: Serialize,
     {
+        if let Some(cookie) = &self.logged_in_cookie {
+            self.request = self.request.header(axum::http::header::COOKIE, cookie);
+        }
+
         let request = self
             .request
             .method(http::Method::POST)
@@ -71,12 +77,15 @@ impl RequestBuilder {
 
         TestResponse {
             response,
-            router: self.router,
-            original_url: url.to_string(),
+            new_request_builder: RequestBuilder::new(&self.router, self.logged_in_cookie),
         }
     }
 
     pub async fn get(mut self, url: &str) -> TestResponse {
+        if let Some(cookie) = &self.logged_in_cookie {
+            self.request = self.request.header(axum::http::header::COOKIE, cookie);
+        }
+
         let request = self.request.uri(url).body(Body::empty()).unwrap();
 
         let response = ServiceExt::<Request<Body>>::ready(&mut self.router)
@@ -92,8 +101,7 @@ impl RequestBuilder {
 
         TestResponse {
             response,
-            router: self.router,
-            original_url: url.to_string(),
+            new_request_builder: RequestBuilder::new(&self.router, self.logged_in_cookie),
         }
     }
 
@@ -113,8 +121,7 @@ impl RequestBuilder {
 
 pub struct TestResponse {
     response: Response<Body>,
-    original_url: String,
-    router: axum::Router,
+    new_request_builder: RequestBuilder,
 }
 
 impl TestResponse {
@@ -148,16 +155,14 @@ impl TestResponse {
 
         TestPage {
             dom,
-            url: self.original_url,
-            request_builder: RequestBuilder::new(&self.router),
+            // TODO this doesn't persist the previous login cookie
+            request_builder: self.new_request_builder,
         }
     }
 }
 
 pub struct TestPage {
     pub dom: visdom::types::Elements<'static>,
-    #[expect(dead_code)]
-    pub url: String,
     pub request_builder: RequestBuilder,
 }
 
@@ -194,7 +199,7 @@ impl TestPage {
         self
     }
 
-    pub async fn visit_link(&self, app: &mut TestApp, text_contains: &str) -> TestPage {
+    pub async fn visit_link(self, text_contains: &str) -> TestPage {
         let url = self
             .dom
             .find("a")
@@ -204,6 +209,6 @@ impl TestPage {
             .to_string();
         let url = html_decode(&url);
 
-        app.req().get(&url).await.test_page().await
+        self.request_builder.get(&url).await.test_page().await
     }
 }

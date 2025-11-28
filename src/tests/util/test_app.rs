@@ -66,11 +66,7 @@ impl TestApp {
     }
 
     pub fn req(&mut self) -> RequestBuilder {
-        let mut req = RequestBuilder::new(&self.router);
-        if let Some(cookie) = &self.logged_in_cookie {
-            req = req.header(axum::http::header::COOKIE, cookie);
-        }
-        req
+        RequestBuilder::new(&self.router, self.logged_in_cookie.clone())
     }
 
     /// Since there's no route for creating users yet, we're doing this via the
