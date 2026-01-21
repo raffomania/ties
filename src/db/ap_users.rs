@@ -67,7 +67,7 @@ impl TryFrom<ApUserRow> for ApUser {
 pub async fn insert(tx: &mut AppTx, create_user: CreateApUser) -> ResponseResult<ApUser> {
     // TODO either take base_url here like in db::bookmarks::insert, or refactor
     // InsertBookmark to already contain an ap_id property
-    // https://github.com/raffomania/linkblocks/issues/163
+    // https://github.com/raffomania/ties/issues/163
     let user = query_as!(
         ApUserRow,
         r#"

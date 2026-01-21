@@ -67,7 +67,7 @@ async fn post_create(
     // TODO exclude items that are already linked
     // TODO: if source is public, only show public destinations
     // if source is private, only show private destinations from the same owner
-    // https://github.com/raffomania/linkblocks/issues/149
+    // https://github.com/raffomania/ties/issues/149
     let search_results = match search_term {
         Some(search_term) => db::lists::search(&mut tx, search_term, auth_user.ap_user_id).await?,
         None => Vec::new(),
@@ -75,7 +75,7 @@ async fn post_create(
 
     // TODO if the link points to a public list and we haven't sent an activity for
     // this src bookmark before, send an activity now
-    // https://github.com/raffomania/linkblocks/issues/175
+    // https://github.com/raffomania/ties/issues/175
     if let (Some(src), Some(dest), true) = (&src_from_db, &dest_from_db, input.submitted) {
         db::links::insert(
             &mut tx,

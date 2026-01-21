@@ -1,6 +1,6 @@
 # Writing Migrations
 
-Linkblocks uses a custom migration system that wraps the migration runner from the sqlx crate.
+ties uses a custom migration system that wraps the migration runner from the sqlx crate.
 This allows us to run arbitrary rust code before and after the SQL part of a migration, within the same transaction.
 
 However, it means that the rust code in the project needs to compile successfully so you can run the migrations.

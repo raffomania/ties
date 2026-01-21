@@ -12,7 +12,7 @@ pub fn base_document(children: impl IntoElements) -> Element {
                     name("viewport"),
                     content("width=device-width,initial-scale=1"),
                 ]),
-                title_tag([]).with("linkblocks"),
+                title_tag([]).with("ties"),
             ]))
             .with(body(class("w-full h-full text-gray-200 bg-neutral-800")).with(children)),
     )

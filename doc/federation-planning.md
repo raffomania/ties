@@ -1,12 +1,12 @@
 # Plan for Implementing Federation
 
-This document serves as a technical plan for implementing federation in linkblocks, including a survey of how other platforms federate.
+This document serves as a technical plan for implementing federation in ties, including a survey of how other platforms federate.
 
-This is *not* a standard [FEDERATION.md](https://codeberg.org/fediverse/fep/src/branch/main/fep/67ff/fep-67ff.md) document, as it does not represent linkblocks' current implementation.
+This is *not* a standard [FEDERATION.md](https://codeberg.org/fediverse/fep/src/branch/main/fep/67ff/fep-67ff.md) document, as it does not represent ties' current implementation.
 
 ## Compatibility
 
-We currently aim for compatibility with Mastodon, Lemmy and Betula. As each of these services has a different feature set, compatibility means a lowest common denominator which both linkblocks and the other service support.
+We currently aim for compatibility with Mastodon, Lemmy and Betula. As each of these services has a different feature set, compatibility means a lowest common denominator which both ties and the other service support.
 
 ## Users
 
@@ -16,7 +16,7 @@ Credentials for logging in live in a separate database table from ActivityPub us
 ## Lists
 
 We'll probably build something similar to [Lemmy's groups](https://codeberg.org/fediverse/fep/src/branch/main/fep/1b12/fep-1b12.md).
-This allows users to receive updates for individual lists - on linkblocks, by adding them to one of their own lists, on mastodon by following the list's actor, and on lemmy by subscribing to the list as a "community".
+This allows users to receive updates for individual lists - on ties, by adding them to one of their own lists, on mastodon by following the list's actor, and on lemmy by subscribing to the list as a "community".
 
 Private lists are not federated at all. Public lists can not link to private lists. Private lists can link to private lists of the same owner.
 
@@ -30,18 +30,18 @@ Betula federates bookmarks [as notes](https://git.sr.ht/~bouncepaw/betula/tree/m
 
 Lemmy's posts are `Page` objects. It seems like mastodon can ingest both `Note` and `Page` objects as toots, altough pages have their URL appended to the bottom.
 
-Mastodon does not support attachments pointing to websites, only for images, video and audio. This means we'll have to inline the link in the `content` field, like betula does it. Luckily, when reading bookmarks objects from linkblocks, we can just ignore the `content` field and read the attachment instead.
+Mastodon does not support attachments pointing to websites, only for images, video and audio. This means we'll have to inline the link in the `content` field, like betula does it. Luckily, when reading bookmarks objects from ties, we can just ignore the `content` field and read the attachment instead.
 
 See more at https://docs.joinmastodon.org/spec/activitypub/#status.
 
 ## Knowledge Graph
 
-In linkblocks' context, a "knowledge graph" means that connections (also called links or graph edges) can exist between any two of the following objects:
+In ties' context, a "knowledge graph" means that connections (also called links or graph edges) can exist between any two of the following objects:
 
 - bookmarks
 - notes
 
-On top of this data model, linkblocks can implement lots of functionality:
+On top of this data model, ties can implement lots of functionality:
 
 - note -> note links: Tree of threaded comments
 - note -> bookmark links: A list of bookmarks related to a comment / headline
@@ -71,7 +71,7 @@ Links from a group to its entries can be listed through its `replies` field. Lin
 
 After a scan of lemmy's code, it seems like it doesn't currently work with either of these approaches: `inReplyTo` will reject anything that is not a single post or a single comment.
 
-Lemmy's cross-posts are a little similar to linkblocks' links between bookmarks and multiple lists, but they are duplicated in lemmy: each group gets its own post, and they are fetched query time in each read operation.
+Lemmy's cross-posts are a little similar to ties' links between bookmarks and multiple lists, but they are duplicated in lemmy: each group gets its own post, and they are fetched query time in each read operation.
 
 ### Ibis Wiki
 

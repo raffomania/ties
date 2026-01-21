@@ -1,31 +1,33 @@
-# linkblocks
+# ties
+
+(previously named "linkblocks")
 
 **📚 A federated network to bookmark, share and discuss good web pages with your friends.**
 
-It's getting harder and harder to find good web pages. When you do find good ones, it's worth hanging onto them. Linkblocks is your own small corner of the web, where you can keep your favorite pages, and share them with your friends to help them find good web pages too.
+It's getting harder and harder to find good web pages. When you do find good ones, it's worth hanging onto them. ties is your own small corner of the web, where you can keep your favorite pages, and share them with your friends to help them find good web pages too.
 
-🔭 Linkblocks is in an exploratory phase where we're trying out different ways to make it work well. You can try it out, but big and small things might change with every update.
+🔭 ties is in an exploratory phase where we're trying out different ways to make it work well. You can try it out, but big and small things might change with every update.
 
 ## Vision
 
-- On linkblocks, you can organize, connect, browse and search your favorite web pages.
-- Share carefully curated or wildly chaotic collections of the stuff you really really like with other linkblocks users and the whole world wide web.
+- On ties, you can organize, connect, browse and search your favorite web pages.
+- Share carefully curated or wildly chaotic collections of the stuff you really really like with other ties users and the whole world wide web.
 - Follow users with a similar taste and get a feed of fresh good web pages every day. Browse others' collections to discover new web pages from topics you like.
 - Annotate, highlight and discuss web pages together with your friends.
 - Mark users as trusted whose standards for web pages match yours - and then search through all trusted bookmarks to find good pages on a specific topic. Add trusted users of your trusted users to your search range to cast a wider net.
 
-[See this blog post for more on the vision behind linkblocks.](https://www.rafa.ee/articles/introducing-linkblocks-federated-bookmark-manager/)
+[See this blog post for more on the vision behind ties.](https://www.rafa.ee/articles/introducing-linkblocks-federated-bookmark-manager/)
 
 ## Related Reading
 
-- [Where have all the Websites gone?](https://www.fromjason.xyz/p/notebook/where-have-all-the-websites-gone/) talks about the importance of website curation. Linkblocks is for publicly curating websites.
+- [Where have all the Websites gone?](https://www.fromjason.xyz/p/notebook/where-have-all-the-websites-gone/) talks about the importance of website curation. ties is for publicly curating websites.
 - [The Small Website Discoverability Crisis](https://www.marginalia.nu/log/19-website-discoverability-crisis/) similar to the previous link, it encourages everyone to share reading lists. By the author of the amazing [marginalia search engine](https://search.marginalia.nu/).
 
 ## Installation and Configuration
 
-⚠️ linkblocks is in an alpha stage. Consider all data in the system to be publicly available, even bookmarks in private lists. Only single-user instances are supported.
+⚠️ ties is in an alpha stage. Consider all data in the system to be publicly available, even bookmarks in private lists. Only single-user instances are supported.
 
-You can run the container at `ghcr.io/raffomania/linkblocks`.
+You can run the container at `ghcr.io/raffomania/ties`.
 It's recommended to use the tag of the latest stable release, e.g. `0.1.0`.
 If you're feeling adventurous, there's a `latest` tag which tracks the latest commit on the `main` branch.
 
@@ -35,7 +37,7 @@ See [doc/docker-compose.yml](doc/docker-compose.yml) for an example configuratio
 
 ### Building from Source
 
-Install the rust toolchain, version `1.88.0` or later. Then build the linkblocks binary using:
+Install the rust toolchain, version `1.88.0` or later. Then build the ties binary using:
 
 ```sh
 cargo build --release
@@ -43,14 +45,14 @@ cargo build --release
 
 ### Running the Server Binary
 
-linkblocks is deployed using a single binary.
-If you've built the binary or downloaded it from [GitHub releases](https://github.com/raffomania/linkblocks/releases), you can run the server using `linkblocks start`.
+ties is deployed using a single binary.
+If you've built the binary or downloaded it from [GitHub releases](https://github.com/raffomania/ties/releases), you can run the server using `ties start`.
 The only dependency is a PostgreSQL instance.
 
 ### Configuring the Server
 
-Linkblocks is configured through environment variables or command line options.
-Run `linkblocks start --help` to for comprehensive documentation on the available options.
+ties is configured through environment variables or command line options.
+Run `ties start --help` to for comprehensive documentation on the available options.
 Let's go over a few of the central knobs you might want to configure:
 
 - `DATABASE_URL`: [PostgreSQL Connection URI](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS) for connecting to the database.
@@ -58,7 +60,7 @@ Let's go over a few of the central knobs you might want to configure:
 - `LISTEN`: IP address and port to listen on.
 - `ADMIN_USERNAME`, `ADMIN_PASSWORD` (Optional): Create an admin user with these credentials if it doesn't exist yet.
 - `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ISSUER_URL`, `OIDC_ISSUER_NAME` (Optional): Configuration for single-sign-on using an OIDC provider.
-- `TLS_CERT`, `TLS_KEY` (Optional): Paths to TLS keypair, if you'd like to serve linkblocks via TLS directly. If you don't set this, it's recommended to use a reverse proxy in front of linkblocks.
+- `TLS_CERT`, `TLS_KEY` (Optional): Paths to TLS keypair, if you'd like to serve ties via TLS directly. If you don't set this, it's recommended to use a reverse proxy in front of ties.
 
 ### Upgrading & Stability
 
@@ -100,7 +102,7 @@ Then, open [http://localhost:4040] in your browser.
 1. Go to the admin area and log in as `admin@rauthy.localhost` with the password `test`.
 1. Create a new client. Use `{BASE_URL}/login_oidc_redirect` as your redirect URI, with the base URL defined in your `.env` file. Set access and id algorithm to "EdDSA", if it's not already set.
 1. Enter your client ID and secret in your `.env` file.
-1. Restart the linkblocks server. Click the  "Sign in with Rauthy" button at the bottom of linkblocks' login page. If it's not there, check the server logs to see if something related to OIDC went wrong.
+1. Restart the ties server. Click the  "Sign in with Rauthy" button at the bottom of ties' login page. If it's not there, check the server logs to see if something related to OIDC went wrong.
 1. Use the same admin credentials as above to log into rauthy again.
 
 ### Writing Migrations
@@ -126,12 +128,12 @@ This web app is implemented using technologies hand-picked for a smooth developm
 
 ## Software Bill of Materials
 
-An up-to-date Software Bill of Materials can be found in the [linkblocks.cdx.json](linkblocks.cdx.json) file.
+An up-to-date Software Bill of Materials can be found in the [ties.cdx.json](ties.cdx.json) file.
 
 ## Acknowledgements
 
 <img src="doc/nlnet.svg?raw=true" alt="NLnet logo" height="60em"> <img src="doc/ngi_zero.svg?raw=true" alt="NGI Zero Commons logo" height="60em">
 
-linkblocks is made possible with a [donation](https://nlnet.nl/commonsfund/acknowledgement.pdf) from NGI Zero Commons Fund.
+ties is made possible with a [donation](https://nlnet.nl/commonsfund/acknowledgement.pdf) from NGI Zero Commons Fund.
 NGI Zero Commons Fund is part of the [European Commission](https://ec.europa.eu/)'s [Next Generation Internet](https://ngi.eu/) initiative, established under the aegis of the [DG Communications Networks, Content and Technology](https://ec.europa.eu/info/departments/communications-networks-content-and-technology_en).
 Additional funding is made available by the Swiss State Secretariat for Education, Research and Innovation (SERI).

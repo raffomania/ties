@@ -22,8 +22,8 @@ generate-sbom:
     # Remove some fields that make the sbom non-reproducible.
     # https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/556
     # https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/514
-    jq --sort-keys '.components |= sort_by(.purl) | del(.serialNumber) | del(.metadata.timestamp) | del(..|select(type == "string" and test("^path\\+file")))' linkblocks_bin.cdx.json > linkblocks.cdx.json
-    rm linkblocks_bin.cdx.json
+    jq --sort-keys '.components |= sort_by(.purl) | del(.serialNumber) | del(.metadata.timestamp) | del(..|select(type == "string" and test("^path\\+file")))' ties_bin.cdx.json > ties.cdx.json
+    rm ties_bin.cdx.json
 
 
 [group('Database')]
@@ -31,14 +31,14 @@ start-database:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    if podman ps --format "{{{{.Names}}" | grep -wq linkblocks_postgres; then
+    if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres; then
         echo "Database is running."
         exit
     fi
 
-    if ! podman inspect linkblocks_postgres &> /dev/null; then
+    if ! podman inspect ties_postgres &> /dev/null; then
         podman create \
-            --name linkblocks_postgres \
+            --name ties_postgres \
             --health-cmd="pg_isready" \
             --health-startup-cmd="pg_isready" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME} \
@@ -46,9 +46,9 @@ start-database:
             postgres
     fi
 
-    podman start linkblocks_postgres
+    podman start ties_postgres
 
-    podman wait --condition=healthy linkblocks_postgres
+    podman wait --condition=healthy ties_postgres
 
 [group('OIDC')]
 start-rauthy:
@@ -56,14 +56,14 @@ start-rauthy:
     set -euxo pipefail
 
     # TODO: extract helpers for repetitive podman tasks.
-    if podman ps --format "{{{{.Names}}" | grep -wq linkblocks_rauthy; then
+    if podman ps --format "{{{{.Names}}" | grep -wq ties_rauthy; then
         echo "Rauthy is running."
         exit
     fi
 
-    if ! podman inspect linkblocks_rauthy &> /dev/null; then
+    if ! podman inspect ties_rauthy &> /dev/null; then
         podman create \
-            --replace --name linkblocks_rauthy \
+            --replace --name ties_rauthy \
             --pull=missing \
             -e COOKIE_MODE=danger-insecure \
             -e PUB_URL=localhost:${RAUTHY_PORT} \
@@ -76,23 +76,23 @@ start-rauthy:
             ghcr.io/sebadob/rauthy:0.29.4
     fi
 
-    podman start linkblocks_rauthy
+    podman start ties_rauthy
 
 [group('OIDC')]
 stop-rauthy:
-    podman stop linkblocks_rauthy
+    podman stop ties_rauthy
 
 [group('OIDC')]
 wipe-rauthy: stop-rauthy
-    podman rm linkblocks_rauthy
+    podman rm ties_rauthy
 
 [group('Database')]
 stop-database:
-    podman stop --ignore linkblocks_postgres
+    podman stop --ignore ties_postgres
 
 [group('Database')]
 wipe-database: stop-database
-    podman rm --ignore linkblocks_postgres
+    podman rm --ignore ties_postgres
     # SQLX_OFFLINE: when migrating an empty db, checking queries against
     # it would fail during compilation
     SQLX_OFFLINE=true just migrate-database
@@ -103,21 +103,21 @@ migrate-database: start-database
 
 [group('Database')]
 exec-database-cli: start-database
-    podman exec -ti -u postgres linkblocks_postgres psql ${DATABASE_NAME}
+    podman exec -ti -u postgres ties_postgres psql ${DATABASE_NAME}
 
 [group('Testing')]
 start-test-database:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    if podman ps --format "{{{{.Names}}" | grep -wq linkblocks_postgres_test; then
+    if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres_test; then
         echo "Test database is running."
         exit
     fi
 
-    if ! podman inspect linkblocks_postgres_test &> /dev/null; then
+    if ! podman inspect ties_postgres_test &> /dev/null; then
         podman create \
-            --replace --name linkblocks_postgres_test --image-volume tmpfs \
+            --replace --name ties_postgres_test --image-volume tmpfs \
             --health-cmd pg_isready --health-interval 10s \
             --health-startup-cmd="pg_isready" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME_TEST} \
@@ -129,9 +129,9 @@ start-test-database:
             -c autovacuum=off
     fi
 
-    podman start linkblocks_postgres_test
+    podman start ties_postgres_test
 
-    podman wait --condition=healthy linkblocks_postgres
+    podman wait --condition=healthy ties_postgres
 
 [group('Testing')]
 test *args: start-test-database generate-database-info
@@ -142,7 +142,7 @@ test *args: start-test-database generate-database-info
 [group('Development')]
 development-cert: (ensure-command "mkcert")
     mkdir -p development_cert
-    test -f development_cert/localhost.crt || mkcert -cert-file development_cert/localhost.crt -key-file development_cert/localhost.key localhost linkblocks.localhost 127.0.0.1 ::1
+    test -f development_cert/localhost.crt || mkcert -cert-file development_cert/localhost.crt -key-file development_cert/localhost.key localhost ties.localhost 127.0.0.1 ::1
 
 [group('Development')]
 insert-demo-data: migrate-database
@@ -172,7 +172,7 @@ build-podman-container target="release":
     [[ "{{target}}" == "debug" ]] && cargo_flag="" || cargo_flag="--{{target}}"
     cargo build $cargo_flag
 
-    podman build --format docker --platform linux/amd64 --manifest linkblocks -f Containerfile target/{{target}}
+    podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{target}}
 
 [group('Code Quality')]
 lint *args: reuse-lint

@@ -1,12 +1,12 @@
 services:
-  linkblocks:
-    image: ghcr.io/raffomania/linkblocks
+  ties:
+    image: ghcr.io/raffomania/ties
     depends_on:
       db:
         condition: service_healthy
     environment:
       - LISTEN=0.0.0.0:3000
-      - DATABASE_URL=postgres://linkblocks:linkblocks@db/linkblocks
+      - DATABASE_URL=postgres://ties:ties@db/ties
       - RUST_LOG=info
       # Careful: This will form the domain part of user handles, such as "rafael@ties.pub",
       # and cannot be changed once set!
@@ -20,9 +20,9 @@ services:
   db:
     image: docker.io/library/postgres:18
     environment:
-      - POSTGRES_DB=linkblocks
-      - POSTGRES_USER=linkblocks
-      - POSTGRES_PASSWORD=linkblocks
+      - POSTGRES_DB=ties
+      - POSTGRES_USER=ties
+      - POSTGRES_PASSWORD=ties
     volumes:
       - db:/var/lib/postgresql
     command: |
@@ -33,7 +33,7 @@ services:
       -c effective_cache_size=32MB
 
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "linkblocks"]
+      test: ["CMD", "pg_isready", "-U", "ties"]
       interval: 60s
       start_period: 30s
     restart: always

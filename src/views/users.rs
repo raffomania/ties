@@ -24,7 +24,7 @@ fn bookmarklet_help() -> Element {
     fragment().with([
         p(class("mb-2")).with(
             "Click the bookmarklet on any website to add it as a bookmark in
-      linkblocks!",
+      ties!",
         ),
         p([]).with("To install, drag the following link to your bookmarks / favorites toolbar:"),
     ])
@@ -45,5 +45,5 @@ fn bookmarklet(base_url: &Url) -> Element {
              26title%3D%22%0A%20%20%2BencodeURIComponent(document.title)%0A)%7D)()",
         )),
     ])
-    .with("Add to linkblocks")
+    .with("Add to ties")
 }
