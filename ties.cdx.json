@@ -12849,14 +12849,14 @@
     "component": {
       "components": [
         {
-          "name": "linkblocks",
-          "purl": "pkg:cargo/linkblocks@0.1.0?download_url=file://.#src/lib.rs",
+          "name": "ties",
+          "purl": "pkg:cargo/ties@0.1.0?download_url=file://.#src/lib.rs",
           "type": "library",
           "version": "0.1.0"
         },
         {
-          "name": "linkblocks",
-          "purl": "pkg:cargo/linkblocks@0.1.0?download_url=file://.#src/main.rs",
+          "name": "ties",
+          "purl": "pkg:cargo/ties@0.1.0?download_url=file://.#src/main.rs",
           "type": "application",
           "version": "0.1.0"
         }
@@ -12866,8 +12866,8 @@
           "expression": "AGPL-3.0-or-later"
         }
       ],
-      "name": "linkblocks",
-      "purl": "pkg:cargo/linkblocks@0.1.0?download_url=file://.#src/main.rs",
+      "name": "ties",
+      "purl": "pkg:cargo/ties@0.1.0?download_url=file://.#src/main.rs",
       "scope": "required",
       "type": "application",
       "version": "0.1.0"

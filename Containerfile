@@ -1,3 +1,3 @@
 FROM debian:testing-slim
-COPY --chmod=755 linkblocks /app/
-ENTRYPOINT ["/app/linkblocks", "start"]
+COPY --chmod=755 ties /app/
+ENTRYPOINT ["/app/ties", "start"]

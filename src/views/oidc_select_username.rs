@@ -22,7 +22,7 @@ pub fn view(Data { errors, form_input }: Data) -> Element {
             [
                 h1(
                     class("text-2xl font-bold tracking-tight text-center"),
-                    "Welcome to linkblocks! Please select a username.",
+                    "Welcome to ties! Please select a username.",
                 ),
                 p(
                     (),

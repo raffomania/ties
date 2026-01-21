@@ -57,7 +57,7 @@ pub async fn insert_demo_data(
                 private_lists.push(list);
             } else {
                 // TODO also create some links from private to private lists of the same owner
-                // https://github.com/raffomania/linkblocks/issues/148
+                // https://github.com/raffomania/ties/issues/148
                 public_lists.push(list);
             }
         }

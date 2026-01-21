@@ -19,7 +19,7 @@ pub struct Data {
 
 async fn get_metadata(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Metadata> {
     // TODO add indexes to optimize this query.
-    // https://github.com/raffomania/linkblocks/issues/153
+    // https://github.com/raffomania/ties/issues/153
     Ok(sqlx::query_as!(
         Metadata,
         r#"
@@ -46,7 +46,7 @@ pub async fn view(
 ) -> ResponseResult<Element> {
     let metadata = get_metadata(&mut tx, ap_user.id).await?;
     // TODO find out what the user-visible domain of the ApUser is and show it here
-    // https://github.com/raffomania/linkblocks/issues/154
+    // https://github.com/raffomania/ties/issues/154
     let children = fragment([
         header(
             [class("pt-3 mb-8")],

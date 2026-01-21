@@ -14,12 +14,12 @@ pub fn view() -> Element {
         [
             h1(
                 class("text-2xl font-bold tracking-tight text-center"),
-                "Welcome to the linkblocks demo!",
+                "Welcome to the ties demo!",
             ),
             p(
                 class("mt-10"),
-                "Here, you can try linkblocks with a temporary account. Every hour, All accounts \
-                 on this server are permanently deleted.",
+                "Here, you can try ties with a temporary account. Every hour, All accounts on \
+                 this server are permanently deleted.",
             ),
             button(
                 [

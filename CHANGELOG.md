@@ -1,6 +1,13 @@
-# linkblocks Changelog
+# ties Changelog
 
 ## Unreleased
+
+linkblocks is now named **ties**!
+
+### Breaking Changes
+
+- The container is now at `ghcr.io/raffomania/ties`.
+- Development environments will have to re-run `just development cert` if switching to the new default development base URL of `ties.localhost`.
 
 ### Internals
 

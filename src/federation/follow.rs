@@ -68,7 +68,7 @@ impl ActivityHandler for Follow {
         verify_is_remote_object(&self.actor, data)?;
         verify_domains_match(self.actor.inner(), &self.id)?;
         // TODO verify that someone on this server is following the actor
-        // https://github.com/raffomania/linkblocks/issues/180
+        // https://github.com/raffomania/ties/issues/180
         Ok(())
     }
 

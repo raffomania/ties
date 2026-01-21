@@ -185,7 +185,7 @@ struct LoginQuery {
 }
 
 // TODO: redirect to homepage if already logged in
-// https://github.com/raffomania/linkblocks/issues/177
+// https://github.com/raffomania/ties/issues/177
 async fn get_login(
     Query(query): Query<LoginQuery>,
     State(state): State<AppState>,
@@ -225,7 +225,7 @@ async fn get_start_page(
 
 // TODO: set this route as @url in activitypub person objects
 // https://www.w3.org/TR/activitystreams-vocabulary/#dfn-url
-// https://github.com/raffomania/linkblocks/issues/150
+// https://github.com/raffomania/ties/issues/150
 async fn get_profile(
     extract::Tx(mut tx): extract::Tx,
     Path(handle): Path<String>,

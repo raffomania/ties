@@ -60,7 +60,7 @@ impl TryFrom<BookmarkJson> for InsertBookmark {
         // TODO how to validate InsertBookmark?
         // ideally, we'd find a single point for the validation rules that
         // now live in CreateBookmark
-        // https://github.com/raffomania/linkblocks/issues/163
+        // https://github.com/raffomania/ties/issues/163
 
         Ok(create_bookmark)
     }
@@ -89,7 +89,7 @@ impl Object for db::Bookmark {
             // TODO according to ActivityStreams, this "identifies the MIME media type of the
             // referenced resource", but we currently do not fetch remote URLs so we
             // have no way of knowing the media type
-            // https://github.com/raffomania/linkblocks/issues/164
+            // https://github.com/raffomania/ties/issues/164
             media_type: None,
             kind: LinkType::Link,
         }];
@@ -117,7 +117,7 @@ impl Object for db::Bookmark {
         verify_is_remote_object(&json.id, data)?;
         // TODO see validation todo above
         // InsertBookmark::try_from(json.clone())?.validate()?;
-        // https://github.com/raffomania/linkblocks/issues/163
+        // https://github.com/raffomania/ties/issues/163
         Ok(())
     }
 

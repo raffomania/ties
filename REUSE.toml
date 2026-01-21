@@ -1,7 +1,7 @@
 # NOTE: This project does not attribute contributors individually. Instead refer to `git log --format="%an <%aE>" | sort -u` for a list of individual contributors.
 version = 1
-SPDX-PackageName = "linkblocks"
-SPDX-PackageDownloadLocation = "https://github.com/raffomania/linkblocks"
+SPDX-PackageName = "ties"
+SPDX-PackageDownloadLocation = "https://github.com/raffomania/ties"
 
 # "Proper" Source Code is AGPL-licensed
 [[annotations]]
@@ -24,23 +24,23 @@ path = [
     ".config/*.toml",
     ".cargo/*.toml",
 ]
-SPDX-FileCopyrightText = "linkblocks Contributors"
+SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "AGPL-3.0-only"
 
 # For docs, other prose, and images, a CC-style license is better suited
 [[annotations]]
 path = ["**.md", "doc/*.svg"]
-SPDX-FileCopyrightText = "linkblocks Contributors"
+SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
-# People deploying linkblocks can copy .env.example and do whatever they wish with it.
+# People deploying ties can copy .env.example and do whatever they wish with it.
 [[annotations]]
 path = [
     ".env.example",
     "doc/docker-compose.yml",
     "doc/.docker-compose.test.yml",
 ]
-SPDX-FileCopyrightText = "linkblocks Contributors"
+SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "CC0-1.0"
 
 # Vendored dependencies
@@ -61,7 +61,7 @@ path = [
     ".sqlx/*.json",
     "Cargo.lock",
     "src/tests/snapshots/*.snap",
-    "linkblocks.cdx.json",
+    "ties.cdx.json",
 ]
-SPDX-FileCopyrightText = "linkblocks Contributors"
+SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "CC0-1.0"

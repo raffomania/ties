@@ -3,7 +3,7 @@
 # `just check-example-docker-compose`.
 # Do not use these values for production.
 services:
-  linkblocks:
+  ties:
     environment:
       - BASE_URL=http://localhost:3000
       - ADMIN_USERNAME=testuser

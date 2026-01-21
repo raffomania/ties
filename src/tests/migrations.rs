@@ -110,7 +110,7 @@ async fn test_generate_missing_bookmark_ap_ids_migration() -> Result<()> {
     let user = db::users::insert(&mut tx, create_user, &base_url).await?;
     let id = Uuid::new_v4();
     let title = "test title";
-    let url = "https://linkblocks.rafa.ee";
+    let url = "https://ties.rafa.ee";
 
     let bookmark_id: Uuid = sqlx::query(
         r"

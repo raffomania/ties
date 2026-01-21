@@ -179,7 +179,7 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
 
 fn list_item_list(inner_list: &db::ListWithLinks) -> Element {
     // TODO show owning user if it's different than this list's owner
-    // https://github.com/raffomania/linkblocks/issues/152
+    // https://github.com/raffomania/ties/issues/152
     fragment().with([
         a([
             class(

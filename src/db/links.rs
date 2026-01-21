@@ -70,7 +70,7 @@ pub struct LinkWithContent {
 }
 
 // TODO: when showing backlinks in the browser, this needs to be re-evaluated
-// https://github.com/raffomania/linkblocks/issues/147
+// https://github.com/raffomania/ties/issues/147
 async fn validate_private_lists_belong_to_same_owner(
     tx: &mut AppTx,
     create_link: &CreateLink,
