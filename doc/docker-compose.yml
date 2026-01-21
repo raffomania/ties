@@ -8,6 +8,8 @@ services:
       - LISTEN=0.0.0.0:3000
       - DATABASE_URL=postgres://linkblocks:linkblocks@db/linkblocks
       - RUST_LOG=info
+      # Careful: This will form the domain part of user handles, such as "rafael@ties.pub",
+      # and cannot be changed once set!
       - BASE_URL=
       - ADMIN_USERNAME=
       - ADMIN_PASSWORD=

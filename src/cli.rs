@@ -29,8 +29,9 @@ struct Cli {
 struct SharedConfig {
     #[clap(env, long, hide_env_values = true)]
     database_url: String,
-    /// Public URL the server is reachable at. Cannot be changed once the first
-    /// user has been created.
+    /// Public URL the server is reachable at.
+    /// This forms the domain part of user handles, e.g. "rafael@ties.pub", and
+    /// cannot be changed once the first user has been created.
     #[clap(long, env)]
     base_url: Url,
 }

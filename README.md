@@ -25,7 +25,9 @@ It's getting harder and harder to find good web pages. When you do find good one
 
 ⚠️ linkblocks is in an alpha stage. Consider all data in the system to be publicly available, even bookmarks in private lists. Only single-user instances are supported.
 
-You can run the container at `ghcr.io/raffomania/linkblocks:latest`. It's automatically updated to contain the latest version of the `main` branch.
+You can run the container at `ghcr.io/raffomania/linkblocks`.
+It's recommended to use the tag of the latest stable release, e.g. `0.1.0`.
+If you're feeling adventurous, there's a `latest` tag which tracks the latest commit on the `main` branch.
 
 ### With docker-compose
 
