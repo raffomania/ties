@@ -131,7 +131,7 @@ start-test-database:
 
     podman start ties_postgres_test
 
-    podman wait --condition=healthy ties_postgres
+    podman wait --condition=healthy ties_postgres_test
 
 [group('Testing')]
 test *args: start-test-database generate-database-info
