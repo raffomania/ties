@@ -29,7 +29,14 @@ SPDX-License-Identifier = "AGPL-3.0-only"
 
 # For docs, other prose, and images, a CC-style license is better suited
 [[annotations]]
-path = ["**.md", "doc/*.svg"]
+path = [
+    "**.md",
+    "doc/*.svg",
+    "assets/logo_text.*",
+    "assets/logo_icon_only.*",
+    "assets/favicon.*",
+    "assets/apple-touch-icon.*",
+]
 SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 

@@ -12,7 +12,7 @@ It's getting harder and harder to find good web pages. When you do find good one
 
 ## Vision
 
-- On ties, you can organize, connect, browse and search your favorite web pages.
+- With ties, you can organize, connect, browse and search your favorite web pages.
 - Share carefully curated or wildly chaotic collections of the stuff you really really like with other ties users and the whole world wide web.
 - Follow users with a similar taste and get a feed of fresh good web pages every day. Browse others' collections to discover new web pages from topics you like.
 - Annotate, highlight and discuss web pages together with your friends.
