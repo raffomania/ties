@@ -7,7 +7,11 @@ linkblocks is now named **ties**!
 ### Breaking Changes
 
 - The container is now at `ghcr.io/raffomania/ties`.
-- Development environments will have to re-run `just development cert` if switching to the new default development base URL of `ties.localhost`.
+
+#### Updating Development environments
+
+- `rm development_cert/*` and re-run `just development cert` if switching to the new default development base URL of `ties.localhost`.
+- Set `BASE_URL` to `ties.localhost` in your `.env` file.
 
 ### Internals
 
@@ -18,7 +22,7 @@ linkblocks is now named **ties**!
 _Released on 2025-11-23_
 
 This is the initial release of linkblocks!
-A lot of groundwork has been laid for federating with other services, and posting bookmarks to Mastodon is the first fruit of that labor available with this release. For an example, check out [rafael@lb.rafa.ee](https://mstdn.io/@rafael@lb.rafa.ee), or try it with [the linkblocks demo](https://linkblocks.rafa.ee).
+A lot of groundwork has been laid for federating with other services, and posting bookmarks to Mastodon is the first fruit of that labor available with this release. For an example, check out [rafael@ties.rafa.ee](https://mstdn.io/@rafael@ties.rafa.ee), or try it with [the linkblocks demo](https://linkblocks.rafa.ee).
 
 linkblocks is now quite stable, and I've been using it for myself for over a year.
 Of course there are still some rough edges, and tons of features I'd like to add, so watch this space!
