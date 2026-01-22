@@ -83,18 +83,13 @@ fn sidebar(authed_info: &AuthedInfo) -> Element {
     .with([
         div(class("sm:overflow-y-auto sm:flex-1")).with([lists_header(), lists(authed_info)]),
         header(class(
-            "sticky bottom-0 flex justify-between p-2 leading-8 bg-neutral-900",
+            "sticky bottom-0 flex justify-between items-center p-2 leading-8 bg-neutral-900",
         ))
-        .with([
-            a([
-                href(format!("/user/{}", authed_info.username)),
-                class("px-2 font-bold rounded  hover:bg-neutral-800 border border-neutral-900"),
-            ])
-            .with(&authed_info.username),
-            form([action("/logout"), method("post")]).with(
-                button(class("rounded px-3  text-neutral-400 hover:bg-neutral-800")).with("Logout"),
-            ),
-        ]),
+        .with([a([
+            href("/"),
+            class("px-2 font-bold rounded hover:bg-neutral-800 border border-neutral-900"),
+        ])
+        .with([span([]).with(&authed_info.username)])]),
     ])
 }
 

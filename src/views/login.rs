@@ -69,6 +69,10 @@ fn login_form(template: &Template) -> Element {
         class("flex flex-col w-full"),
     ])
     .with([
+        img([
+            src("/assets/logo_icon_only.svg"),
+            class("w-24 max-w-full self-center mb-4"),
+        ]),
         h1(class("text-2xl font-bold tracking-tight text-center")).with("Sign in to your account"),
         username_field(&template.errors, &template.input.credentials.username),
         password_field(&template.errors),
