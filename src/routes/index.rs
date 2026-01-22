@@ -18,9 +18,11 @@ async fn index(
     extract::Tx(mut tx): extract::Tx,
     State(state): State<AppState>,
 ) -> ResponseResult<HtmfResponse> {
+    let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
     Ok(views::index::view(&views::index::Data {
-        layout: &layout::Template::from_db(&mut tx, Some(&auth_user)).await?,
+        layout: &layout,
         base_url: &state.base_url,
+        authed_info: &layout.authed_info,
     })
     .into())
 }

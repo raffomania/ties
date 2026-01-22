@@ -1,52 +1,87 @@
 use htmf::prelude_inline::*;
 use url::Url;
 
+use crate::{authentication::AuthUser, db::layout::AuthedInfo};
+
 use super::layout;
 
 pub struct Data<'a> {
     pub layout: &'a layout::Template,
     pub base_url: &'a Url,
+    pub authed_info: &'a AuthedInfo,
 }
 
 pub fn view(data: &Data) -> Element {
     super::layout::layout(
-        fragment([
-            header(
-                class("mx-4 mt-3 mb-4"),
-                [h1(class("text-xl font-bold"), "Welcome to ties!")],
-            ),
-            // TODO add intro text: what can you do with ties? How to get started?  Where to
-            // get help?
-            ul(
-                class("flex flex-col max-w-sm gap-2 px-4 pb-4"),
-                [li(
-                    (),
-                    a(
-                        [
-                            class(
-                                "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
+        div(
+            class("mx-4"),
+            [
+                header(
+                    class("mt-3 mb-4 flex justify-between flex-wrap"),
+                    [
+                        h1(
+                            class("text-xl font-bold flex items-center gap-2"),
+                            [
+                                img([src("/assets/logo_icon_only.png"), class("inline h-8")]),
+                                span((), "Welcome to ties!"),
+                            ],
+                        ),
+                        form(
+                            [action("/logout"), method("post")],
+                            button(
+                                class("rounded px-3 py-1 text-neutral-400 hover:bg-neutral-700"),
+                                "Log out",
                             ),
-                            href("/bookmarks/create"),
-                        ],
-                        "Add a bookmark",
-                    ),
-                )
-                .with([li(
-                    [],
-                    a(
-                        [
-                            class(
-                                "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
+                        ),
+                    ],
+                ),
+                // TODO add intro text: what can you do with ties? How to get started?  Where to
+                // get help?
+                ul(
+                    class("flex flex-col max-w-sm gap-2 pb-4"),
+                    [
+                        li(
+                            (),
+                            a(
+                                [
+                                    class(
+                                        "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
+                                    ),
+                                    href("/bookmarks/create"),
+                                ],
+                                "Add a bookmark",
                             ),
-                            href("/lists/create"),
-                        ],
-                        "Create a list",
-                    ),
-                )])
-                .with(bookmarklet_section(data))],
-            ),
-            // TODO add social links here
-        ]),
+                        ),
+                        li(
+                            [],
+                            a(
+                                [
+                                    class(
+                                        "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
+                                    ),
+                                    href("/lists/create"),
+                                ],
+                                "Create a list",
+                            ),
+                        ),
+                        li(
+                            (),
+                            a(
+                                [
+                                    class(
+                                        "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
+                                    ),
+                                    href(format!("/user/{}", data.authed_info.username)),
+                                ],
+                                "View my profile",
+                            ),
+                        ),
+                    ],
+                ),
+                // TODO add social links here
+                bookmarklet_section(data),
+            ],
+        ),
         data.layout,
     )
 }

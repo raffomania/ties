@@ -1,6 +1,7 @@
 set dotenv-load := true
 set export := true
 
+# Show an overview of all tasks
 default:
     just --list
 
