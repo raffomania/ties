@@ -2,11 +2,13 @@
 
 (previously named "linkblocks")
 
-**📚 A federated network to bookmark, share and discuss good web pages with your friends.**
+**📚 A federated network to bookmark, organize, share and discover good web pages.**
 
 It's getting harder and harder to find good web pages. When you do find good ones, it's worth hanging onto them. ties is your own small corner of the web, where you can keep your favorite pages, and share them with your friends to help them find good web pages too.
 
 🔭 ties is in an exploratory phase where we're trying out different ways to make it work well. You can try it out, but big and small things might change with every update.
+
+[Try our demo here.](https://demo.ties.pub)
 
 ## Vision
 
