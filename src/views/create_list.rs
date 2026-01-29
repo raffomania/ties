@@ -50,7 +50,7 @@ pub fn view(
                     value("true"),
                     input_data.private.then(checked).into_attrs(),
                 ]),
-                text("Private"),
+                text(" Private"),
             ])]),
             errors.view("root"),
             button([
