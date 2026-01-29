@@ -18,7 +18,7 @@ use crate::{
     oidc::{self},
     response_error::{ResponseError, ResponseResult},
     server::AppState,
-    views::{self, layout, login, oidc_select_username, users::ProfileTemplate},
+    views::{self, layout, login, oidc_select_username},
 };
 
 pub fn router() -> Router<AppState> {
@@ -29,7 +29,6 @@ pub fn router() -> Router<AppState> {
         .route("/login_oidc", get(get_login_oidc))
         .route("/login_demo", post(post_login_demo))
         .route("/logout", post(logout))
-        .route("/start", get(get_start_page))
         .route("/user/{username}", get(get_profile))
 }
 
@@ -208,19 +207,6 @@ async fn get_login(
         )))
         .into_response())
     }
-}
-
-async fn get_start_page(
-    extract::Tx(mut tx): extract::Tx,
-    auth_user: AuthUser,
-    State(state): State<AppState>,
-) -> ResponseResult<HtmfResponse> {
-    let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
-
-    Ok(HtmfResponse(views::users::start_page(&ProfileTemplate {
-        layout,
-        base_url: state.base_url,
-    })))
 }
 
 // TODO: set this route as @url in activitypub person objects

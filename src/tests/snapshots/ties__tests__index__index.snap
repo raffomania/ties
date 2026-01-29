@@ -22,10 +22,21 @@ expression: index.dom.htmls()
             <a class="block p-4 border rounded border-neutral-700 hover:bg-neutral-700" href="/bookmarks/create">Add a bookmark</a>
             <li>
               <a class="block p-4 border rounded border-neutral-700 hover:bg-neutral-700" href="/lists/create">Create a list</a>
-              <li>
-                <a class="block px-4 py-2 border rounded border-neutral-700 hover:bg-neutral-700" href="/profile">Install the bookmarklet</a>
-              </li>
             </li>
+            <header class="pt-8">
+              <h2 class="font-bold">Install Bookmarklet</h2>
+            </header>
+            <section class="py-2">
+              <p class="mb-2">
+                Click the bookmarklet on any website to add it as a bookmark in
+                ties!
+              </p>
+              <p class="mb-4">
+                To install, drag the following link to your bookmarks /
+                favorites toolbar:
+              </p>
+              <a class="text-center my-2 font-bold text-orange-200 border rounded py-2 px-16 cursor-grab" href="javascript:(function()%7Bwindow.open(%0A%20%20%22http://localhost:4048/%2Fbookmarks%2Fcreate%3Furl%3D%22%0A%20%20%2BencodeURIComponent(window.location.href)%0A%20%20%2B%22%26title%3D%22%0A%20%20%2BencodeURIComponent(document.title)%0A)%7D)()">Add to ties</a>
+            </section>
           </li>
         </ul>
       </main>
