@@ -22,7 +22,8 @@ expression: create_list.dom.htmls()
           <input required="" name="title" type="text" value="" class="rounded py-1.5 px-3 mt-2 bg-neutral-900" />
           <label class="mt-4">Note<textarea name="content" placeholder="" value="" class="rounded py-1.5 px-3 mt-2 bg-neutral-900 block w-full"></textarea></label>
           <div class="mt-3 mb-5">
-            <label><input type="checkbox" name="private" value="true" />Private</label>
+            <label><input type="checkbox" name="private" value="true" />
+              Private</label>
           </div>
           <button type="submit" class="bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded mt-4 self-end">
             Add List
