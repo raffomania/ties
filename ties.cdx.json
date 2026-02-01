@@ -4349,6 +4349,37 @@
       "version": "0.13.0"
     },
     {
+      "author": "bluss",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#itertools@0.14.0",
+      "description": "Extra iterator adaptors, iterator methods, free functions, and macros.",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/itertools/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/rust-itertools/itertools"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "itertools",
+      "purl": "pkg:cargo/itertools@0.14.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.14.0"
+    },
+    {
       "author": "David Tolnay <dtolnay@gmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.15",
       "description": "Fast integer primitive to string conversion",
@@ -10272,6 +10303,7 @@
         "git+https://github.com/raffomania/garde?branch=url-length#0.22.0",
         "git+https://github.com/raffomania/htmf#0.3.0",
         "registry+https://github.com/rust-lang/crates.io-index#include_dir@0.7.4",
+        "registry+https://github.com/rust-lang/crates.io-index#itertools@0.14.0",
         "registry+https://github.com/rust-lang/crates.io-index#listenfd@1.0.2",
         "registry+https://github.com/rust-lang/crates.io-index#mime_guess@2.0.5",
         "registry+https://github.com/rust-lang/crates.io-index#openidconnect@4.0.1",
@@ -11341,6 +11373,12 @@
         "registry+https://github.com/rust-lang/crates.io-index#either@1.15.0"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#itertools@0.13.0"
+    },
+    {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#either@1.15.0"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#itertools@0.14.0"
     },
     {
       "dependsOn": [],

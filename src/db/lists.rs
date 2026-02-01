@@ -99,6 +99,31 @@ pub async fn by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<List> {
     Ok(list)
 }
 
+pub async fn backlinks(
+    tx: &mut AppTx,
+    list_id: Uuid,
+    ap_user_id: Option<Uuid>,
+) -> ResponseResult<Vec<List>> {
+    let list = query_as!(
+        List,
+        r#"
+        select * from lists
+        where exists (
+            select null from links
+            where links.dest_list_id = $1
+            and links.src_list_id = lists.id
+        )
+        and (not lists.private or lists.ap_user_id = $2)
+        "#,
+        list_id,
+        ap_user_id
+    )
+    .fetch_all(&mut **tx)
+    .await?;
+
+    Ok(list)
+}
+
 pub async fn metadata_by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<Metadata> {
     let list = query_as!(
         Metadata,

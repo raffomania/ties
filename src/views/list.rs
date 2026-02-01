@@ -11,6 +11,7 @@ pub struct Data {
     pub links: Vec<db::LinkWithContent>,
     pub list: db::List,
     pub metadata: db::lists::Metadata,
+    pub backlinks: Vec<db::List>,
 }
 
 pub fn view(
@@ -19,38 +20,19 @@ pub fn view(
         links,
         list,
         metadata,
+        backlinks,
     }: &Data,
 ) -> Element {
     layout::layout(
         fragment()
-            .with([header(class("px-4 pt-3 mb-4"))
-                .with([
-                    div(class("flex items-center justify-between"))
-                        .with([h1(class("text-xl font-bold")).with(&list.title)]),
-                    div(class("flex flex-wrap text-sm gap-x-1 text-neutral-400")).with([
-                        a([
-                            href(format!("/user/{}", metadata.username)),
-                            class("hover:text-neutral-200"),
-                        ])
-                        .with(format!("by {}", metadata.username)),
-                        text("∙"),
-                        p([]).with(format!("{} bookmarks", metadata.linked_bookmark_count)),
-                        text("∙"),
-                        p([]).with(pluralize(metadata.linked_list_count, "list", "lists")),
-                        text("∙"),
-                        p(id("private_indicator")).with(if list.private {
-                            "private"
-                        } else {
-                            "public"
-                        }),
-                    ]),
-                ])
-                .with(list.content.as_ref().and_then(|content| {
-                    (!content.is_empty()).then_some(p(class("max-w-2xl mt-2")).with(content))
-                }))])
-            .with(layout.authed_info.as_ref().and_then(|authed_info| {
-                (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
-            }))
+            .with(
+                div(class("bg-neutral-900 border-b border-black px-4"))
+                    .with(title_and_description(list, metadata))
+                    .with(layout.authed_info.as_ref().and_then(|authed_info| {
+                        (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
+                    }))
+                    .with(backlink_section(backlinks)),
+            )
             .with(
                 links
                     .iter()
@@ -61,10 +43,74 @@ pub fn view(
     )
 }
 
+fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Element {
+    header(class("pt-3 mb-4"))
+        .with([
+            div(class("flex items-center justify-between"))
+                .with([h1(class("text-xl font-bold")).with(&list.title)]),
+            div(class("flex flex-wrap text-sm gap-x-1 text-neutral-400")).with([
+                a([
+                    href(format!("/user/{}", metadata.username)),
+                    class("hover:text-neutral-200"),
+                ])
+                .with(format!("by {}", metadata.username)),
+                text("∙"),
+                p([]).with(format!("{} bookmarks", metadata.linked_bookmark_count)),
+                text("∙"),
+                p([]).with(pluralize(metadata.linked_list_count, "list", "lists")),
+                text("∙"),
+                p(id("private_indicator")).with(if list.private { "private" } else { "public" }),
+            ]),
+        ])
+        .with(list.content.as_ref().and_then(|content| {
+            (!content.is_empty()).then_some(p(class("max-w-2xl mt-2")).with(content))
+        }))
+}
+
+fn backlink_section(backlinks: &[db::List]) -> Element {
+    use htmf::prelude_inline::*;
+
+    let link_elems = itertools::intersperse(
+        backlinks.iter().map(|list| {
+            fragment(a(
+                [
+                    href(format!("/lists/{}", list.id)),
+                    class("hover:text-fuchsia-300"),
+                ],
+                &list.title,
+            ))
+        }),
+        span((), "∙"),
+    )
+    .collect::<Vec<_>>();
+
+    section(
+        class("pb-4 mt-4"),
+        [
+            h2(
+                class("font-bold mb-0.5 text-sm tracking-tight"),
+                [
+                    span((), "Backlinks"),
+                    span(
+                        [
+                            title_attr(
+                                "These are lists that point to the list you are currently viewing.",
+                            ),
+                            class("text-neutral-400 hover:text-neutral-200 cursor-default text-sm"),
+                        ],
+                        "🛈",
+                    ),
+                ],
+            ),
+            p((), link_elems),
+        ],
+    )
+}
+
 fn edit_buttons(Data { list, .. }: &Data) -> Element {
-    section(class("flex flex-wrap m-4 gap-x-4 gap-y-2")).with([
+    section(class("flex flex-wrap my-4 mx-1 gap-x-4 gap-y-2")).with([
         a([
-            class("block px-4 py-1 border rounded hover:bg-neutral-700 border-neutral-700 w-max"),
+            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
             href(format!("/links/create?dest_id={}", list.id)),
         ])
         .with("Add to other list"),
@@ -78,7 +124,7 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             method("post"),
         ])
         .with([button([
-            class("block px-4 py-1 border rounded hover:bg-neutral-700 border-neutral-700 w-max"),
+            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
             name("private"),
             type_("submit"),
             value(if list.private { "false" } else { "true" }),
@@ -94,7 +140,7 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             method("post"),
         ])
         .with([button([
-            class("block px-4 py-1 border rounded hover:bg-neutral-700 border-neutral-700 w-max"),
+            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
             name("pinned"),
             type_("submit"),
             value(if list.pinned { "false" } else { "true" }),
@@ -105,14 +151,14 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             "Pin to sidebar"
         })]),
         a([
-            class("block px-4 py-1 border rounded hover:bg-neutral-700 border-neutral-700 w-max"),
+            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
             href(format!("/lists/{}/edit_title", list.id)),
         ])
         .with([
             text("Rename"),
             a([
                 class(
-                    "block px-4 py-1 border rounded hover:bg-neutral-700 border-neutral-700 w-max",
+                    "block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max",
                 ),
                 href(format!("/bookmarks/create?parent_id={}", list.id)),
                 attr("hx-get", format!("/bookmarks/create?parent_id={}", list.id)),

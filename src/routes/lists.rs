@@ -38,9 +38,10 @@ async fn get_show(
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
 ) -> ResponseResult<HtmfResponse> {
-    let links =
-        db::links::list_by_list(&mut tx, list_id, auth_user.as_ref().map(|u| u.ap_user_id)).await?;
+    let maybe_ap_user_id = auth_user.as_ref().map(|u| u.ap_user_id);
+    let links = db::links::list_by_list(&mut tx, list_id, maybe_ap_user_id).await?;
     let list = db::lists::by_id(&mut tx, list_id).await?;
+    let backlinks = db::lists::backlinks(&mut tx, list_id, maybe_ap_user_id).await?;
 
     match auth_user {
         Some(ref user) => {
@@ -60,6 +61,7 @@ async fn get_show(
         links,
         list,
         metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
+        backlinks,
     })))
 }
 

@@ -11,6 +11,7 @@ rust-version = "1.88.0"
 doctest = false
 
 [dependencies]
+itertools = "0.14.0"
 anyhow = { version = "1.0.100" }
 argon2 = "0.5.3"
 axum = { version = "0.8.8", features = ["macros", "tracing"] }
@@ -84,7 +85,6 @@ serde_json = "1.0.149"
 test-log = { version = "0.2.19", features = [
     "trace",
 ], default-features = false }
-itertools = "0.14.0"
 insta = "1.46.1"
 
 [package.metadata.bin]
