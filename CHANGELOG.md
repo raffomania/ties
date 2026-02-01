@@ -9,6 +9,10 @@ linkblocks is now named **ties**!
 - The container is now at `ghcr.io/raffomania/ties`.
 - For development environments, if you want to use the new recommended development URL of `ties.localhost`, you'll have to update `BASE_URL` in your `.env` file, `rm -r ./development_cert` and run `just development cert`.
 
+### Highlights
+
+- Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
+
 ### Bugfixes
 
 - Fix missing spaces around some labels in the UI ([#206](https://github.com/raffomania/ties/issues/206))
