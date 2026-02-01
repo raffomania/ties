@@ -78,7 +78,7 @@ fn view_lists(lists: &[db::ListWithMetadata], metadata: &Metadata) -> Element {
                         "public lists",
                     ),
                 ),
-                span((), "with"),
+                span((), " containing "),
                 span(
                     (),
                     pluralize(metadata.public_bookmark_count, "bookmark", "bookmarks"),
