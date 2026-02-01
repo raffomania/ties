@@ -1,1 +1,3 @@
-{}
+{
+  "rust-analyzer.cargo.extraEnv": { "SQLX_OFFLINE": "false" }
+}
