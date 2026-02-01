@@ -1,2 +1,5 @@
 [env]
+# Using SQLX_OFFLINE by default means that people can build
+# the sources in this repository with a plain `cargo build`
+# and don't have to think about setting any options.
 SQLX_OFFLINE = "true"
