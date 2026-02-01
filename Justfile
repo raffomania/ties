@@ -12,8 +12,10 @@ watch *args: development-cert migrate-database
 run *args: development-cert migrate-database
     cargo run -- {{args}}
 
+# Generate metadata for verifying SQL queries at compile time.
+# Don't use SQLX_OFFLINE: the data it's based on is most likely out of date when this task runs.
 [group('Codegen')]
-generate-database-info: start-database migrate-database
+generate-database-info: start-database (migrate-database "false")
     cargo bin sqlx-cli prepare -- --all-targets
 
 [group('Codegen')]
@@ -90,16 +92,18 @@ wipe-rauthy: stop-rauthy
 stop-database:
     podman stop --ignore ties_postgres
 
+# Delete the whole development database and create a new, empty one.
+# SQLX_OFFLINE=false: when migrating an empty db, checking queries against
+# it would fail during compilation
 [group('Database')]
-wipe-database: stop-database
+wipe-database: stop-database && (migrate-database "false")
     podman rm --ignore ties_postgres
-    # SQLX_OFFLINE: when migrating an empty db, checking queries against
-    # it would fail during compilation
-    SQLX_OFFLINE=true just migrate-database
 
+# Migrate the database.
+# Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
 [group('Database')]
-migrate-database: start-database
-    cargo run -- db migrate
+migrate-database sqlx_offline=env("SQLX_OFFLINE"): start-database
+    SQLX_OFFLINE={{sqlx_offline}} cargo run -- db migrate
 
 [group('Database')]
 exec-database-cli: start-database
