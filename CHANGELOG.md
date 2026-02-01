@@ -12,10 +12,17 @@ linkblocks is now named **ties**!
 ### Bugfixes
 
 - Fix missing spaces around some labels in the UI ([#206](https://github.com/raffomania/ties/issues/206))
+- Fix the incorrect link to the page for installing the bookmarklet by moving the installation instructions to the start page.
+
+### Docs
+
+- Mention the `latest` tag in the deployment guide.
+- In the deployment guide and CLI help, mention that it's not supported to change the `BASE_URL` once accounts have been created.
 
 ### Internals
 
 - Update all dependencies.
+- Make error handling more robust for unauthenticated requests that need to get redirected to login ([#204](https://github.com/raffomania/ties/pull/204), thanks @danilax86!)
 
 ## 0.1.0
 
