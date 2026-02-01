@@ -164,7 +164,7 @@ where
 
 async fn periodically_wipe_all_data(pool: PgPool) -> anyhow::Result<()> {
     // interval: every hour
-    let period = tokio::time::Duration::from_secs(60 * 60);
+    let period = tokio::time::Duration::from_secs(10);
     let mut interval = tokio::time::interval(period);
     // First interval completes immediately, but we want to wait
     // before doing the first deletion to give users time

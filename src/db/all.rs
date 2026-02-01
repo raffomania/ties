@@ -4,16 +4,11 @@ use super::AppTx;
 use crate::response_error::ResponseResult;
 
 pub async fn wipe_all_data(tx: &mut AppTx) -> ResponseResult<()> {
-    query!("truncate table links cascade;")
-        .execute(&mut **tx)
-        .await?;
-    query!("truncate table lists cascade;")
-        .execute(&mut **tx)
-        .await?;
-    query!("truncate table bookmarks cascade;")
-        .execute(&mut **tx)
-        .await?;
-    query!("truncate table users cascade;")
+    let tables = query!(
+        r#"select tablename as "tablename!" from pg_tables where schemaname in ('public', 'tower_sessions') and tablename != '_sqlx_migrations';"#
+    ).fetch_all(&mut **tx).await?.into_iter().map(|record|record.tablename).collect::<Vec<_>>().join(",");
+
+    query(&format!("truncate {tables}"))
         .execute(&mut **tx)
         .await?;
 

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select tablename as \"tablename!\" from pg_tables where schemaname in ('public', 'tower_sessions') and tablename != '_sqlx_migrations';",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tablename!",
+        "type_info": "Name"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "0497f2f9d6e873be9a1b00ef5168b16b9e1b01e8be75cebae632b3549dba2b08"
+}
