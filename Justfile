@@ -195,6 +195,11 @@ reuse-lint: (ensure-command "reuse")
 format:
     cargo +nightly fmt --all
 
+# Run the pre-commit hook script.
+[group('Code Quality')]
+pre-commit:
+    ./pre-commit.sh
+
 [group('Setup')]
 install-git-hooks:
     ln -srf pre-commit.sh .git/hooks/pre-commit
