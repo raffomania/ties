@@ -76,7 +76,9 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
 
-      - run: cargo bin just lint
+      - run: cargo bin just clippy
+
+      - run: cargo bin just reuse-lint
 
       - run: cargo bin just generate-sbom
 
@@ -148,7 +150,7 @@ jobs:
       - name: Install cargo-run-bin
         run: cargo install cargo-run-bin
 
-      - run: cargo bin just format
+      - run: cargo bin just format-lint
 
   test:
     name: Test
