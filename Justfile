@@ -179,11 +179,11 @@ build-podman-container target="release":
     podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{ target }}
 
 [group('Code Quality')]
-lint *args: reuse-lint
+clippy *args:
     cargo clippy {{ args }} -- -D warnings
 
 [group('Code Quality')]
-lint-fix *args: reuse-lint
+fix-lints *args: reuse-lint
     cargo clippy --fix {{ args }}
     cargo fix --allow-staged --all-targets
 
@@ -194,6 +194,10 @@ reuse-lint: (ensure-command "reuse")
 [group('Code Quality')]
 format:
     cargo +nightly fmt --all
+
+[group('Code Quality')]
+format-lint:
+    cargo +nightly fmt --all --check
 
 # Run the pre-commit hook script.
 [group('Code Quality')]
