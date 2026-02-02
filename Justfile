@@ -102,7 +102,7 @@ wipe-database: stop-database && (migrate-database "false")
 # Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
 [doc("Migrate the database.")]
 [group('Database')]
-migrate-database sqlx_offline=env("SQLX_OFFLINE"): start-database
+migrate-database sqlx_offline=env("SQLX_OFFLINE", "true"): start-database
     SQLX_OFFLINE={{ sqlx_offline }} cargo run -- db migrate
 
 [group('Database')]
