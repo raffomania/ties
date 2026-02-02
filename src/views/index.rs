@@ -92,8 +92,8 @@ fn bookmarklet(base_url: &Url) -> Element {
             ),
             href(format!(
                 "javascript:(function()%7Bwindow.open(%0A%20%20%22{base_url}bookmarks%2Fcreate%\
-             3Furl%3D%22%0A%20%20%2BencodeURIComponent(window.location.href)%0A%20%20%2B%22%\
-             26title%3D%22%0A%20%20%2BencodeURIComponent(document.title)%0A)%7D)()",
+                 3Furl%3D%22%0A%20%20%2BencodeURIComponent(window.location.href)%0A%20%20%2B%22%\
+                 26title%3D%22%0A%20%20%2BencodeURIComponent(document.title)%0A)%7D)()",
             )),
         ],
         "Add to ties",

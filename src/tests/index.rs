@@ -16,8 +16,9 @@ async fn index() -> anyhow::Result<()> {
     // Check that we can access the index when logged in
     app.req().get("/").await.test_page().await;
 
-    // no snapshot here, since the bookmarklet contains the base url which contains a new random port every time the test runs
-    // insta::assert_snapshot!(index.dom.htmls());
+    // no snapshot here, since the bookmarklet contains the base url which contains
+    // a new random port every time the test runs insta::assert_snapshot!(index.
+    // dom.htmls());
 
     Ok(())
 }
