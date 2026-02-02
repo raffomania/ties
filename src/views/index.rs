@@ -80,7 +80,7 @@ fn bookmarklet_help() -> Element {
 
 fn bookmarklet(base_url: &Url) -> Element {
     // window.open(
-    //   "{ base_url }/bookmarks/create?url="
+    //   "{ base_url }bookmarks/create?url="
     //   +encodeURIComponent(window.location.href)
     //   +"&title="
     //   +encodeURIComponent(document.title)
@@ -91,7 +91,7 @@ fn bookmarklet(base_url: &Url) -> Element {
                 "text-center my-2 font-bold text-orange-200 border rounded py-2 px-16 cursor-grab",
             ),
             href(format!(
-                "javascript:(function()%7Bwindow.open(%0A%20%20%22{base_url}%2Fbookmarks%2Fcreate%\
+                "javascript:(function()%7Bwindow.open(%0A%20%20%22{base_url}bookmarks%2Fcreate%\
              3Furl%3D%22%0A%20%20%2BencodeURIComponent(window.location.href)%0A%20%20%2B%22%\
              26title%3D%22%0A%20%20%2BencodeURIComponent(document.title)%0A)%7D)()",
             )),
