@@ -6,14 +6,15 @@ default:
 
 [group('Development')]
 watch *args: development-cert migrate-database
-    cargo bin systemfd --no-pid -s ${LISTEN} -- cargo bin cargo-watch -- cargo run start --listenfd {{args}}
+    cargo bin systemfd --no-pid -s ${LISTEN} -- cargo bin cargo-watch -- cargo run start --listenfd {{ args }}
 
 [group('Development')]
 run *args: development-cert migrate-database
-    cargo run -- {{args}}
+    cargo run -- {{ args }}
 
-# Generate metadata for verifying SQL queries at compile time.
+
 # Don't use SQLX_OFFLINE: the data it's based on is most likely out of date when this task runs.
+[doc("Generate metadata for verifying SQL queries at compile time.")]
 [group('Codegen')]
 generate-database-info: start-database (migrate-database "false")
     cargo bin sqlx-cli prepare -- --all-targets
@@ -26,7 +27,6 @@ generate-sbom:
     # https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/514
     jq --sort-keys '.components |= sort_by(.purl) | del(.serialNumber) | del(.metadata.timestamp) | del(..|select(type == "string" and test("^path\\+file")))' ties_bin.cdx.json > ties.cdx.json
     rm ties_bin.cdx.json
-
 
 [group('Database')]
 start-database:
@@ -92,18 +92,18 @@ wipe-rauthy: stop-rauthy
 stop-database:
     podman stop --ignore ties_postgres
 
-# Delete the whole development database and create a new, empty one.
-# SQLX_OFFLINE=false: when migrating an empty db, checking queries against
+# This sets SQLX_OFFLINE=false: when migrating an empty db, checking queries against
 # it would fail during compilation
+[doc("Delete the whole development database and create a new, empty one.")]
 [group('Database')]
 wipe-database: stop-database && (migrate-database "false")
     podman rm --ignore ties_postgres
 
-# Migrate the database.
 # Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
+[doc("Migrate the database.")]
 [group('Database')]
 migrate-database sqlx_offline=env("SQLX_OFFLINE"): start-database
-    SQLX_OFFLINE={{sqlx_offline}} cargo run -- db migrate
+    SQLX_OFFLINE={{ sqlx_offline }} cargo run -- db migrate
 
 [group('Database')]
 exec-database-cli: start-database
@@ -141,7 +141,7 @@ start-test-database:
 test *args: start-test-database generate-database-info
     # SQLX_OFFLINE: Without it, `cargo test` would compile against the test db
     # which is always empty and only migrated inside the tests themselves.
-    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{args}}
+    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{ args }}
 
 [group('Development')]
 development-cert: (ensure-command "mkcert")
@@ -173,18 +173,18 @@ ci-dev: migrate-database start-test-database && generate-sbom generate-database-
 [group('Testing')]
 build-podman-container target="release":
     #!/bin/sh
-    [[ "{{target}}" == "debug" ]] && cargo_flag="" || cargo_flag="--{{target}}"
+    [[ "{{ target }}" == "debug" ]] && cargo_flag="" || cargo_flag="--{{ target }}"
     cargo build $cargo_flag
 
-    podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{target}}
+    podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{ target }}
 
 [group('Code Quality')]
 lint *args: reuse-lint
-    cargo clippy {{args}} -- -D warnings
+    cargo clippy {{ args }} -- -D warnings
 
 [group('Code Quality')]
 lint-fix *args: reuse-lint
-    cargo clippy --fix {{args}}
+    cargo clippy --fix {{ args }}
     cargo fix --allow-staged --all-targets
 
 [group('Code Quality')]
