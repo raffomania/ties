@@ -13,7 +13,6 @@ services:
       - BASE_URL=
       - ADMIN_USERNAME=
       - ADMIN_PASSWORD=
-    restart: always
     ports:
       - "3000:3000"
 
@@ -31,12 +30,6 @@ services:
       -c max_connections=10
       -c maintenance_work_mem=4MB
       -c effective_cache_size=32MB
-
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "ties"]
-      interval: 60s
-      start_period: 30s
-    restart: always
 
 volumes:
   db:
