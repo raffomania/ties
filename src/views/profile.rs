@@ -49,9 +49,12 @@ pub async fn view(
     // https://github.com/raffomania/ties/issues/154
     let children = fragment([
         header(
-            [class("pt-3 mb-8")],
+            [class("p-4 bg-neutral-900")],
             [
-                h1([class("text-xl font-bold px-4")], [&ap_user.username]),
+                h1(
+                    [class("text-xl font-bold tracking-tight")],
+                    [&ap_user.username],
+                ),
                 ap_user
                     .bio
                     .as_ref()
@@ -68,7 +71,7 @@ fn view_lists(lists: &[db::ListWithMetadata], metadata: &Metadata) -> Element {
     section(
         [],
         [p(
-            class("px-4 text-neutral-400 pb-1"),
+            class("px-4 text-neutral-400 pb-3 bg-neutral-900 border-b border-black"),
             [
                 span(
                     class("font-bold tracking-tight"),
