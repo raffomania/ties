@@ -29,6 +29,7 @@ Design document for full-text search through
 - No BM25 ranking, but it can at least normalize word frequency by document length
 - tsvectors can only take a limited number of lexeme positions (but an unlimited number of lexemes?)
 - Can rank different parts of the tsvector differently (title, body)
+- ranking output is not normalized, so it might be tricky to compare list and bookmark ranks for the same query (so we can display both in the same search result list)
 - quicker to implement than Tantivy
 - Let's evaluate how good the ranking actually is
 
