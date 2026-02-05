@@ -12,6 +12,7 @@ linkblocks is now named **ties**!
 ### Highlights
 
 - Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
+- Search through bookmark titles using the search bar at the top of every page.
 
 ### Bugfixes
 
