@@ -2,28 +2,4 @@
 source: src/tests/users.rs
 expression: login_page.dom.htmls()
 ---
-
-  <head>
-    <link rel="stylesheet" href="/assets/preflight.css" />
-    <link rel="stylesheet" href="/assets/railwind.css" />
-    <script src="/assets/htmx.1.9.9.js"></script>
-    <meta name="color-scheme" content="dark" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ties</title>
-  </head>
-  <body class="w-full h-full text-gray-200 bg-neutral-800">
-    <div class="flex flex-col justify-center max-w-md min-h-full px-4 mx-auto">
-      <form action="/login" method="post" hx-boost="true" hx-disabled-elt="button" class="flex flex-col w-full">
-        <h1 class="text-2xl font-bold tracking-tight text-center">
-          Sign in to your account
-        </h1>
-        <label class="mt-10 text-neutral-400" for="credentials[username]">Username</label>
-        <input type="text" name="credentials[username]" class="rounded py-1.5 px-3 mt-2 bg-neutral-900" value="" required="true" />
-        <label class="mt-4 text-neutral-400" for="credentials[password]">Password</label>
-        <input type="password" name="credentials[password]" class="rounded py-1.5 px-3 mt-2 bg-neutral-900" required="true" />
-        <button type="submit" class="leading-6 bg-neutral-300 mt-5 font-semibold rounded py-1.5 flex items-center justify-center disabled:bg-neutral-500 text-neutral-900">
-          <span class="inline-block w-0 h-4"><span class="block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-900 animate-spin border-t-transparent htmx-indicator"></span></span>Sign in
-        </button>
-      </form>
-    </div>
-  </body>
+<head><link rel="stylesheet" href="/assets/preflight.css" /><link rel="stylesheet" href="/assets/railwind.css" /><script src="/assets/htmx.1.9.9.js"></script><meta name="color-scheme" content="dark" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>ties</title></head><body class="w-full h-full text-gray-200 bg-neutral-800"><div class="flex flex-col justify-center max-w-md min-h-full px-4 mx-auto"><form action="/login" method="post" hx-boost="true" hx-disabled-elt="button" class="flex flex-col w-full"><h1 class="text-2xl font-bold tracking-tight text-center">Sign in to your account</h1><label class="mt-10 text-neutral-400" for="credentials[username]">Username</label><input type="text" name="credentials[username]" class="rounded py-1.5 px-3 mt-2 bg-neutral-900" value="" required="true" /><label class="mt-4 text-neutral-400" for="credentials[password]">Password</label><input type="password" name="credentials[password]" class="rounded py-1.5 px-3 mt-2 bg-neutral-900" required="true" /><button type="submit" class="leading-6 bg-neutral-300 mt-5 font-semibold rounded py-1.5 flex items-center justify-center disabled:bg-neutral-500 text-neutral-900"><span class="inline-block w-0 h-4"><span class="block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-900 animate-spin border-t-transparent htmx-indicator"></span></span>Sign in</button></form></div></body>
