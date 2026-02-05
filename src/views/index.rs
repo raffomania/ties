@@ -10,9 +10,10 @@ pub struct Data<'a> {
 
 pub fn view(data: &Data) -> Element {
     super::layout::layout(
-        fragment([
+        div(class("border-t border-black") ,[
+            div(class("border-t border-neutral-700"), ()),
             header(
-                class("mx-4 mt-3 mb-4"),
+                class("m-4"),
                 [h1(class("text-xl font-bold"), "Welcome to ties!")],
             ),
             // TODO add intro text: what can you do with ties? How to get started?  Where to

@@ -216,8 +216,9 @@ async fn get_profile(
     extract::Tx(mut tx): extract::Tx,
     Path(handle): Path<String>,
     State(state): State<AppState>,
+    auth_user: Option<AuthUser>,
 ) -> ResponseResult<HtmfResponse> {
-    let layout = layout::Template::from_db(&mut tx, None).await?;
+    let layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
 
     let ap_user = db::ap_users::read_by_username(
         &mut tx,
