@@ -20,6 +20,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changelog-check:
+    name: Changelog Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check changelog updated
+        run: |
+          if ! git diff --name-only "origin/${BASE_REF}...HEAD" | grep -q '^CHANGELOG.md$'; then
+            echo "::warning file=CHANGELOG.md::Changelog has not been updated"
+          fi
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
   build-lint:
     name: Build & Lint
     runs-on: ubuntu-latest
