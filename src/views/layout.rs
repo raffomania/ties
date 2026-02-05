@@ -44,7 +44,7 @@ pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> 
 }
 
 fn search(previous_input: Option<&str>) -> Element {
-    div(class("p-2 bg-neutral-900")).with(
+    div(class("px-4 py-2 bg-neutral-900")).with(
         form([
             action("/search"),
             method("get"),
@@ -59,7 +59,10 @@ fn search(previous_input: Option<&str>) -> Element {
                 name("q"),
                 placeholder("Search all bookmarks"),
                 value(previous_input.unwrap_or("")),
-                class("leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700"),
+                class(
+                    "leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700 \
+                     max-w-2xl",
+                ),
             ]),
             button(class(
                 "px-2 text-neutral-400 shrink border-y border-r rounded-r border-neutral-700",

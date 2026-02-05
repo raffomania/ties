@@ -1,6 +1,10 @@
 use anyhow::{Context, Result, anyhow};
 use fake::Fake;
-use rand::{Rng, seq::IndexedRandom};
+use itertools::Itertools;
+use rand::{
+    Rng,
+    seq::{IndexedRandom, IteratorRandom},
+};
 use sqlx::PgPool;
 use url::Url;
 use uuid::Uuid;
@@ -39,9 +43,7 @@ pub async fn insert_demo_data(
 
         for _ in 0..100 {
             let content: Option<Vec<_>> = fake::faker::lorem::en::Paragraphs(1..3).fake();
-            let city: String = fake::faker::address::en::CityName().fake();
-            let noun: String = fake::faker::company::en::BsNoun().fake();
-            let title = format!("{city} {noun}");
+            let title = random_list_name()?;
             let create_list = CreateList {
                 title,
                 content: content.map(|c| c.join("\n\n")),
@@ -183,4 +185,81 @@ fn random_link_reference(bookmarks: &[db::Bookmark], lists: &[db::List]) -> Resu
         }
         _ => unreachable!(),
     })
+}
+
+fn random_list_name() -> Result<String> {
+    let adjectives = &[
+        "colorful",
+        "offline",
+        "really good",
+        "kinda boring",
+        "random",
+        "old",
+        "archived",
+        "fediverse",
+        "obscure",
+        "vintage",
+        "underrated",
+        "niche",
+        "indie",
+        "minimalist",
+        "weird",
+        "cozy",
+        "useful",
+        "forgotten",
+        "local",
+        "experimental",
+        "open source",
+    ];
+
+    let nouns = &[
+        "board games",
+        "music",
+        "apps",
+        "tools",
+        "movies",
+        "blog posts",
+        "reference",
+        "tutorials",
+        "personal sites",
+        "standards",
+        "social networks",
+        "podcasts",
+        "recipes",
+        "articles",
+        "resources",
+        "games",
+        "books",
+        "zines",
+        "newsletters",
+        "communities",
+        "documentation",
+        "fonts",
+        "art",
+        "photography",
+        "web design",
+        "comics",
+        "videos",
+        "research papers",
+        "wikis",
+        "forums",
+    ];
+
+    let chosen_adjectives = adjectives
+        .choose_multiple(
+            &mut rand::rng(),
+            (1..3)
+                .choose(&mut rand::rng())
+                .context("random number required")?,
+        )
+        .join(" ");
+
+    Ok(format!(
+        "{} {}",
+        chosen_adjectives,
+        nouns
+            .iter()
+            .choose(&mut rand::rng())
+            .context("Noun required")?
+    ))
 }

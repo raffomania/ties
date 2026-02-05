@@ -4,5 +4,5 @@ pub mod federation;
 pub mod index;
 pub mod links;
 pub mod lists;
-pub mod users;
 pub mod search;
+pub mod users;
