@@ -70,6 +70,10 @@ fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Ele
 fn backlink_section(backlinks: &[db::List]) -> Element {
     use htmf::prelude_inline::*;
 
+    if backlinks.is_empty() {
+        return nothing();
+    }
+
     let link_elems = itertools::intersperse(
         backlinks.iter().map(|list| {
             fragment(a(
@@ -80,7 +84,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
                 &list.title,
             ))
         }),
-        span((), "∙"),
+        span((), " ∙ "),
     )
     .collect::<Vec<_>>();
 
@@ -88,7 +92,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
         class("pb-4 mt-4"),
         [
             h2(
-                class("font-bold mb-0.5 text-sm tracking-tight"),
+                class("font-bold mb-0.5 text-sm tracking-tight flex gap-1"),
                 [
                     span((), "Backlinks"),
                     span(
