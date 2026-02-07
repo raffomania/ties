@@ -92,7 +92,7 @@ pretty_assertions = "1.4.1"
 just = { version = "1.38.0", locked = true }
 cargo-watch = { version = "8.5.3", locked = true }
 systemfd = { version = "0.4.3", locked = true }
-sqlx-cli = { version = "0.8.3", locked = true, bins = ["sqlx"] }
+sqlx-cli = { version = "0.8.6", locked = true, bins = ["sqlx"] }
 cargo-cyclonedx = { version = "0.5.7", locked = true }
 zizmor = { version = "1.16.3", locked = true }
 
