@@ -15,6 +15,7 @@ run *args: development-cert migrate-database
 
 
 # Don't use SQLX_OFFLINE: the data it's based on is most likely out of date when this task runs.
+# This will cause a recompilation of the ties crate.
 [doc("Generate metadata for verifying SQL queries at compile time.")]
 [group('Codegen')]
 generate-database-info: start-database (migrate-database "false")
@@ -139,10 +140,12 @@ start-test-database:
     podman wait --condition=healthy ties_postgres_test
 
 [group('Testing')]
-test *args: start-test-database generate-database-info
-    # SQLX_OFFLINE: Without it, `cargo test` would compile against the test db
-    # which is always empty and only migrated inside the tests themselves.
-    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{ args }}
+test *args: start-test-database
+    # Migrate the test database so we can compile the tests using SQLX_OFFLINE=false,
+    # which avoids needless recompilations
+    cargo run -- --database-url=${DATABASE_URL_TEST} db migrate
+
+    DATABASE_URL=${DATABASE_URL_TEST} cargo test {{ args }}
 
 [group('Development')]
 development-cert: (ensure-command "mkcert")
