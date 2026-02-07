@@ -6,7 +6,7 @@
 
 (previously named "linkblocks")
 
-**📚 A federated network to bookmark, organize, share and discover good web pages.**
+**🔗 A federated network to bookmark, organize, share and discover good web pages.**
 
 It's getting harder and harder to find good web pages. When you do find good ones, it's worth hanging onto them. ties is your own small corner of the web, where you can keep your favorite pages, and share them with your friends to help them find good web pages too.
 
@@ -14,7 +14,7 @@ It's getting harder and harder to find good web pages. When you do find good one
 
 [Try our demo here.](https://demo.ties.pub)
 
-## Vision
+## 🌟 Vision
 
 - With ties, you can organize, connect, browse and search your favorite web pages.
 - Share carefully curated or wildly chaotic collections of the stuff you really really like with other ties users and the whole world wide web.
@@ -24,12 +24,18 @@ It's getting harder and harder to find good web pages. When you do find good one
 
 [See this blog post for more on the vision behind ties.](https://www.rafa.ee/articles/introducing-linkblocks-federated-bookmark-manager/)
 
-## Related Reading
+## 📖 Related Reading
 
 - [Where have all the Websites gone?](https://www.fromjason.xyz/p/notebook/where-have-all-the-websites-gone/) talks about the importance of website curation. ties is for publicly curating websites.
 - [The Small Website Discoverability Crisis](https://www.marginalia.nu/log/19-website-discoverability-crisis/) similar to the previous link, it encourages everyone to share reading lists. By the author of the amazing [marginalia search engine](https://search.marginalia.nu/).
 
-## Installation and Configuration
+## 🤝 Contributing
+
+We are looking for contributors!
+See [the contributing guide](CONTRIBUTING.MD) to get started.
+
+
+## 🚀 Installation and Configuration
 
 ⚠️ ties is in an alpha stage. Consider all data in the system to be publicly available, even bookmarks in private lists. Only single-user instances are supported.
 
@@ -74,49 +80,13 @@ By default, upgrades do not require manual intervention. The database is migrate
 
 If an upgrade does require manual intervention, it is marked with a new minor version ([as long as we are pre-1.0](https://semver.org/)), and will be called out prominently in the [changelog](CHANGELOG.md).
 
-## Development Setup
+## 🛠️ Development Docs
 
-Install the dependencies:
+Our [Developer Docs](./doc/index.md) should cover everything you need to know. If anything is missing, feel free to [open an issue](https://github.com/raffomania/ties/issues/new) or ask a question in the [discussions](https://github.com/raffomania/ties/discussions).
 
-- [Latest stable version of Rust](https://www.rust-lang.org/learn/get-started) (An older version might work as well, but is not tested)
-- [mkcert](https://github.com/FiloSottile/mkcert#installation)
-  - Don't forget to run `mkcert -install`
-- [podman](http://podman.io/docs/installation), for conveniently running postgres for development and tests
+See [Development Setup](./doc/development-setup.md) to get started with a local development environment.
 
-Install dependencies available via cargo:
-
-```sh
-cargo install cargo-run-bin
-```
-
-Copy `.env.example` to `.env` and edit it to your liking.
-
-Optional: run `cargo bin just install-git-hooks` to automatically run checks before committing.
-
-In the root of the repository, launch the server:
-
-```sh
-cargo bin just watch
-```
-
-Then, open [http://localhost:4040] in your browser.
-
-### Testing SSO with Rauthy
-
-1. Run `just start-rauthy` to run [rauthy](https://github.com/sebadob/rauthy) in development mode in a container.
-1. Open rauthy in your browser by going to localhost with the port specified by `RAUTHY_PORT` in your `.env` file.
-1. Go to the admin area and log in as `admin@rauthy.localhost` with the password `test`.
-1. Create a new client. Use `{BASE_URL}/login_oidc_redirect` as your redirect URI, with the base URL defined in your `.env` file. Set access and id algorithm to "EdDSA", if it's not already set.
-1. Enter your client ID and secret in your `.env` file.
-1. Restart the ties server. Click the  "Sign in with Rauthy" button at the bottom of ties' login page. If it's not there, check the server logs to see if something related to OIDC went wrong.
-1. Use the same admin credentials as above to log into rauthy again.
-
-### Writing Migrations
-
-See [the docs](doc/migrations.md).
-
-
-## Technical Details
+## ⚙️ Technical Details
 
 This web app is implemented using technologies hand-picked for a smooth development and deployment workflow. Here are some of the features of the stack:
 
@@ -132,11 +102,11 @@ This web app is implemented using technologies hand-picked for a smooth developm
 - Built-in CLI for production maintenance
 - Auto-reload in development [without dropped connections](https://github.com/mitsuhiko/listenfd)
 
-## Software Bill of Materials
+## 📋 Software Bill of Materials
 
 An up-to-date Software Bill of Materials can be found in the [ties.cdx.json](ties.cdx.json) file.
 
-## Acknowledgements
+## 💙 Acknowledgements
 
 <img src="doc/nlnet.svg?raw=true" alt="NLnet logo" height="60em"> <img src="doc/ngi_zero.svg?raw=true" alt="NGI Zero Commons logo" height="60em">
 
