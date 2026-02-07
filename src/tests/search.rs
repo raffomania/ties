@@ -171,12 +171,12 @@ async fn search_pagination_navigation() -> anyhow::Result<()> {
             &app.base_url,
         )
         .await?;
-        bookmarks.push((bookmark.id, bookmark.title.clone()));
+        bookmarks.push(bookmark);
     }
     tx.commit().await?;
 
     // Sort bookmarks by ID to match the database sort order
-    bookmarks.sort_by_key(|(id, _)| *id);
+    bookmarks.sort_by_key(|bookmark| bookmark.id);
 
     let assert_is_page = |page: &TestPage, n: usize| {
         // for debugging
@@ -187,12 +187,12 @@ async fn search_pagination_navigation() -> anyhow::Result<()> {
         tracing::info!("Checking page {n}");
 
         let html = page.dom.find("main").htmls();
-        assert!(html.contains(&bookmarks[page_size * n].1));
+        assert!(html.contains(&bookmarks[page_size * n].title));
         if n > 0 {
-            assert!(!html.contains(&bookmarks[(page_size * n) - 1].1));
+            assert!(!html.contains(&bookmarks[(page_size * n) - 1].title));
         }
         if n < 2 {
-            assert!(!html.contains(&bookmarks[page_size * (n + 1)].1));
+            assert!(!html.contains(&bookmarks[page_size * (n + 1)].title));
         }
         if n < 2 {
             assert!(html.contains("Next page"));
