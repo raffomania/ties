@@ -10,44 +10,49 @@ pub struct Data<'a> {
 
 pub fn view(data: &Data) -> Element {
     super::layout::layout(
-        div(class("border-t border-black") ,[
-            div(class("border-t border-neutral-700"), ()),
-            header(
-                class("m-4"),
-                [h1(class("text-xl font-bold"), "Welcome to ties!")],
-            ),
-            // TODO add intro text: what can you do with ties? How to get started?  Where to
-            // get help?
-            ul(
-                class("flex flex-col max-w-sm gap-2 px-4 pb-4"),
-                [li(
-                    (),
-                    a(
-                        [
-                            class(
-                                "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
-                            ),
-                            href("/bookmarks/create"),
-                        ],
-                        "Add a bookmark",
-                    ),
-                )
-                .with([li(
-                    [],
-                    a(
-                        [
-                            class(
-                                "block p-4 border rounded border-neutral-700 hover:bg-neutral-700",
-                            ),
-                            href("/lists/create"),
-                        ],
-                        "Create a list",
-                    ),
-                )])
-                .with(bookmarklet_section(data))],
-            ),
-            // TODO add social links here
-        ]),
+        div(
+            class("border-t border-black"),
+            [
+                div(class("border-t border-neutral-700"), ()),
+                header(
+                    class("m-4"),
+                    [h1(class("text-xl font-bold"), "Welcome to ties!")],
+                ),
+                // TODO add intro text: what can you do with ties? How to get started?  Where to
+                // get help?
+                ul(
+                    class("flex flex-col max-w-sm gap-2 px-4 pb-4"),
+                    [li(
+                        (),
+                        a(
+                            [
+                                class(
+                                    "block p-4 border rounded border-neutral-700 \
+                                     hover:bg-neutral-700",
+                                ),
+                                href("/bookmarks/create"),
+                            ],
+                            "Add a bookmark",
+                        ),
+                    )
+                    .with([li(
+                        [],
+                        a(
+                            [
+                                class(
+                                    "block p-4 border rounded border-neutral-700 \
+                                     hover:bg-neutral-700",
+                                ),
+                                href("/lists/create"),
+                            ],
+                            "Create a list",
+                        ),
+                    )])
+                    .with(bookmarklet_section(data))],
+                ),
+                // TODO add social links here
+            ],
+        ),
         data.layout,
     )
 }
