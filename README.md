@@ -70,6 +70,10 @@ By default, upgrades do not require manual intervention. The database is migrate
 
 If an upgrade does require manual intervention, it is marked with a new minor version ([as long as we are pre-1.0](https://semver.org/)), and will be called out prominently in the [changelog](CHANGELOG.md).
 
+## Contributing
+
+See [the contributing guide](CONTRIBUTING.MD).
+
 ## Development Setup
 
 Install the dependencies:
