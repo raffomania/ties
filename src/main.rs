@@ -4,6 +4,7 @@
 #![expect(clippy::missing_errors_doc)]
 #![expect(clippy::redundant_closure_for_method_calls)]
 
+mod archive;
 mod authentication;
 pub mod cli;
 mod db;
