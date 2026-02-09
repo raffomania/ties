@@ -144,6 +144,12 @@ test *args: start-test-database generate-database-info
     # which is always empty and only migrated inside the tests themselves.
     DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{ args }}
 
+[group('Testing')]
+test-flaky *args: start-test-database generate-database-info
+    # SQLX_OFFLINE: Without it, `cargo test` would compile against the test db
+    # which is always empty and only migrated inside the tests themselves.
+    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{ args }} -- --ignored
+
 [group('Development')]
 development-cert: (ensure-command "mkcert")
     mkdir -p development_cert
