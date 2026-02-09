@@ -38,6 +38,14 @@ pub fn view(
                     .iter()
                     .map(|link| list_item(link, data))
                     .collect::<Vec<_>>(),
+            )
+            .with(
+                links.is_empty().then_some(
+                    p(class(
+                        "border-t border-neutral-700 text-neutral-400 italic p-4",
+                    ))
+                    .with("No bookmarks here yet."),
+                ),
             ),
         layout,
     )
