@@ -13,7 +13,7 @@ pub fn view(Data { layout, lists }: Data) -> Element {
     super::layout::layout(
         [
             header(
-                class("px-4 pt-3 mb-4"),
+                class("px-4 pt-3 pb-4 bg-neutral-900 border-b border-black"),
                 [h1(class("text-xl font-bold"), "Unpinned Lists")],
             ),
             fragment(lists.into_iter().map(list_item).collect::<Vec<_>>()),

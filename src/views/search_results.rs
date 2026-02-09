@@ -19,7 +19,7 @@ pub fn view(data: &Data) -> Element {
 fn results(data: &Data) -> Element {
     fragment([
         p(
-            class("bg-neutral-900 px-4 pt-3 pb-3 font-bold tracking-tight"),
+            class("bg-neutral-900 px-4 pt-3 pb-3 font-bold tracking-tight border-b border-black"),
             format!("{} bookmarks found", data.results.total_count),
         ),
         fragment(

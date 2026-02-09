@@ -22,85 +22,89 @@ pub fn view(
     }: &Data,
 ) -> Element {
     layout::layout(
-        fragment().with([form([
-            action("/bookmarks/create"),
-            class("flex flex-col max-w-xl mx-4 mb-4 grow"),
-            attr("hx-post", "/bookmarks/create"),
-            attr("hx-push-url", "true"),
-            attr("hx-select", "main"),
-            attr("hx-target", "main"),
-            id("create_bookmark"),
-            method("POST"),
-        ])
-        .with([
-            header(class("mt-3 mb-4"))
-                .with([h1(class("text-xl font-bold")).with("Add a bookmark")]),
-            label(for_("url")).with("URL"),
-            errors.view("url"),
-            input([
-                value(&input_data.url),
-                class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
-                name("url"),
-                placeholder("https://..."),
-                required(""),
-                type_("text"),
-            ]),
-            label([class("mt-4"), for_("title")]).with("Title"),
-            errors.view("title"),
-            input([
-                value(&input_data.title),
-                class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
-                name("title"),
-                required(""),
-                type_("text"),
-            ]),
-            label([class("mt-4"), for_("list_search_term")]).with("Add to Lists"),
-            div(id("selected_lists")).with([
-                errors.view("parents"),
-                fragment().with(
-                    selected_parents
-                        .iter()
-                        .map(|parent| {
-                            label(class("block leading-8 text-fuchsia-100")).with([
-                                span(class("text-fuchsia-100"))
-                                    .with(format!("🧵 {}", parent.title)),
-                                input([name("parents[]"), type_("hidden"), value(parent.id)]),
-                            ])
-                        })
-                        .collect::<Vec<_>>(),
-                ),
-                errors.view("create_parents"),
-                fragment().with(
-                    input_data
-                        .create_parents
-                        .iter()
-                        .map(|parent_name| {
-                            label(class("block leading-8")).with([
-                                text("New public list "),
-                                span(class("text-fuchsia-100")).with(format!("🧵 {parent_name}")),
-                                input([
-                                    name("create_parents[]"),
-                                    type_("hidden"),
-                                    value(parent_name),
-                                ]),
-                            ])
-                        })
-                        .collect::<Vec<_>>(),
-                ),
-            ]),
-            search(data),
-            errors.view("root"),
-            // TODO Refresh whole page in case there's a new list in the sidebar
-            button([
-                class("bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded mt-4 self-end"),
+        div(class("border-t border-black")).with([
+            div(class("border-t border-neutral-700")),
+            form([
+                action("/bookmarks/create"),
+                class("flex flex-col max-w-xl px-4 pb-4 rounded grow bg-neutral-800"),
                 attr("hx-post", "/bookmarks/create"),
-                attr("hx-select-oob", "#nav"),
-                name("submitted"),
-                type_("submit"),
-                value("true"),
+                attr("hx-push-url", "true"),
+                attr("hx-select", "main"),
+                attr("hx-target", "main"),
+                id("create_bookmark"),
+                method("POST"),
             ])
-            .with("Add Bookmark"),
-        ])]),
+            .with([
+                header(class("mt-3 mb-4"))
+                    .with([h1(class("text-xl font-bold")).with("Add a bookmark")]),
+                label(for_("url")).with("URL"),
+                errors.view("url"),
+                input([
+                    value(&input_data.url),
+                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    name("url"),
+                    placeholder("https://..."),
+                    required(""),
+                    type_("text"),
+                ]),
+                label([class("mt-4"), for_("title")]).with("Title"),
+                errors.view("title"),
+                input([
+                    value(&input_data.title),
+                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    name("title"),
+                    required(""),
+                    type_("text"),
+                ]),
+                label([class("mt-4"), for_("list_search_term")]).with("Add to Lists"),
+                div(id("selected_lists")).with([
+                    errors.view("parents"),
+                    fragment().with(
+                        selected_parents
+                            .iter()
+                            .map(|parent| {
+                                label(class("block leading-8 text-fuchsia-100")).with([
+                                    span(class("text-fuchsia-100"))
+                                        .with(format!("🧵 {}", parent.title)),
+                                    input([name("parents[]"), type_("hidden"), value(parent.id)]),
+                                ])
+                            })
+                            .collect::<Vec<_>>(),
+                    ),
+                    errors.view("create_parents"),
+                    fragment().with(
+                        input_data
+                            .create_parents
+                            .iter()
+                            .map(|parent_name| {
+                                label(class("block leading-8")).with([
+                                    text("New public list "),
+                                    span(class("text-fuchsia-100"))
+                                        .with(format!("🧵 {parent_name}")),
+                                    input([
+                                        name("create_parents[]"),
+                                        type_("hidden"),
+                                        value(parent_name),
+                                    ]),
+                                ])
+                            })
+                            .collect::<Vec<_>>(),
+                    ),
+                ]),
+                search(data),
+                errors.view("root"),
+                // TODO Refresh whole page in case there's a new list in the sidebar
+                button([
+                    class("bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded mt-4 self-end"),
+                    attr("hx-post", "/bookmarks/create"),
+                    attr("hx-select-oob", "#nav"),
+                    name("submitted"),
+                    type_("submit"),
+                    value("true"),
+                ])
+                .with("Add Bookmark"),
+            ]),
+        ]),
         layout,
     )
 }

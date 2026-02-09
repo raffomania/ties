@@ -44,7 +44,7 @@ pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> 
 }
 
 fn search(previous_input: Option<&str>) -> Element {
-    div(class("px-4 py-2 bg-neutral-900")).with(
+    div(class("px-4 py-4 bg-neutral-900")).with(
         form([
             action("/search"),
             method("get"),

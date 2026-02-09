@@ -11,8 +11,10 @@ pub struct Data {
 pub fn view(data: &Data) -> Element {
     layout::layout(
         fragment()
-            .with([header(class("px-4 pt-3 mb-4"))
-                .with([h1(class("text-xl font-bold")).with("Unsorted Bookmarks")])])
+            .with([
+                header(class("px-4 pt-3 pb-4 bg-neutral-900 border-b border-black"))
+                    .with([h1(class("text-xl font-bold")).with("Unsorted Bookmarks")]),
+            ])
             .with(
                 data.bookmarks
                     .iter()
