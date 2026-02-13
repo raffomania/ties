@@ -1,8 +1,8 @@
+mod readability;
 mod safe_dns_resolver;
 
-use std::usize;
-
 use anyhow::{Context, Result, anyhow};
+pub use readability::make_readable;
 use url::Url;
 
 const MAX_RESPONSE_SIZE_BYTES: u64 = 5 * 1000 * 1000; // ~ 5 megabytes

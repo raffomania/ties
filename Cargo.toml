@@ -68,6 +68,8 @@ enum_delegate = "0.2.0"
 tower-livereload = "0.10.2"
 reqwest = "0.13.2"
 ipnet = "2.11.0"
+legible = "0.4.1"
+ammonia = "4.1.2"
 
 [patch.crates-io]
 garde = { git = "https://github.com/raffomania/garde", branch = "url-length" }
