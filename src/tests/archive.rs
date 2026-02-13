@@ -21,3 +21,21 @@ async fn flaky_test_get_website() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test_log::test(tokio::test)]
+#[ignore = "Test depends on an external resource and should only be run manually."]
+async fn flaky_test_readability() -> anyhow::Result<()> {
+    let text = archive::fetch_url_as_text("https://rafa.ee").await?;
+    let readable = archive::make_readable(&text)?;
+    dbg!(readable);
+
+    let text = archive::fetch_url_as_text("https://google.com").await?;
+    let readable = archive::make_readable(&text)?;
+    dbg!(readable);
+
+    let text = archive::fetch_url_as_text("https://github.com/ArthurTent/ShaderAmp").await?;
+    let readable = archive::make_readable(&text)?;
+    dbg!(readable);
+
+    Ok(())
+}
