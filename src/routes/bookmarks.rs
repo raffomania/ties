@@ -112,13 +112,16 @@ async fn post_create(
     if db::bookmarks::is_public(&mut tx, bookmark.id).await? {
         federation::CreateBookmark::send_to_followers(
             &db::ap_users::read_by_id(&mut tx, auth_user.ap_user_id).await?,
-            bookmark,
+            bookmark.clone(),
             &federation_data,
         )
         .await?;
     }
 
     tx.commit().await?;
+
+    // Start archiving bookmark but don't wait for completion
+    state.archive_queue.archive_bookmark(bookmark);
 
     let redirect_dest = match selected_parents.first().or(first_created_parent.as_ref()) {
         Some(parent) => parent.path(),
