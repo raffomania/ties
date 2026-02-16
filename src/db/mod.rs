@@ -3,6 +3,7 @@ use sqlx::PgPool;
 
 pub mod all;
 pub mod ap_users;
+pub mod archives;
 pub mod follows;
 pub mod run_migrations;
 pub use ap_users::ApUser;
