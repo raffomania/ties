@@ -92,11 +92,11 @@ wipe-rauthy: stop-rauthy
 stop-database:
     podman stop --ignore ties_postgres
 
-# This sets SQLX_OFFLINE=false: when migrating an empty db, checking queries against
+# This sets SQLX_OFFLINE=true: when migrating an empty db, checking queries against
 # it would fail during compilation
 [doc("Delete the whole development database and create a new, empty one.")]
 [group('Database')]
-wipe-database: stop-database && (migrate-database "false")
+wipe-database: stop-database && (migrate-database "true")
     podman rm --ignore ties_postgres
 
 # Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
