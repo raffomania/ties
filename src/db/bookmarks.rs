@@ -15,7 +15,6 @@ use crate::{
 pub struct Bookmark {
     pub id: Uuid,
     #[serde(with = "time::serde::iso8601")]
-    #[expect(dead_code)]
     pub created_at: OffsetDateTime,
     pub ap_user_id: Uuid,
 

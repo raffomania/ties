@@ -12,6 +12,7 @@ use tower_sessions::ExpiredDeletion;
 use url::Url;
 
 use crate::{
+    archive,
     cli::ListenArgs,
     db::{self},
     federation, oidc, routes,
@@ -24,6 +25,7 @@ pub struct AppState {
     pub demo_mode: bool,
     pub oidc_state: oidc::State,
     pub federation_config: FederationConfig<federation::Context>,
+    pub archive_queue: archive::QueueHandle,
 }
 
 pub async fn app(state: AppState) -> anyhow::Result<Router> {

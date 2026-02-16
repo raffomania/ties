@@ -18,27 +18,32 @@ pub struct Archive {
 
     pub created_at: OffsetDateTime,
     pub status: Status,
-    pub extracted_html: String,
+    pub error_description: Option<String>,
+    pub extracted_html: Option<String>,
 }
 
 pub async fn insert(
     tx: &mut AppTx,
     bookmark_id: Uuid,
-    extracted_html: &str,
+    article: &anyhow::Result<legible::Article>,
 ) -> ResponseResult<Archive> {
     let id = Uuid::new_v4();
-    let status = Status::Success;
+    let (status, error_description, extracted_html) = match article {
+        Ok(article) => (Status::Success, None, Some(&article.content)),
+        Err(e) => (Status::Error, Some(e.to_string()), None),
+    };
     let archive = sqlx::query_as!(
         Archive,
         r#"
         insert into archives
-        (id, bookmark_id, status, extracted_html)
-        values ($1, $2, $3, $4)
-        returning id, bookmark_id, created_at, status as "status: _", extracted_html
+        (id, bookmark_id, status, error_description, extracted_html)
+        values ($1, $2, $3, $4, $5)
+        returning id, bookmark_id, created_at, status as "status: _", error_description, extracted_html
         "#,
         id,
         bookmark_id,
         status as Status,
+        error_description,
         extracted_html
     )
     .fetch_one(&mut **tx)
@@ -51,7 +56,7 @@ pub async fn by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult
     let archive = sqlx::query_as!(
         Archive,
         r#"
-        select id, bookmark_id, created_at, status as "status: _", extracted_html
+        select id, bookmark_id, created_at, status as "status: _", error_description, extracted_html
         from archives
         where bookmark_id = $1
         "#,

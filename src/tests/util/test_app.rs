@@ -7,6 +7,7 @@ use url::Url;
 
 use super::request_builder::RequestBuilder;
 use crate::{
+    archive,
     db::{self, AppTx},
     federation,
     forms::users::CreateUser,
@@ -46,6 +47,7 @@ impl TestApp {
             federation_config: federation::config::new_config(pool.clone(), base_url.clone())
                 .await
                 .unwrap(),
+            archive_queue: archive::QueueHandle::new(pool.clone()),
         };
 
         TestApp {

@@ -6,7 +6,7 @@ use std::{
 use anyhow::anyhow;
 
 #[allow(clippy::unwrap_used)]
-const BLOCKED_IPV4_NETS: LazyLock<Vec<ipnet::Ipv4Net>> = LazyLock::new(|| {
+static BLOCKED_IPV4_NETS: LazyLock<Vec<ipnet::Ipv4Net>> = LazyLock::new(|| {
     vec![
         // Loopback (127.0.0.0/8)
         "127.0.0.0/8".parse().unwrap(),

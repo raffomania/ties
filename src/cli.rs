@@ -9,7 +9,7 @@ use url::Url;
 #[cfg(debug_assertions)]
 use crate::insert_demo_data::insert_demo_data;
 use crate::{
-    db, federation,
+    archive, db, federation,
     forms::users::CreateUser,
     oidc,
     server::{self, AppState},
@@ -175,12 +175,15 @@ pub async fn run() -> Result<()> {
 
             let oidc_state = oidc::State::initialize(&base_url, oidc_args).await;
 
+            let archive_queue = archive::QueueHandle::new(pool.clone());
+
             let app = server::app(AppState {
                 pool: pool.clone(),
                 base_url: base_url.clone(),
                 demo_mode,
                 oidc_state,
                 federation_config: federation::config::new_config(pool, base_url.clone()).await?,
+                archive_queue,
             })
             .await?;
             server::start(listen_address, base_url.clone(), app, tls_cert, tls_key).await?;
