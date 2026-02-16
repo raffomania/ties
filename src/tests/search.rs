@@ -166,7 +166,7 @@ async fn search_pagination_navigation() -> anyhow::Result<()> {
             user.ap_user_id,
             InsertBookmark {
                 url: format!("https://example.com/test{i}"),
-                title: format!("Test Bookmark {i:02}"),
+                title: format!("Test Bookmark {i:03}"),
             },
             &app.base_url,
         )
