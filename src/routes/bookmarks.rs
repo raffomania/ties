@@ -4,7 +4,7 @@ use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
-    routing::{delete, get},
+    routing::{delete, get, post},
 };
 use serde::Deserialize;
 use uuid::Uuid;
@@ -17,7 +17,7 @@ use crate::{
     form_errors::FormErrors,
     forms::{bookmarks::CreateBookmark, links::CreateLink, lists::CreateList},
     htmf_response::HtmfResponse,
-    response_error::ResponseResult,
+    response_error::{ResponseError, ResponseResult},
     server::AppState,
     views::{self, layout, unsorted_bookmarks},
 };
@@ -26,7 +26,8 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/bookmarks/create", get(get_create).post(post_create))
         .route("/bookmarks/unsorted", get(get_unsorted))
-        .route("/bookmarks/{id}", delete(delete_by_id))
+        .route("/bookmarks/{id}", delete(delete_by_id).get(get_by_id))
+        .route("/bookmarks/{id}/archive", post(post_archive))
 }
 
 async fn post_create(
@@ -118,10 +119,11 @@ async fn post_create(
         .await?;
     }
 
-    tx.commit().await?;
-
     // Start archiving bookmark but don't wait for completion
-    state.archive_queue.archive_bookmark(bookmark);
+    let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+    state.archive_queue.archive_bookmark(bookmark, archive);
+
+    tx.commit().await?;
 
     let redirect_dest = match selected_parents.first().or(first_created_parent.as_ref()) {
         Some(parent) => parent.path(),
@@ -166,6 +168,43 @@ async fn get_create(
     )))
 }
 
+async fn get_by_id(
+    extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> ResponseResult<HtmfResponse> {
+    let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
+
+    let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
+
+    if !db::bookmarks::is_public(&mut tx, bookmark.id).await?
+        && bookmark.ap_user_id != auth_user.ap_user_id
+    {
+        return Err(ResponseError::NotFound);
+    }
+
+    let archive = db::archives::by_bookmark_id(&mut tx, bookmark.id).await?;
+    let backlinks = db::lists::pointing_to_bookmark(
+        &mut tx,
+        id,
+        layout.authed_info.as_ref().map(|a| a.ap_user_id),
+    )
+    .await?;
+    let username = db::ap_users::read_by_id(&mut tx, bookmark.ap_user_id)
+        .await?
+        .username;
+
+    Ok(HtmfResponse(views::show_bookmark::view(
+        views::show_bookmark::Data {
+            layout,
+            bookmark,
+            archive,
+            backlinks,
+            username,
+        },
+    )))
+}
+
 async fn get_unsorted(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
@@ -193,4 +232,25 @@ async fn delete_by_id(
     );
 
     Ok(headers)
+}
+
+async fn post_archive(
+    extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> ResponseResult<Redirect> {
+    let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
+    if bookmark.ap_user_id != auth_user.ap_user_id {
+        return Err(crate::response_error::ResponseError::NotFound);
+    }
+
+    db::archives::delete_by_bookmark_id(&mut tx, id).await?;
+
+    let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+    state.archive_queue.archive_bookmark(bookmark, archive);
+
+    tx.commit().await?;
+
+    Ok(Redirect::to(&format!("/bookmarks/{id}")))
 }

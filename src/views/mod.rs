@@ -16,4 +16,5 @@ pub mod login_demo;
 pub mod oidc_select_username;
 pub mod profile;
 pub mod search_results;
+pub mod show_bookmark;
 pub mod unsorted_bookmarks;
