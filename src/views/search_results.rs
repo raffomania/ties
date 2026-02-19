@@ -19,7 +19,9 @@ pub fn view(data: &Data) -> Element {
 fn results(data: &Data) -> Element {
     fragment([
         p(
-            class("bg-neutral-900 px-4 pt-3 pb-3 font-bold tracking-tight border-b border-black"),
+            class(
+                "bg-neutral-900 px-4 pt-3 pb-3 font-bold tracking-tight border-b border-black text-xl",
+            ),
             format!("{} bookmarks found", data.results.total_count),
         ),
         fragment(
@@ -104,7 +106,7 @@ fn list_item_bookmark(result: &db::search::Result) -> Element {
                     "block overflow-hidden leading-8 text-orange-100 hover:text-orange-300 \
                      text-ellipsis whitespace-nowrap",
                 ),
-                href(&result.bookmark_url),
+                href(format!("/bookmarks/{}", result.bookmark_id)),
             ],
             &result.title,
         ),

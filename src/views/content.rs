@@ -1,10 +1,18 @@
-use htmf::prelude::*;
+use htmf::prelude_inline::*;
+use time::{OffsetDateTime, format_description};
 
 pub fn link_url(url: &str) -> Element {
-    p(class(
-        "w-full max-w-sm overflow-hidden text-sm text-neutral-400 whitespace-nowrap text-ellipsis",
-    ))
-    .with(url)
+    p(
+        class(
+            "w-full overflow-hidden text-sm text-neutral-400 hover:text-neutral-300 whitespace-nowrap text-ellipsis",
+        ),
+        a(href(url), url),
+    )
+}
+
+pub fn format_date(date: OffsetDateTime) -> String {
+    date.format(&format_description::parse("[year]-[month]-[day]").unwrap())
+        .unwrap()
 }
 
 pub fn pluralize<'a>(

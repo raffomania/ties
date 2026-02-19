@@ -26,7 +26,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/bookmarks/create", get(get_create).post(post_create))
         .route("/bookmarks/unsorted", get(get_unsorted))
-        .route("/bookmarks/{id}", delete(delete_by_id))
+        .route("/bookmarks/{id}", delete(delete_by_id).get(get_by_id))
 }
 
 async fn post_create(
@@ -162,6 +162,30 @@ async fn get_create(
             selected_parents: selected_parent.into_iter().collect(),
             // TODO exclude items that are already linked
             search_results: db::lists::list_recent(&mut tx, auth_user.user_id).await?,
+        },
+    )))
+}
+
+async fn get_by_id(
+    extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> ResponseResult<HtmfResponse> {
+    let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
+    let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
+    let archive = db::archives::by_bookmark_id(&mut tx, bookmark.id).await?;
+    let backlinks = db::lists::pointing_to_bookmark(
+        &mut tx,
+        id,
+        layout.authed_info.as_ref().map(|a| a.ap_user_id),
+    )
+    .await?;
+    Ok(HtmfResponse(views::show_bookmark::view(
+        views::show_bookmark::Data {
+            layout,
+            bookmark,
+            archive,
+            backlinks,
         },
     )))
 }

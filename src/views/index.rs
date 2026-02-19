@@ -21,7 +21,7 @@ pub fn view(data: &Data) -> Element {
                     header(
                         class("m-8"),
                         [h1(
-                            class("text-xl font-bold flex items-center gap-2"),
+                            class("text-2xl font-bold flex items-center gap-2"),
                             [
                                 img([src("/assets/logo_icon_only.png"), class("inline h-8")]),
                                 span(

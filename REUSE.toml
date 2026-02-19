@@ -57,7 +57,7 @@ SPDX-FileCopyrightText = "NONE"
 SPDX-License-Identifier = "0BSD"
 
 [[annotations]]
-path = ["assets/preflight.css"]
+path = ["assets/preflight.css", "assets/prose.css"]
 SPDX-FileCopyrightText = "Tailwind Labs, Inc"
 SPDX-License-Identifier = "MIT"
 
