@@ -25,12 +25,33 @@ pub struct Archive {
     pub extracted_html: Option<String>,
 }
 
-pub async fn insert(
+pub async fn insert_pending(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<Archive> {
+    let id = Uuid::new_v4();
+    let status = Status::Pending;
+
+    let archive = sqlx::query_as!(
+        Archive,
+        r#"
+        insert into archives
+        (id, bookmark_id, status)
+        values ($1, $2, $3)
+        returning id, bookmark_id, created_at, status as "status: _", error as "error: Json<archive::Error>", extracted_html
+        "#,
+        id,
+        bookmark_id,
+        status as Status,
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Ok(archive)
+}
+
+pub async fn update(
     tx: &mut AppTx,
-    bookmark_id: Uuid,
+    archive_id: Uuid,
     article: &Result<legible::Article, archive::Error>,
 ) -> ResponseResult<Archive> {
-    let id = Uuid::new_v4();
     let (status, error, extracted_html) = match article {
         Ok(article) => (Status::Success, None, Some(&article.content)),
         Err(e) => (
@@ -42,13 +63,14 @@ pub async fn insert(
     let archive = sqlx::query_as!(
         Archive,
         r#"
-        insert into archives
-        (id, bookmark_id, status, error, extracted_html)
-        values ($1, $2, $3, $4, $5)
+        update archives
+        set status = $2,
+            error = $3,
+            extracted_html = $4
+        where id = $1
         returning id, bookmark_id, created_at, status as "status: _", error as "error: Json<archive::Error>", extracted_html
         "#,
-        id,
-        bookmark_id,
+        archive_id,
         status as Status,
         error,
         extracted_html
@@ -73,4 +95,12 @@ pub async fn by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult
     .await?;
 
     Ok(archive)
+}
+
+pub async fn delete_by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<()> {
+    sqlx::query!("delete from archives where bookmark_id = $1", bookmark_id)
+        .execute(&mut **tx)
+        .await?;
+
+    Ok(())
 }

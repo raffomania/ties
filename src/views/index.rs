@@ -63,7 +63,7 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                         class("mt-12 mx-4 mb-6"),
                         [
                             h1(
-                                class("text-xl font-bold flex items-center gap-2"),
+                                class("text-2xl font-bold flex items-center gap-2"),
                                 [
                                     img([src("/assets/logo_icon_only.png"), class("inline h-8")]),
                                     span(

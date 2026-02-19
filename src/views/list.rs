@@ -54,7 +54,7 @@ pub fn view(
 fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Element {
     header(class("pt-3 mb-4"))
         .with([
-            h1(class("text-xl font-bold tracking-tight")).with(&list.title),
+            h1(class("text-2xl font-bold tracking-tight")).with(&list.title),
             div(class("flex flex-wrap text-sm gap-x-1 text-neutral-400")).with([
                 a([
                     href(format!("/user/{}", metadata.username)),
@@ -227,7 +227,7 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
                 "block overflow-hidden leading-8 text-orange-100 hover:text-orange-300 \
                  text-ellipsis whitespace-nowrap",
             ),
-            href(&bookmark.url),
+            href(format!("/bookmarks/{}", bookmark.id)),
         ])
         .with(&bookmark.title),
         content::link_url(&bookmark.url),

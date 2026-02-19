@@ -4064,7 +4064,7 @@
         }
       ],
       "name": "htmf",
-      "purl": "pkg:cargo/htmf@0.3.0?vcs_url=git%2Bhttps://github.com/raffomania/htmf%40557d1dd25fee30a8b146ddb7a1ccdededdf54788",
+      "purl": "pkg:cargo/htmf@0.3.0?vcs_url=git%2Bhttps://github.com/raffomania/htmf%4087037f40cb2f82ac0c145347567ab3fef79288b3",
       "scope": "required",
       "type": "library",
       "version": "0.3.0"

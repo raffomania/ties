@@ -2,4 +2,4 @@
 source: src/tests/bookmarks.rs
 expression: "unsorted_bookmarks.dom.find(\"main\").htmls()"
 ---
-<div class="px-4 py-4 bg-neutral-900"><form action="/search" method="get" hx-boost="true" class="inline-flex w-full"><input type="text" name="q" placeholder="Search all bookmarks" value="" class="leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700 max-w-2xl" /><button class="px-2 text-neutral-400 shrink border-y border-r rounded-r border-neutral-700">Search</button></form></div><header class="px-4 pt-3 pb-4 bg-neutral-900 border-b border-black"><h1 class="text-xl font-bold">Unsorted Bookmarks</h1></header>
+<div class="px-4 py-4 bg-neutral-900"><form action="/search" method="get" hx-boost="true" class="inline-flex w-full"><input type="text" name="q" placeholder="Search all bookmarks" value="" class="leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700 max-w-2xl" /><button class="px-2 text-neutral-400 shrink border-y border-r rounded-r border-neutral-700">Search</button></form></div><header class="px-4 pt-3 pb-4 bg-neutral-900 border-b border-black"><h1 class="text-xl font-bold">0 unsorted Bookmarks</h1></header>

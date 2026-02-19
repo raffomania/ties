@@ -21,11 +21,14 @@ struct Queue {
     db_pool: sqlx::PgPool,
 }
 
+struct ArchiveTask {
+    bookmark: db::Bookmark,
+    archive: db::Archive,
+    respond_to: oneshot::Sender<Result<db::Archive>>,
+}
+
 enum Message {
-    ArchiveBookmark {
-        bookmark: db::Bookmark,
-        respond_to: oneshot::Sender<Result<db::Archive>>,
-    },
+    ArchiveBookmark(ArchiveTask),
 }
 
 impl Queue {
@@ -34,28 +37,39 @@ impl Queue {
     }
 
     async fn process(mut self) {
-        while let Some(msg) = self.receiver.recv().await {
-            self.handle_message(msg).await;
+        while let Some(message) = self.receiver.recv().await {
+            self.receive_message(message).await;
         }
+
+        // TODO: find left-over pending bookmarks in DB and process them
+        tracing::debug!("Exiting");
     }
 
-    async fn handle_message(&mut self, message: Message) {
+    async fn receive_message(&mut self, message: Message) {
         match message {
-            Message::ArchiveBookmark {
-                bookmark,
-                respond_to,
-            } => self.archive_bookmark(bookmark, respond_to).await,
+            Message::ArchiveBookmark(archive_bookmark) => {
+                self.archive_bookmark(archive_bookmark).await;
+            }
         }
     }
 
     async fn archive_bookmark(
         &mut self,
-        bookmark: Bookmark,
-        respond_to: oneshot::Sender<Result<db::Archive>>,
+        ArchiveTask {
+            bookmark,
+            archive,
+            respond_to,
+        }: ArchiveTask,
     ) {
         tracing::info!(?bookmark, "Archiving bookmark");
         let article = self.get_article(&bookmark).await;
-        let archive = self.save_archive(&bookmark, &article).await;
+        if article.is_err() {
+            tracing::info!(?article);
+        }
+        let archive = self.save_archive(&archive, &article).await;
+        if archive.is_err() {
+            tracing::error!(?archive);
+        }
 
         tracing::info!(?bookmark, "Archived bookmark");
 
@@ -79,12 +93,12 @@ impl Queue {
 
     async fn save_archive(
         &mut self,
-        bookmark: &Bookmark,
+        archive: &db::Archive,
         article: &std::result::Result<legible::Article, archive::Error>,
     ) -> Result<db::Archive> {
         let mut tx = self.db_pool.begin().await?;
 
-        let archive = db::archives::insert(&mut tx, bookmark.id, article).await?;
+        let archive = db::archives::update(&mut tx, archive.id, article).await?;
 
         tx.commit().await?;
 
@@ -99,7 +113,7 @@ pub struct QueueHandle {
 
 impl QueueHandle {
     pub fn new(db_pool: sqlx::PgPool) -> Self {
-        let (sender, receiver) = mpsc::channel(10);
+        let (sender, receiver) = mpsc::channel(50);
 
         let queue = Queue::new(receiver, db_pool);
         tokio::spawn(queue.process());
@@ -108,12 +122,13 @@ impl QueueHandle {
     }
 
     /// Dispatch a bookmark for archiving, but ignore any failures.
-    pub fn archive_bookmark(&self, bookmark: Bookmark) {
+    pub fn archive_bookmark(&self, bookmark: Bookmark, archive: db::Archive) {
         let (send, _recv) = oneshot::channel();
-        let msg = Message::ArchiveBookmark {
+        let msg = Message::ArchiveBookmark(ArchiveTask {
             bookmark,
+            archive,
             respond_to: send,
-        };
+        });
 
         let _ = self.sender.try_send(msg);
     }
