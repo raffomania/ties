@@ -18,11 +18,14 @@ linkblocks is now named **ties**!
 
 - Add bookmark and list stats to index page.
 - Move logout button to index page to make sidebar less noisy.
+- Add the ties logo to the login and index pages, and as a favicon.
+- Use a darker background for page header sections to distinguish them from pages' main content.
 
 ### Bugfixes
 
 - Fix missing spaces around some labels in the UI ([#206](https://github.com/raffomania/ties/issues/206))
 - Fix the incorrect link to the page for installing the bookmarklet by moving the installation instructions to the start page.
+- Fix demo mode not deleting data from all tables.
 
 ### Docs
 
@@ -33,6 +36,10 @@ linkblocks is now named **ties**!
 
 - Update all dependencies.
 - Make error handling more robust for unauthenticated requests that need to get redirected to login ([#204](https://github.com/raffomania/ties/pull/204), thanks @danilax86!)
+- Add live reloading in development.
+- Decrease the time it takes to reload the server in watch mode.
+- Check formatting in CI.
+- Disable htmf formatter and return unformatted HTML in debug mode as well. The formatter introduced whitespace changes that resulted in rendering differences between debug and release modes.
 
 ## 0.1.0
 
