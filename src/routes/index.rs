@@ -21,10 +21,14 @@ async fn index(
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
     let authed_info = db::layout::by_ap_user_id(&mut tx, auth_user.ap_user_id).await?;
 
-    Ok(views::index::view(&views::index::Data {
-        layout: &layout,
-        base_url: &state.base_url,
-        authed_info: &authed_info,
-    })
+    Ok(views::index::view(
+        &views::index::Data {
+            layout: &layout,
+            base_url: &state.base_url,
+            authed_info: &authed_info,
+        },
+        &mut tx,
+    )
+    .await?
     .into())
 }

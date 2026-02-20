@@ -14,6 +14,11 @@ linkblocks is now named **ties**!
 - Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
 - Search through bookmark titles using the search bar at the top of every page.
 
+### Features
+
+- Add bookmark and list stats to index page.
+- Move logout button to index page to make sidebar less noisy.
+
 ### Bugfixes
 
 - Fix missing spaces around some labels in the UI ([#206](https://github.com/raffomania/ties/issues/206))

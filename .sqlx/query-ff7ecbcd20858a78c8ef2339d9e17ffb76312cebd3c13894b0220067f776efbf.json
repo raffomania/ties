@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select count(bookmarks) as \"count!\"\n        from bookmarks\n        where bookmarks.ap_user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ff7ecbcd20858a78c8ef2339d9e17ffb76312cebd3c13894b0220067f776efbf"
+}

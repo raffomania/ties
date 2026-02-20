@@ -1,8 +1,12 @@
 use htmf::{attr::Attrs, prelude_inline::*};
 use url::Url;
+use uuid::Uuid;
 
 use super::layout;
-use crate::db::layout::AuthedInfo;
+use crate::{
+    db::{AppTx, layout::AuthedInfo},
+    response_error::ResponseResult,
+};
 
 pub struct Data<'a> {
     pub layout: &'a layout::Template,
@@ -10,8 +14,45 @@ pub struct Data<'a> {
     pub authed_info: &'a AuthedInfo,
 }
 
-pub fn view(data: &Data) -> Element {
-    super::layout::layout(
+struct UserStats {
+    bookmark_count: i64,
+    list_count: i64,
+}
+
+// This is a little experiment: usually, we keep queries in the db module. But
+// since this data is only used here, let's see how well it works to keep
+// queries close to where their output is used.
+async fn user_stats(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<UserStats> {
+    let bookmarks = sqlx::query!(
+        r#"
+        select count(bookmarks) as "count!"
+        from bookmarks
+        where bookmarks.ap_user_id = $1
+        "#,
+        ap_user_id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+    let lists = sqlx::query!(
+        r#"
+        select count(lists) as "count!"
+        from lists
+        where lists.ap_user_id = $1
+        "#,
+        ap_user_id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Ok(UserStats {
+        bookmark_count: bookmarks.count,
+        list_count: lists.count,
+    })
+}
+
+pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
+    let user_stats = user_stats(tx, data.authed_info.ap_user_id).await?;
+    let element = super::layout::layout(
         [
             div(class("border-t border-black"), ()),
             div(class("border-t border-neutral-700"), ()),
@@ -19,34 +60,53 @@ pub fn view(data: &Data) -> Element {
                 class("px-4 flex flex-col w-full items-center"),
                 [
                     header(
-                        class("m-8"),
-                        [h1(
-                            class("text-xl font-bold flex items-center gap-2"),
-                            [
-                                img([src("/assets/logo_icon_only.png"), class("inline h-8")]),
-                                span(
-                                    (),
-                                    format!("Welcome to ties, {}!", data.authed_info.username),
-                                ),
-                            ],
-                        )],
+                        class("mt-12 mx-4 mb-6"),
+                        [
+                            h1(
+                                class("text-xl font-bold flex items-center gap-2"),
+                                [
+                                    img([src("/assets/logo_icon_only.png"), class("inline h-8")]),
+                                    span(
+                                        (),
+                                        format!("Welcome to ties, {}!", data.authed_info.username),
+                                    ),
+                                ],
+                            ),
+                            p(
+                                class("mt-2 text-neutral-400"),
+                                [
+                                    span((), "You have "),
+                                    span(
+                                        class("text-neutral-300"),
+                                        user_stats.bookmark_count.to_string(),
+                                    ),
+                                    span((), " bookmarks  in "),
+                                    span(
+                                        class("text-neutral-300"),
+                                        user_stats.list_count.to_string(),
+                                    ),
+                                    span((), " lists."),
+                                ],
+                            ),
+                        ],
                     ),
                     // TODO add intro text: what can you do with ties? How to get started?  Where
                     // to get help?
                     div(
                         class(
-                            "flex flex-wrap gap-x-2 gap-y-4 justify-center pb-4 text-center w-full",
+                            "flex flex-wrap gap-x-2 gap-y-4 justify-stretch pb-4 text-center \
+                             w-full max-w-xl",
                         ),
                         [
                             div(
-                                class("flex flex-col gap-2 w-72"),
+                                class("flex flex-col gap-2 flex-auto"),
                                 [
                                     dash_button(href("/bookmarks/create"), "Add a bookmark"),
                                     dash_button(href("/lists/create"), "Create a list"),
                                 ],
                             ),
                             div(
-                                class("flex flex-col gap-2"),
+                                class("flex flex-col gap-2 flex-auto"),
                                 [
                                     dash_button(
                                         href(format!("/user/{}", data.authed_info.username)),
@@ -72,7 +132,8 @@ pub fn view(data: &Data) -> Element {
             ),
         ],
         data.layout,
-    )
+    );
+    Ok(element)
 }
 
 fn dash_button<C: Into<Element>>(attrs: Attrs, children: C) -> Element {
