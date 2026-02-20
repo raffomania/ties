@@ -12931,12 +12931,6 @@
       "components": [
         {
           "name": "ties",
-          "purl": "pkg:cargo/ties@0.1.0?download_url=file://.#src/lib.rs",
-          "type": "library",
-          "version": "0.1.0"
-        },
-        {
-          "name": "ties",
           "purl": "pkg:cargo/ties@0.1.0?download_url=file://.#src/main.rs",
           "type": "application",
           "version": "0.1.0"
