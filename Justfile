@@ -7,7 +7,7 @@ default:
 
 [group('Development')]
 watch *args: development-cert migrate-database
-    cargo bin systemfd --no-pid -s ${LISTEN} -- cargo bin cargo-watch -- cargo run start --listenfd {{ args }}
+    cargo bin systemfd --no-pid -s ${LISTEN} -- cargo bin cargo-watch --delay 0 -- cargo run start --listenfd {{ args }}
 
 [group('Development')]
 run *args: development-cert migrate-database
