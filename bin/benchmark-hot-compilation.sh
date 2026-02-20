@@ -36,4 +36,4 @@ hyperfine \
     --max-runs 10 \
     --prepare "prepare_next" \
     --setup "make_change \$RANDOM" \
-    "cargo build"
+    "cargo +nightly build"

@@ -23,6 +23,7 @@ path = [
     ".config/*.toml",
     ".cargo/*.toml",
     "bin/*",
+    "rust-toolchain.toml",
 ]
 SPDX-FileCopyrightText = "ties Contributors"
 SPDX-License-Identifier = "AGPL-3.0-only"
