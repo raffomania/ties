@@ -3494,7 +3494,7 @@
     },
     {
       "author": "Alex Crichton <alex@alexcrichton.com>, Carl Lerche <me@carllerche.com>, Sean McArthur <sean@seanmonstar.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
       "description": "A set of types for representing HTTP requests and responses. ",
       "externalReferences": [
         {
@@ -3509,7 +3509,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "f4a85d31aea989eead29a3aaf9e1115a180df8282431156e533de47660892565"
+          "content": "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
         }
       ],
       "licenses": [
@@ -3518,10 +3518,10 @@
         }
       ],
       "name": "http",
-      "purl": "pkg:cargo/http@1.3.1",
+      "purl": "pkg:cargo/http@1.4.0",
       "scope": "required",
       "type": "library",
-      "version": "1.3.1"
+      "version": "1.4.0"
     },
     {
       "author": "Sean McArthur <sean@seanmonstar.com>",
@@ -8841,6 +8841,37 @@
       "version": "0.3.3"
     },
     {
+      "author": "Leo Gaskin <leo.gaskin@le0.gs>",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-livereload@0.10.2",
+      "description": "A LiveReload middleware built on top of tower.",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/leotaku/tower-livereload"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/leotaku/tower-livereload"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "62a893f6b4fbc35dc32eacd6b5cf61dd49abac153ac7b3892c5725b350912e25"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "tower-livereload",
+      "purl": "pkg:cargo/tower-livereload@0.10.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.10.2"
+    },
+    {
       "author": "Tower Maintainers <team@tower-rs.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3",
       "description": "Trait representing an asynchronous, request / response based, client or server. ",
@@ -10237,7 +10268,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#enum_delegate@0.2.0",
         "registry+https://github.com/rust-lang/crates.io-index#futures@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-signature-normalization@0.7.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-signature-normalization-reqwest@0.12.0",
         "registry+https://github.com/rust-lang/crates.io-index#httpdate@1.0.3",
@@ -10323,6 +10354,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#tokio@1.49.0",
         "registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3",
         "registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.8",
+        "registry+https://github.com/rust-lang/crates.io-index#tower-livereload@0.10.2",
         "registry+https://github.com/rust-lang/crates.io-index#tower-sessions@0.14.0",
         "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-sqlx-store@0.15.0",
         "registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44",
@@ -10426,7 +10458,7 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#http-body-util@0.1.3",
         "registry+https://github.com/rust-lang/crates.io-index#mime@0.3.17",
@@ -10452,7 +10484,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#either@1.15.0",
         "registry+https://github.com/rust-lang/crates.io-index#fs-err@3.1.0",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#hyper@1.8.1",
         "registry+https://github.com/rust-lang/crates.io-index#hyper-util@0.1.19",
@@ -10472,7 +10504,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#form_urlencoded@1.2.2",
         "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#http-body-util@0.1.3",
         "registry+https://github.com/rust-lang/crates.io-index#hyper@1.8.1",
@@ -11046,7 +11078,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#fnv@1.0.7",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-sink@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#indexmap@2.9.0",
         "registry+https://github.com/rust-lang/crates.io-index#slab@0.4.9",
         "registry+https://github.com/rust-lang/crates.io-index#tokio@1.49.0",
@@ -11109,7 +11141,7 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.16"
       ],
@@ -11118,7 +11150,7 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1"
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1"
     },
@@ -11145,10 +11177,9 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
-        "registry+https://github.com/rust-lang/crates.io-index#fnv@1.0.7",
         "registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.15"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0"
     },
     {
       "dependsOn": [],
@@ -11161,7 +11192,7 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#hyper@1.8.1",
         "registry+https://github.com/rust-lang/crates.io-index#hyper-util@0.1.19",
         "registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.36",
@@ -11179,7 +11210,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#futures-channel@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#hyper@1.8.1",
         "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.172",
@@ -11198,7 +11229,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#futures-channel@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#h2@0.4.9",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#httparse@1.10.1",
         "registry+https://github.com/rust-lang/crates.io-index#httpdate@1.0.3",
@@ -11542,7 +11573,7 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
         "registry+https://github.com/rust-lang/crates.io-index#chrono@0.4.43",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.5",
         "registry+https://github.com/rust-lang/crates.io-index#reqwest@0.12.15",
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
@@ -11565,7 +11596,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#dyn-clone@1.0.19",
         "registry+https://github.com/rust-lang/crates.io-index#ed25519-dalek@2.1.1",
         "registry+https://github.com/rust-lang/crates.io-index#hmac@0.12.1",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#itertools@0.10.5",
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.27",
         "registry+https://github.com/rust-lang/crates.io-index#oauth2@5.0.0",
@@ -11832,7 +11863,7 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.100",
         "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#reqwest@0.12.15",
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
         "registry+https://github.com/rust-lang/crates.io-index#thiserror@1.0.69",
@@ -11846,7 +11877,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#futures-core@0.3.31",
         "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#http-body-util@0.1.3",
         "registry+https://github.com/rust-lang/crates.io-index#hyper@1.8.1",
@@ -12559,7 +12590,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#axum-core@0.5.5",
         "registry+https://github.com/rust-lang/crates.io-index#cookie@0.18.1",
         "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.3",
         "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.16",
         "registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3",
@@ -12571,7 +12602,7 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#bitflags@2.9.0",
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.16",
         "registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3",
@@ -12585,6 +12616,17 @@
       "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3"
     },
     {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
+        "registry+https://github.com/rust-lang/crates.io-index#http-body@1.0.1",
+        "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.16",
+        "registry+https://github.com/rust-lang/crates.io-index#tokio@1.49.0",
+        "registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-livereload@0.10.2"
+    },
+    {
       "dependsOn": [],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3"
     },
@@ -12594,7 +12636,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#axum-core@0.5.5",
         "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
         "registry+https://github.com/rust-lang/crates.io-index#futures@0.3.31",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.3",
         "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.5",
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
@@ -12629,7 +12671,7 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.3.1",
+        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
         "registry+https://github.com/rust-lang/crates.io-index#tokio@1.49.0",
         "registry+https://github.com/rust-lang/crates.io-index#tower-cookies@0.11.0",

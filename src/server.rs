@@ -52,7 +52,8 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
             cookie_inactivity_limit,
         ));
 
-    Ok(Router::new()
+    #[allow(unused_mut)]
+    let mut router = Router::new()
         .merge(routes::users::router())
         .merge(routes::index::router())
         .merge(routes::lists::router())
@@ -68,8 +69,23 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
                 .layer(TraceLayer::new_for_http())
                 .layer(session_service)
                 .layer(FederationMiddleware::new(state.federation_config.clone())),
-        )
-        .with_state(state))
+        );
+
+    #[cfg(all(debug_assertions, not(test)))]
+    {
+        use tower_livereload::LiveReloadLayer;
+
+        fn not_htmx_request_livereload_predicate(
+            req: &axum::http::Request<axum::body::Body>,
+        ) -> bool {
+            !req.headers().contains_key("hx-request")
+        }
+
+        router = router
+            .layer(LiveReloadLayer::new().request_predicate(not_htmx_request_livereload_predicate));
+    }
+
+    Ok(router.with_state(state))
 }
 
 pub async fn start(
