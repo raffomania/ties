@@ -6,10 +6,6 @@ license = "AGPL-3.0-or-later"
 publish = false
 rust-version = "1.88.0"
 
-[lib]
-# Doctests are slow, so we don't use them
-doctest = false
-
 [dependencies]
 itertools = "0.14.0"
 anyhow = { version = "1.0.100" }
