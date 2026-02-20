@@ -54,8 +54,7 @@ pub fn view(
 fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Element {
     header(class("pt-3 mb-4"))
         .with([
-            div(class("flex items-center justify-between"))
-                .with([h1(class("text-xl font-bold tracking-tight")).with(&list.title)]),
+            h1(class("text-xl font-bold tracking-tight")).with(&list.title),
             div(class("flex flex-wrap text-sm gap-x-1 text-neutral-400")).with([
                 a([
                     href(format!("/user/{}", metadata.username)),
