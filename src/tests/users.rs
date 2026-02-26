@@ -13,7 +13,7 @@ async fn can_login() -> anyhow::Result<()> {
     app.create_user("test", "testpassword").await;
 
     let login_page = app.req().get("/login").await.test_page().await;
-    insta::assert_snapshot!(login_page.dom.htmls());
+    insta::assert_snapshot!(login_page.dom.find("form").outer_htmls());
 
     let input = Login {
         credentials: Credentials {

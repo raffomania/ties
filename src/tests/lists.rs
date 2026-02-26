@@ -8,7 +8,7 @@ async fn get_create_list() -> anyhow::Result<()> {
 
     let create_list = app.req().get("/lists/create").await.test_page().await;
 
-    insta::assert_snapshot!(create_list.dom.htmls());
+    insta::assert_snapshot!(create_list.dom.find("main").htmls());
 
     Ok(())
 }

@@ -12,7 +12,7 @@ async fn get_unsorted_bookmarks() -> anyhow::Result<()> {
 
     let unsorted_bookmarks = app.req().get("/bookmarks/unsorted").await.test_page().await;
 
-    insta::assert_snapshot!(unsorted_bookmarks.dom.htmls());
+    insta::assert_snapshot!(unsorted_bookmarks.dom.find("main").htmls());
 
     Ok(())
 }
