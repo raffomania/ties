@@ -10,10 +10,11 @@
 
 use anyhow::Result;
 use tokio::sync::{mpsc, oneshot};
+use uuid::Uuid;
 
 use crate::{
     archive,
-    db::{self, Bookmark},
+    db::{self, AppTx},
 };
 
 struct Queue {
@@ -22,8 +23,7 @@ struct Queue {
 }
 
 struct ArchiveTask {
-    bookmark: db::Bookmark,
-    archive: db::Archive,
+    archive_id: Uuid,
     respond_to: oneshot::Sender<Result<db::Archive>>,
 }
 
@@ -37,52 +37,83 @@ impl Queue {
     }
 
     async fn process(mut self) {
-        while let Some(message) = self.receiver.recv().await {
-            self.receive_message(message).await;
+        tracing::debug!("Starting");
+
+        while !self.receiver.is_closed() {
+            // Process all incoming messages with high priority.
+            while let Ok(message) = self.receiver.try_recv() {
+                self.receive_message(message).await;
+            }
+
+            tracing::debug!("Processed all high-priority tasks");
+
+            // No incoming messages at the moment, process an arbitrary pending bookmark if
+            // it exists.
+            let pending_archive_id = self.get_pending_archive_id().await;
+
+            if let Some(pending_archive_id) = pending_archive_id {
+                tracing::debug!("Found dangling pending archive");
+                let _ = self.archive(pending_archive_id).await;
+            }
+
+            // No work at the moment: wait for new messages to come in
+            if self.receiver.is_empty() && pending_archive_id.is_none() {
+                tracing::debug!("No archiving to do, waiting...");
+
+                if let Some(msg) = self.receiver.recv().await {
+                    self.receive_message(msg).await;
+                }
+            }
         }
 
-        // TODO: find left-over pending bookmarks in DB and process them
         tracing::debug!("Exiting");
     }
 
     async fn receive_message(&mut self, message: Message) {
+        tracing::debug!("Received message");
         match message {
-            Message::ArchiveBookmark(archive_bookmark) => {
-                self.archive_bookmark(archive_bookmark).await;
+            Message::ArchiveBookmark(task) => {
+                let archive = self.archive(task.archive_id).await;
+
+                let _ = task.respond_to.send(archive);
             }
         }
     }
 
-    async fn archive_bookmark(
-        &mut self,
-        ArchiveTask {
-            bookmark,
-            archive,
-            respond_to,
-        }: ArchiveTask,
-    ) {
+    async fn get_pending_archive_id(&mut self) -> Option<Uuid> {
+        let mut tx = self.db_pool.begin().await.ok()?;
+        let pending_id = db::archives::find_one_pending(&mut tx).await.ok()?;
+        let _ = tx.commit().await;
+
+        pending_id
+    }
+
+    async fn archive(&mut self, archive_id: Uuid) -> Result<db::Archive> {
+        let mut tx = self.db_pool.begin().await?;
+        let pending = db::archives::by_id(&mut tx, archive_id).await?;
+        let bookmark = db::bookmarks::by_id(&mut tx, pending.bookmark_id).await?;
+
         tracing::info!(?bookmark, "Archiving bookmark");
-        let article = self.get_article(&bookmark).await;
+        let article = self.get_article(&bookmark.url).await;
         if article.is_err() {
-            tracing::info!(?article);
+            tracing::info!(?article, "Fetching complete");
         }
-        let archive = self.save_archive(&archive, &article).await;
+        let archive = self.save_archive(&mut tx, &pending, &article).await;
         if archive.is_err() {
-            tracing::error!(?archive);
+            tracing::error!(?archive, "Could not save archive");
         }
+
+        tx.commit().await?;
 
         tracing::info!(?bookmark, "Archived bookmark");
 
-        let _ = respond_to.send(archive);
+        archive
     }
 
-    async fn get_article(
-        &mut self,
-        bookmark: &Bookmark,
-    ) -> Result<legible::Article, archive::Error> {
-        let html = archive::fetch_url_as_text(&bookmark.url).await?;
+    async fn get_article(&mut self, url: &str) -> Result<legible::Article, archive::Error> {
+        let html = archive::fetch_url_as_text(url).await?;
         tracing::debug!(html_length = html.len(), "Fetched website HTML");
-        let article = archive::make_readable(bookmark.url.parse()?, &html)?;
+        let article = archive::make_readable(url.parse()?, &html)?;
         tracing::debug!(
             readable_html_length = article.content.len(),
             "Extracted readable HTML"
@@ -93,14 +124,11 @@ impl Queue {
 
     async fn save_archive(
         &mut self,
+        tx: &mut AppTx,
         archive: &db::Archive,
         article: &std::result::Result<legible::Article, archive::Error>,
     ) -> Result<db::Archive> {
-        let mut tx = self.db_pool.begin().await?;
-
-        let archive = db::archives::update(&mut tx, archive.id, article).await?;
-
-        tx.commit().await?;
+        let archive = db::archives::update(tx, archive.id, article).await?;
 
         Ok(archive)
     }
@@ -122,11 +150,10 @@ impl QueueHandle {
     }
 
     /// Dispatch a bookmark for archiving, but ignore any failures.
-    pub fn archive_bookmark(&self, bookmark: Bookmark, archive: db::Archive) {
+    pub fn archive_in_background(&self, archive_id: Uuid) {
         let (send, _recv) = oneshot::channel();
         let msg = Message::ArchiveBookmark(ArchiveTask {
-            bookmark,
-            archive,
+            archive_id,
             respond_to: send,
         });
 

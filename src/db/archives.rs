@@ -97,6 +97,38 @@ pub async fn by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult
     Ok(archive)
 }
 
+pub async fn by_id(tx: &mut AppTx, archive_id: Uuid) -> ResponseResult<Archive> {
+    let archive = sqlx::query_as!(
+        Archive,
+        r#"
+        select id, bookmark_id, created_at, status as "status: _", error as "error: Json<archive::Error>", extracted_html
+        from archives
+        where id = $1
+        "#,
+        archive_id,
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Ok(archive)
+}
+
+pub async fn find_one_pending(tx: &mut AppTx) -> ResponseResult<Option<Uuid>> {
+    let archive = sqlx::query!(
+        r#"
+        select id
+        from archives
+        where status = $1
+        "#,
+        Status::Pending as Status,
+    )
+    .fetch_optional(&mut **tx)
+    .await?
+    .map(|r| r.id);
+
+    Ok(archive)
+}
+
 pub async fn delete_by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<()> {
     sqlx::query!("delete from archives where bookmark_id = $1", bookmark_id)
         .execute(&mut **tx)

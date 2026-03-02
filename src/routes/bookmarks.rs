@@ -119,11 +119,10 @@ async fn post_create(
         .await?;
     }
 
-    // Start archiving bookmark but don't wait for completion
     let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
-    state.archive_queue.archive_bookmark(bookmark, archive);
-
     tx.commit().await?;
+
+    state.archive_queue.archive_in_background(archive.id);
 
     let redirect_dest = match selected_parents.first().or(first_created_parent.as_ref()) {
         Some(parent) => parent.path(),
@@ -248,9 +247,9 @@ async fn post_archive(
     db::archives::delete_by_bookmark_id(&mut tx, id).await?;
 
     let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
-    state.archive_queue.archive_bookmark(bookmark, archive);
-
     tx.commit().await?;
+
+    state.archive_queue.archive_in_background(archive.id);
 
     Ok(Redirect::to(&format!("/bookmarks/{id}")))
 }
