@@ -94,6 +94,28 @@ impl TestApp {
         user
     }
 
+    pub async fn create_bookmark(
+        &self,
+        user: &db::User,
+        url: &str,
+    ) -> anyhow::Result<db::Bookmark> {
+        let mut tx = self.tx().await;
+        let bookmark = db::bookmarks::insert_local(
+            &mut tx,
+            user.ap_user_id,
+            db::bookmarks::InsertBookmark {
+                url: url.to_string(),
+                title: url.to_string(),
+            },
+            &self.base_url,
+        )
+        .await?;
+
+        tx.commit().await?;
+
+        Ok(bookmark)
+    }
+
     pub async fn create_test_user(&self) -> db::User {
         self.create_user(TEST_USER_USERNAME, TEST_USER_PASSWORD)
             .await

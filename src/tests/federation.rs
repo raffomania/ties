@@ -3,7 +3,7 @@ use anyhow::Result;
 use axum::http::StatusCode;
 
 use crate::{
-    db::{self, bookmarks::InsertBookmark},
+    db::{self},
     federation::{self, webfinger},
     forms::users::{Credentials, Login},
     tests::util::test_app::TestApp,
@@ -80,18 +80,7 @@ async fn can_resolve_bookmark() -> Result<()> {
     let app_b = TestApp::new().await;
 
     let user = app_a.create_test_user().await;
-    let mut tx = app_a.pool.begin().await?;
-    let bookmark = db::bookmarks::insert_local(
-        &mut tx,
-        user.ap_user_id,
-        InsertBookmark {
-            url: "https://www.rafa.ee".to_string(),
-            title: "Test Bookmark".to_string(),
-        },
-        &app_a.base_url,
-    )
-    .await?;
-    tx.commit().await?;
+    let bookmark = app_a.create_bookmark(&user, "https://rafa.ee").await?;
 
     app_a.serve().await;
     let ap_cx_b = app_b.state.federation_config.to_request_data();
