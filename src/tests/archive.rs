@@ -1,4 +1,4 @@
-use crate::archive;
+use crate::{archive, db, tests::util::test_app::TestApp};
 
 #[test_log::test(tokio::test)]
 #[ignore = "Test depends on an external resource and should only be run manually."]
@@ -39,6 +39,77 @@ async fn flaky_test_readability() -> anyhow::Result<()> {
     let text = archive::fetch_url_as_text(url).await?;
     let readable = archive::make_readable(url.parse()?, &text)?;
     dbg!(readable);
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+#[ignore = "Test depends on an external resource and should only be run manually."]
+async fn flaky_test_archive_queue() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+
+    let user = app.create_test_user().await;
+    let mut tx = app.tx().await;
+    let bookmark = db::bookmarks::insert_local(
+        &mut tx,
+        user.ap_user_id,
+        db::bookmarks::InsertBookmark {
+            url: "https://rafa.ee".to_string(),
+            title: "test".to_string(),
+        },
+        &app.base_url,
+    )
+    .await?;
+
+    let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+    tx.commit().await?;
+
+    let queue = archive::QueueHandle::new(app.pool.clone());
+
+    let processed = queue.wait_until_archive_processed(archive.id);
+    queue.archive_in_background(archive.id);
+    assert!(processed.await);
+
+    let mut tx = app.tx().await;
+    let archive = db::archives::by_bookmark_id(&mut tx, archive.bookmark_id)
+        .await?
+        .unwrap();
+    assert_eq!(archive.status, db::archives::Status::Success);
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+#[ignore = "Test depends on an external resource and should only be run manually."]
+async fn flaky_test_archive_queue_dangling_pending() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+
+    let user = app.create_test_user().await;
+    let mut tx = app.tx().await;
+    let bookmark = db::bookmarks::insert_local(
+        &mut tx,
+        user.ap_user_id,
+        db::bookmarks::InsertBookmark {
+            url: "https://rafa.ee".to_string(),
+            title: "test".to_string(),
+        },
+        &app.base_url,
+    )
+    .await?;
+
+    let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+    tx.commit().await?;
+
+    let queue = archive::QueueHandle::new(app.pool.clone());
+
+    let processed = queue.wait_until_archive_processed(archive.id).await;
+    assert!(processed);
+
+    let mut tx = app.tx().await;
+    let archive = db::archives::by_bookmark_id(&mut tx, archive.bookmark_id)
+        .await?
+        .unwrap();
+    assert_eq!(archive.status, db::archives::Status::Success);
 
     Ok(())
 }

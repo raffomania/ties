@@ -9,7 +9,7 @@
 //! - Requests are not rate limited at the moment.
 
 use anyhow::Result;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{broadcast, mpsc, oneshot};
 use uuid::Uuid;
 
 use crate::{
@@ -20,6 +20,7 @@ use crate::{
 struct Queue {
     receiver: tokio::sync::mpsc::Receiver<Message>,
     db_pool: sqlx::PgPool,
+    processed_archive_id_sender: broadcast::Sender<Uuid>,
 }
 
 struct ArchiveTask {
@@ -32,8 +33,16 @@ enum Message {
 }
 
 impl Queue {
-    fn new(receiver: mpsc::Receiver<Message>, db_pool: sqlx::PgPool) -> Self {
-        Self { receiver, db_pool }
+    fn new(
+        receiver: mpsc::Receiver<Message>,
+        db_pool: sqlx::PgPool,
+        processed_archive_id_sender: broadcast::Sender<Uuid>,
+    ) -> Self {
+        Self {
+            receiver,
+            db_pool,
+            processed_archive_id_sender,
+        }
     }
 
     async fn process(mut self) {
@@ -99,13 +108,18 @@ impl Queue {
             tracing::info!(?article, "Fetching complete");
         }
         let archive = self.save_archive(&mut tx, &pending, &article).await;
-        if archive.is_err() {
-            tracing::error!(?archive, "Could not save archive");
+        match &archive {
+            Ok(archive) => {
+                let _ = self.processed_archive_id_sender.send(archive.id);
+            }
+            Err(_) => {
+                tracing::error!(?archive, "Could not save archive");
+            }
         }
 
         tx.commit().await?;
 
-        tracing::info!(?bookmark, "Archived bookmark");
+        tracing::info!(?archive, "Archived bookmark");
 
         archive
     }
@@ -137,16 +151,26 @@ impl Queue {
 #[derive(Clone)]
 pub struct QueueHandle {
     sender: mpsc::Sender<Message>,
+    // Intentionally do not store a receiver here: there's no associated process that receives
+    // messages, so having a receiver here would clog up the channel
+    processed_archive_id_sender: broadcast::Sender<Uuid>,
 }
 
 impl QueueHandle {
     pub fn new(db_pool: sqlx::PgPool) -> Self {
         let (sender, receiver) = mpsc::channel(50);
 
-        let queue = Queue::new(receiver, db_pool);
+        // Since the messages here are only UUIDs, we can afford a large buffer size to
+        // support slow receivers.
+        let (processed_archive_id_sender, _) = broadcast::channel(200);
+
+        let queue = Queue::new(receiver, db_pool, processed_archive_id_sender.clone());
         tokio::spawn(queue.process());
 
-        Self { sender }
+        Self {
+            sender,
+            processed_archive_id_sender,
+        }
     }
 
     /// Dispatch a bookmark for archiving, but ignore any failures.
@@ -158,5 +182,19 @@ impl QueueHandle {
         });
 
         let _ = self.sender.try_send(msg);
+    }
+
+    /// Wait for the given archive id to be processed.
+    pub async fn wait_until_archive_processed(&self, archive_id: Uuid) -> bool {
+        let mut receiver = self.processed_archive_id_sender.subscribe();
+
+        // If the receiver leaks or is closed, quit
+        while let Ok(processed_id) = receiver.recv().await {
+            if processed_id == archive_id {
+                return true;
+            }
+        }
+
+        false
     }
 }

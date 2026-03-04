@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{archive, db::AppTx, response_error::ResponseResult};
 
-#[derive(sqlx::Type, Debug)]
+#[derive(sqlx::Type, Debug, PartialEq, Eq)]
 #[sqlx(type_name = "archive_status")]
 pub enum Status {
     Success,
