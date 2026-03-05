@@ -188,6 +188,14 @@ build-podman-container target="release":
 
     podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{ target }}
 
+[group('Testing')]
+build-and-check-container: build-podman-container verify-podman-container
+
+# Verify an already-built container image. Use build-and-check-container to build and verify in one step.
+[group('Testing')]
+verify-podman-container:
+    podman run --rm --entrypoint "" localhost/ties ls /etc/ssl/certs/ca-certificates.crt
+
 [group('Code Quality')]
 clippy *args:
     cargo clippy {{ args }} -- -D warnings
@@ -220,7 +228,7 @@ install-git-hooks:
 
 # Run extended checks that are not part of the normal CI pipeline.
 [group('Code Quality')]
-check-extended: verify-msrv build-podman-container check-example-docker-compose check-zizmor
+check-extended: verify-msrv build-and-check-container check-example-docker-compose check-zizmor
 
 [group('Code Quality')]
 check-example-docker-compose:

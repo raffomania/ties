@@ -109,6 +109,9 @@ jobs:
       - name: podman build linux/amd64
         run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
 
+      - name: Verify container image
+        run: cargo bin just verify-podman-container
+
       - name: podman manifest push latest
         run: podman manifest push ties ghcr.io/raffomania/ties:latest
         if: github.ref == 'refs/heads/main'
