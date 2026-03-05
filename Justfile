@@ -186,6 +186,9 @@ build-podman-container target="release":
     [[ "{{ target }}" == "debug" ]] && cargo_flag="" || cargo_flag="--{{ target }}"
     cargo build $cargo_flag
 
+    # The action below appends to the manifest if it already exists,
+    # so clean that up beforehand
+    podman manifest rm -i ties
     podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{ target }}
 
 [group('Testing')]
