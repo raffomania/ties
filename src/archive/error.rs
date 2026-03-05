@@ -53,6 +53,7 @@ impl From<reqwest::Error> for Error {
         } else if value.is_timeout() {
             Self::Timeout
         } else {
+            tracing::error!(?value, "Encountered unexpected error while archiving");
             Self::UnexpectedInternal
         }
     }
