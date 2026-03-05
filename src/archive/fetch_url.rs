@@ -2,11 +2,15 @@ use core::f64;
 
 use anyhow::Result;
 use easy_cast::Conv;
+use encoding_rs::{Encoding, UTF_8};
+use http_body_util::BodyExt;
+use mime_guess::Mime;
 use url::Url;
 
 use crate::archive::{self, safe_ips};
 
 const MAX_RESPONSE_SIZE_BYTES: u64 = 5 * 1000 * 1000; // ~ 5 megabytes
+const MAX_RESPONSE_SIZE_BYTES_USIZE: usize = 5 * 1000 * 1000; // ~ 5 megabytes
 
 fn is_domain_url(url: &Url) -> bool {
     if let Some(host) = url.host() {
@@ -83,17 +87,29 @@ pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive:
         return Err(archive::Error::UnsupportedContentType { content_type });
     }
 
-    // TODO: use http_body_util::Limited to prevent occupying memory for bodies that
-    // are too large However, with that solution we need to re-implement
-    // reqwest::Response::text_with_charset :(
-    let text = response.text().await?;
+    limited_body_to_text(response).await
+}
 
-    let len = text.len().try_into().unwrap_or(u64::MAX);
-    if len > MAX_RESPONSE_SIZE_BYTES {
-        return Err(archive::Error::ResponseTooLarge {
-            actual_size_mb: f64::try_conv(len).unwrap_or(f64::MAX) / 1_000_000.0,
-        });
-    }
+async fn limited_body_to_text(response: reqwest::Response) -> Result<String, archive::Error> {
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.parse::<Mime>().ok());
+    let limited_body =
+        http_body_util::Limited::new(reqwest::Body::from(response), MAX_RESPONSE_SIZE_BYTES_USIZE);
+    let encoding_name = content_type
+        .as_ref()
+        .and_then(|mime| mime.get_param("charset").map(|charset| charset.as_str()))
+        .unwrap_or("utf-8");
+    let encoding = Encoding::for_label(encoding_name.as_bytes()).unwrap_or(UTF_8);
 
-    Ok(text)
+    let full = BodyExt::collect(limited_body)
+        .await
+        .map(|buf| buf.to_bytes())
+        .map_err(|_| archive::Error::UnexpectedInternal)?;
+
+    let (text, _, _) = encoding.decode(&full);
+
+    Ok(text.to_string())
 }

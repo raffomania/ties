@@ -72,6 +72,8 @@ ipnet = "2.11.0"
 legible = "0.4.1"
 ammonia = "4.1.2"
 easy-cast = "0.5.4"
+http-body-util = "0.1.3"
+encoding_rs = "0.8.35"
 
 [patch.crates-io]
 garde = { git = "https://github.com/raffomania/garde", branch = "url-length" }

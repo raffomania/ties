@@ -3983,6 +3983,7 @@ dependencies = [
  "chrono",
  "clap",
  "easy-cast",
+ "encoding_rs",
  "enum_delegate",
  "fake",
  "friendly-zoo",
