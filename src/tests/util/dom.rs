@@ -14,15 +14,13 @@ pub fn assert_form_matches<I: Serialize>(form: &visdom::types::Elements, input: 
     // HTML itself
     let input_entries: HashMap<String, String> =
         url::form_urlencoded::parse(input_as_qs_fields.as_bytes())
+            .filter(|(_k, v)| !v.is_empty())
             .map(|(k, v)| (k.into_owned(), v.into_owned()))
             .collect();
 
     tracing::debug!("Form: {:?}", form.htmls());
 
-    tracing::debug!(
-        "Looking for HTML fields matching this form data: {:?}",
-        input_entries
-    );
+    tracing::debug!("Looking for HTML fields matching this form data: {input_entries:?}",);
     for name in input_entries.keys() {
         assert_eq!(
             form.find(&format!("input[name='{name}']")).length(),

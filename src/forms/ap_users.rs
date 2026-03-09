@@ -10,11 +10,11 @@ use crate::federation::{self, person::Person};
 pub struct CreateApUser {
     #[garde(skip)]
     pub id: Uuid,
-    #[garde(length(max = 255))]
+    #[garde(adapt(crate::forms::validate_url), length(max = 255))]
     pub ap_id: Url,
     #[garde(length(max = 50))]
     pub username: String,
-    #[garde(length(max = 255))]
+    #[garde(adapt(crate::forms::validate_url), length(max = 255))]
     pub inbox_url: Url,
     #[garde(length(max = 10_000))]
     pub public_key: String,

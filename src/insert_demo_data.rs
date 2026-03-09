@@ -2,7 +2,7 @@ use anyhow::{Context, Result, anyhow};
 use fake::Fake;
 use itertools::Itertools;
 use rand::{
-    Rng,
+    RngExt,
     seq::{IndexedRandom, IteratorRandom},
 };
 use sqlx::PgPool;
@@ -246,7 +246,7 @@ fn random_list_name() -> Result<String> {
     ];
 
     let chosen_adjectives = adjectives
-        .choose_multiple(
+        .sample(
             &mut rand::rng(),
             (1..3)
                 .choose(&mut rand::rng())
