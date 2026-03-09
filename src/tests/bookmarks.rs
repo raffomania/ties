@@ -18,6 +18,23 @@ async fn get_unsorted_bookmarks() -> anyhow::Result<()> {
 }
 
 #[test_log::test(tokio::test)]
+async fn get_create_bookmark() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let user = app.create_test_user().await;
+    app.login_test_user().await;
+    app.create_list(&user, "recent test list").await;
+
+    let form_page = app.req().get("/bookmarks/create").await.test_page().await;
+
+    let recent_list_button = form_page.dom.find("button[name='parents[]']");
+
+    assert_eq!(recent_list_button.length(), 1);
+    assert!(recent_list_button.text().contains("recent test list"));
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
 async fn is_bookmark_public() -> anyhow::Result<()> {
     let app = TestApp::new().await;
     let user = app.create_test_user().await;

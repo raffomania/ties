@@ -162,7 +162,7 @@ async fn get_create(
             },
             selected_parents: selected_parent.into_iter().collect(),
             // TODO exclude items that are already linked
-            search_results: db::lists::list_recent(&mut tx, auth_user.user_id).await?,
+            search_results: db::lists::list_recent(&mut tx, auth_user.ap_user_id).await?,
         },
     )))
 }

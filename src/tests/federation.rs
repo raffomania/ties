@@ -80,7 +80,7 @@ async fn can_resolve_bookmark() -> Result<()> {
     let app_b = TestApp::new().await;
 
     let user = app_a.create_test_user().await;
-    let bookmark = app_a.create_bookmark(&user, "https://rafa.ee").await?;
+    let bookmark = app_a.create_bookmark(&user, "https://rafa.ee").await;
 
     app_a.serve().await;
     let ap_cx_b = app_b.state.federation_config.to_request_data();
