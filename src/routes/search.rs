@@ -1,5 +1,6 @@
-use axum::{Router, extract::Query, routing::get};
+use axum::{Router, routing::get};
 use serde::{Deserialize, Serialize};
+use serde_qs::web::QsQuery;
 use uuid::Uuid;
 
 use crate::{
@@ -28,7 +29,7 @@ async fn get_search(
     auth_user: AuthUser,
     extract::Tx(mut tx): extract::Tx,
 
-    Query(query): Query<SearchQuery>,
+    QsQuery(query): QsQuery<SearchQuery>,
 ) -> ResponseResult<HtmfResponse> {
     let results = db::search::search(
         &mut tx,

@@ -1,12 +1,13 @@
 use anyhow::{Context, anyhow};
 use axum::{
     Router,
-    extract::{Path, Query, State},
+    extract::{Path, State},
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
 use garde::{Report, Validate};
 use serde::Deserialize;
+use serde_qs::web::QsQuery;
 use tower_sessions::Session;
 
 use crate::{
@@ -87,7 +88,7 @@ async fn get_login_oidc(
 
 async fn get_login_oidc_redirect(
     session: Session,
-    Query(query): Query<OidcLoginQuery>,
+    QsQuery(query): QsQuery<OidcLoginQuery>,
     state: State<AppState>,
     extract::Tx(mut tx): extract::Tx,
 ) -> ResponseResult<Response> {
@@ -186,7 +187,7 @@ struct LoginQuery {
 // TODO: redirect to homepage if already logged in
 // https://github.com/raffomania/ties/issues/177
 async fn get_login(
-    Query(query): Query<LoginQuery>,
+    QsQuery(query): QsQuery<LoginQuery>,
     State(state): State<AppState>,
 ) -> ResponseResult<Response> {
     if state.demo_mode {

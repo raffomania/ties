@@ -1,5 +1,5 @@
 use axum::{
-    Form, Router,
+    Router,
     extract::Path,
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     authentication::AuthUser,
     db::{self},
-    extract,
+    extract::{self, qs_form::QsForm},
     form_errors::FormErrors,
     forms,
     forms::lists::{CreateList, EditListPinned, EditListPrivate},
@@ -68,7 +68,7 @@ async fn get_show(
 async fn post_create(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
-    Form(input): Form<CreateList>,
+    QsForm(input): QsForm<CreateList>,
 ) -> ResponseResult<Response> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 
@@ -130,7 +130,7 @@ async fn post_edit_title(
     auth_user: AuthUser,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
-    Form(input): Form<forms::lists::EditTitle>,
+    QsForm(input): QsForm<forms::lists::EditTitle>,
 ) -> ResponseResult<Response> {
     let list = db::lists::by_id(&mut tx, list_id).await?;
 
@@ -149,7 +149,7 @@ async fn edit_private(
     auth_user: AuthUser,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
-    Form(input): Form<EditListPrivate>,
+    QsForm(input): QsForm<EditListPrivate>,
 ) -> ResponseResult<Response> {
     let list = db::lists::by_id(&mut tx, list_id).await?;
 
@@ -168,7 +168,7 @@ async fn edit_pinned(
     auth_user: AuthUser,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
-    Form(input): Form<EditListPinned>,
+    QsForm(input): QsForm<EditListPinned>,
 ) -> ResponseResult<Response> {
     let list = db::lists::by_id(&mut tx, list_id).await?;
 

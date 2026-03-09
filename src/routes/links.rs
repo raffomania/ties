@@ -1,13 +1,14 @@
 use anyhow::Context;
 use axum::{
     Router,
-    extract::{Path, Query},
+    extract::Path,
     http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
     routing::{delete, get},
 };
 use garde::Validate;
 use serde::Deserialize;
+use serde_qs::web::QsQuery;
 use uuid::Uuid;
 
 use crate::{
@@ -114,7 +115,7 @@ struct CreateLinkQueryString {
 async fn get_create(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
-    Query(query): Query<CreateLinkQueryString>,
+    QsQuery(query): QsQuery<CreateLinkQueryString>,
 ) -> ResponseResult<HtmfResponse> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 

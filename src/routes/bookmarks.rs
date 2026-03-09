@@ -1,12 +1,13 @@
 use anyhow::Context;
 use axum::{
     Router,
-    extract::{Path, Query, State},
+    extract::{Path, State},
     http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
     routing::{delete, get, post},
 };
 use serde::Deserialize;
+use serde_qs::web::QsQuery;
 use uuid::Uuid;
 
 use crate::{
@@ -141,7 +142,7 @@ struct CreateBookmarkQuery {
 async fn get_create(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
-    Query(query): Query<CreateBookmarkQuery>,
+    QsQuery(query): QsQuery<CreateBookmarkQuery>,
 ) -> ResponseResult<HtmfResponse> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 

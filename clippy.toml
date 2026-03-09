@@ -1,0 +1,7 @@
+[[disallowed-types]]
+path = "axum::extract::Query"
+reason = "Use serde_qs::axum::QsQuery instead"
+
+[[disallowed-types]]
+path = "axum::Form"
+reason = "Use serde_qs::axum::QsForm instead"

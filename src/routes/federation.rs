@@ -10,10 +10,11 @@ use activitypub_federation::{
 };
 use axum::{
     Json, Router,
-    extract::{Path, Query, State},
+    extract::{Path, State},
     routing::{get, post},
 };
 use serde::{Deserialize, Serialize};
+use serde_qs::web::QsQuery;
 use url::Url;
 use uuid::Uuid;
 
@@ -94,7 +95,7 @@ pub struct WebfingerQuery {
 
 async fn webfinger(
     extract::Tx(mut tx): extract::Tx,
-    Query(query): Query<WebfingerQuery>,
+    QsQuery(query): QsQuery<WebfingerQuery>,
     State(state): State<AppState>,
     data: federation::Data,
 ) -> ResponseResult<Json<Webfinger>> {
