@@ -19,7 +19,7 @@ pub struct OidcSelectUsername {
 
 #[derive(Serialize, Deserialize, Validate, Debug, Default)]
 pub struct Login {
-    #[garde(length(max = 1000))]
+    #[garde(adapt(crate::forms::validate_url), length(max = 1000))]
     pub previous_uri: Option<Url>,
     #[garde(dive)]
     pub credentials: Credentials,

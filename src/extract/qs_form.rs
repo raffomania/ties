@@ -18,7 +18,8 @@ where
     async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
         let RawForm(bytes) = req.extract().await.context("Failed to extract form")?;
         Ok(Self(
-            serde_qs::Config::new(5, false)
+            serde_qs::Config::new()
+                .use_form_encoding(true)
                 .deserialize_bytes(&bytes)
                 .context("Failed to parse form")?,
         ))
