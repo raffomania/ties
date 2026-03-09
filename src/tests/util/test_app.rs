@@ -10,7 +10,7 @@ use crate::{
     archive,
     db::{self, AppTx},
     federation,
-    forms::users::CreateUser,
+    forms::{self, users::CreateUser},
     server::{AppState, app},
 };
 
@@ -94,11 +94,7 @@ impl TestApp {
         user
     }
 
-    pub async fn create_bookmark(
-        &self,
-        user: &db::User,
-        url: &str,
-    ) -> anyhow::Result<db::Bookmark> {
+    pub async fn create_bookmark(&self, user: &db::User, url: &str) -> db::Bookmark {
         let mut tx = self.tx().await;
         let bookmark = db::bookmarks::insert_local(
             &mut tx,
@@ -109,11 +105,31 @@ impl TestApp {
             },
             &self.base_url,
         )
-        .await?;
+        .await
+        .expect("Failed to insert bookmark");
 
-        tx.commit().await?;
+        tx.commit().await.expect("Failed to commit transaction");
 
-        Ok(bookmark)
+        bookmark
+    }
+
+    pub async fn create_list(&self, user: &db::User, title: &str) -> db::List {
+        let mut tx = self.tx().await;
+        let list = db::lists::insert(
+            &mut tx,
+            user.ap_user_id,
+            forms::lists::CreateList {
+                title: title.to_string(),
+                content: None,
+                private: false,
+            },
+        )
+        .await
+        .expect("Failed to insert list");
+
+        tx.commit().await.expect("Failed to commit transaction");
+
+        list
     }
 
     pub async fn create_test_user(&self) -> db::User {

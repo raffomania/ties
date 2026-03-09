@@ -49,7 +49,7 @@ async fn flaky_test_archive_queue() -> anyhow::Result<()> {
     let app = TestApp::new().await;
 
     let user = app.create_test_user().await;
-    let bookmark = app.create_bookmark(&user, "https://rafa.ee").await?;
+    let bookmark = app.create_bookmark(&user, "https://rafa.ee").await;
 
     let mut tx = app.tx().await;
 
@@ -77,7 +77,7 @@ async fn flaky_test_archive_queue_dangling_pending() -> anyhow::Result<()> {
     let app = TestApp::new().await;
 
     let user = app.create_test_user().await;
-    let bookmark = app.create_bookmark(&user, "https://rafa.ee").await?;
+    let bookmark = app.create_bookmark(&user, "https://rafa.ee").await;
 
     let mut tx = app.tx().await;
     let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
