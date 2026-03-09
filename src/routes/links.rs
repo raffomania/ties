@@ -8,13 +8,13 @@ use axum::{
 };
 use garde::Validate;
 use serde::Deserialize;
-use serde_qs::web::QsQuery;
+use serde_qs::web::{QsForm, QsQuery};
 use uuid::Uuid;
 
 use crate::{
     authentication::AuthUser,
     db::{self, LinkDestination},
-    extract::{self, qs_form::QsForm},
+    extract::{self},
     form_errors::FormErrors,
     forms::links::{CreateLink, PartialCreateLink},
     htmf_response::HtmfResponse,

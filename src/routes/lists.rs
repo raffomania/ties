@@ -5,12 +5,13 @@ use axum::{
     routing::{get, post},
 };
 use garde::Validate;
+use serde_qs::web::QsForm;
 use uuid::Uuid;
 
 use crate::{
     authentication::AuthUser,
     db::{self},
-    extract::{self, qs_form::QsForm},
+    extract::{self},
     form_errors::FormErrors,
     forms,
     forms::lists::{CreateList, EditListPinned, EditListPrivate},

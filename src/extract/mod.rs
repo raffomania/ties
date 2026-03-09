@@ -3,7 +3,6 @@ use axum::{extract::FromRequestParts, http::request::Parts};
 
 use crate::{db::AppTx, response_error::ResponseError, server::AppState};
 
-pub mod qs_form;
 pub struct Tx(pub AppTx);
 
 impl FromRequestParts<AppState> for Tx {
