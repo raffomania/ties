@@ -7,13 +7,13 @@ use axum::{
 };
 use garde::{Report, Validate};
 use serde::Deserialize;
-use serde_qs::web::QsQuery;
+use serde_qs::web::{QsForm, QsQuery};
 use tower_sessions::Session;
 
 use crate::{
     authentication::{self, AuthUser},
     db,
-    extract::{self, qs_form::QsForm},
+    extract::{self},
     forms::users::{CreateOidcUser, Login, OidcLoginQuery, OidcSelectUsername},
     htmf_response::HtmfResponse,
     oidc::{self},

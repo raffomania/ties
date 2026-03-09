@@ -7,13 +7,13 @@ use axum::{
     routing::{delete, get, post},
 };
 use serde::Deserialize;
-use serde_qs::web::QsQuery;
+use serde_qs::web::{QsForm, QsQuery};
 use uuid::Uuid;
 
 use crate::{
     authentication::AuthUser,
     db::{self, bookmarks::InsertBookmark},
-    extract::{self, qs_form::QsForm},
+    extract::{self},
     federation,
     form_errors::FormErrors,
     forms::{bookmarks::CreateBookmark, links::CreateLink, lists::CreateList},
