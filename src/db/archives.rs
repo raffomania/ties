@@ -3,7 +3,11 @@ use sqlx::types::Json;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::{archive, db::AppTx, response_error::ResponseResult};
+use crate::{
+    archive,
+    db::{self, AppTx},
+    response_error::ResponseResult,
+};
 
 #[derive(sqlx::Type, Debug, PartialEq, Eq)]
 #[sqlx(type_name = "archive_status")]
@@ -52,7 +56,7 @@ pub async fn update(
     archive_id: Uuid,
     article: &Result<legible::Article, archive::Error>,
 ) -> ResponseResult<Archive> {
-    let (status, error, extracted_html) = match article {
+    let (status, error, readable_html) = match article {
         Ok(article) => (Status::Success, None, Some(&article.content)),
         Err(e) => (
             Status::Error,
@@ -63,20 +67,25 @@ pub async fn update(
     let archive = sqlx::query_as!(
         Archive,
         r#"
-        update archives
-        set status = $2,
-            error = $3,
-            extracted_html = $4
-        where id = $1
-        returning id, bookmark_id, created_at, status as "status: _", error as "error: Json<archive::Error>", extracted_html
+            update archives
+            set status = $2,
+                error = $3,
+                extracted_html = $4
+            where id = $1
+            returning id, bookmark_id, created_at, status as "status: _", error as "error: Json<archive::Error>", extracted_html
         "#,
         archive_id,
         status as Status,
         error,
-        extracted_html
+        readable_html
     )
     .fetch_one(&mut **tx)
     .await?;
+
+    if let Ok(article) = article {
+        db::bookmarks::update_search_index(tx, archive.bookmark_id, Some(&article.text_content))
+            .await?;
+    }
 
     Ok(archive)
 }

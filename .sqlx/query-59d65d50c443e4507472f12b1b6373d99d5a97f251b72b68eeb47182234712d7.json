@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select count(bookmarks.id) as \"count!\" from bookmarks\n            where bookmarks.search @@ plainto_tsquery($1)\n                and bookmarks.ap_user_id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "59d65d50c443e4507472f12b1b6373d99d5a97f251b72b68eeb47182234712d7"
+}

@@ -75,7 +75,7 @@ pub async fn insert_local(
         insert into bookmarks
         (id, ap_user_id, url, title, ap_id)
         values ($1, $2, $3, $4, $5)
-        returning *"#,
+        returning id, created_at, ap_user_id, url, title, ap_id"#,
         id,
         ap_user_id,
         create_bookmark.url,
@@ -85,6 +85,10 @@ pub async fn insert_local(
     .fetch_one(&mut **tx)
     .await?;
 
+    // Update the search index to include the new URL, title etc.,
+    // even though we don't have the archived text content yet.
+    update_search_index(tx, id, None).await?;
+
     bookmark.try_into()
 }
 
@@ -92,7 +96,7 @@ pub async fn by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Bookmark> {
     let row = query_as!(
         BookmarkRow,
         r#"
-        select *
+        select id, created_at, ap_user_id, url, title, ap_id
         from bookmarks
         where id = $1;
         "#,
@@ -108,7 +112,7 @@ pub async fn by_ap_id(tx: &mut AppTx, ap_id: ObjectId<db::Bookmark>) -> Response
     let row = query_as!(
         BookmarkRow,
         r#"
-        select *
+        select id, created_at, ap_user_id, url, title, ap_id
         from bookmarks
         where ap_id = $1;
         "#,
@@ -124,7 +128,7 @@ pub async fn list_unsorted(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<V
     let bookmarks = query_as!(
         BookmarkRow,
         r#"
-        select *
+        select id, created_at, ap_user_id, url, title, ap_id
         from bookmarks
         where ap_user_id = $1
         and not exists (
@@ -159,7 +163,7 @@ pub async fn delete_by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Bookmark> 
         r#"
         delete from bookmarks
         where id = $1
-        returning *;
+        returning id, created_at, ap_user_id, url, title, ap_id;
         "#,
         id
     )
@@ -189,7 +193,7 @@ pub async fn upsert_remote(
             ap_user_id = $2,
             url = $3,
             title = $4
-        returning *
+        returning id, created_at, ap_user_id, url, title, ap_id
         "#,
         ap_id.inner().as_str(),
         id,
@@ -220,4 +224,41 @@ pub async fn is_public(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<bool
     .await?;
 
     Ok(public_destination_count.count > 0)
+}
+
+/// Weights used:
+/// A: title
+/// B: body
+/// C: URL
+pub async fn update_search_index(
+    tx: &mut AppTx,
+    bookmark_id: Uuid,
+    text: Option<&str>,
+) -> Result<(), crate::response_error::ResponseError> {
+    // The query below adds both the whole URL to the index, as well as a
+    // version where dots and slashes are replaced with spaces to allow queries
+    // for individual parts of the URL (e.g. "github" will find URLs to
+    // "github.com").
+    sqlx::query!(
+        r#"
+                update bookmarks
+                set search =
+                    setweight(to_tsvector('english', bookmarks.title), 'A')
+                    ||
+                    setweight(to_tsvector('english', $1), 'B')
+                    ||
+                    setweight(
+                        to_tsvector('english',
+                            regexp_replace(bookmarks.url, '[\./]', ' ', 'g'))
+                        ||
+                        to_tsvector('english', bookmarks.url)
+                    , 'C')
+                where id = $2
+            "#,
+        text.unwrap_or(""),
+        bookmark_id
+    )
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
 }

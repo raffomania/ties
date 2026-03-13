@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                update bookmarks\n                set search =\n                    setweight(to_tsvector('english', bookmarks.title), 'A')\n                    ||\n                    setweight(to_tsvector('english', $1), 'B')\n                    ||\n                    setweight(\n                        to_tsvector('english',\n                            regexp_replace(bookmarks.url, '[\\./]', ' ', 'g'))\n                        ||\n                        to_tsvector('english', bookmarks.url)\n                    , 'C')\n                where id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "de6831a566fa2931052c3ce30bdb4cfb7435aba02936b2474cb8c84bc0ea2684"
+}

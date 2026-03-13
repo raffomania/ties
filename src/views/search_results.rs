@@ -37,34 +37,20 @@ fn results(data: &Data) -> Element {
 }
 
 fn pagination(data: &Data) -> Element {
+    let previous_input = data.layout.previous_search_input.as_deref().unwrap_or("");
     section(
         class("flex flex-row gap-4 justify-center w-full p-4 border-t border-neutral-700"),
         [
             match data.results.previous_page {
-                db::search::PreviousPage::AfterBookmarkId(id) => {
-                    let url = format!(
-                        "/search?q={}&after_bookmark_id={}",
-                        data.layout.previous_search_input.as_deref().unwrap_or(""),
-                        id
-                    );
+                Some(page) => {
+                    let url = format!("/search?q={previous_input}&page={page}");
                     a([href(url)], "Previous page")
                 }
-                db::search::PreviousPage::IsFirstPage => {
-                    let url = format!(
-                        "/search?q={}",
-                        data.layout.previous_search_input.as_deref().unwrap_or(""),
-                    );
-                    a([href(url)], "Previous page")
-                }
-                db::search::PreviousPage::DoesNotExist => nothing(),
+                None => nothing(),
             },
-            match data.results.next_page_after_bookmark_id {
-                Some(next_page_after_bookmark_id) => {
-                    let url = format!(
-                        "/search?q={}&after_bookmark_id={}",
-                        data.layout.previous_search_input.as_deref().unwrap_or(""),
-                        next_page_after_bookmark_id
-                    );
+            match data.results.next_page {
+                Some(page) => {
+                    let url = format!("/search?q={previous_input}&page={page}");
                     a([href(url)], "Next page")
                 }
                 None => nothing(),
