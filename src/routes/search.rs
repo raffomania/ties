@@ -1,7 +1,6 @@
 use axum::{Router, routing::get};
 use serde::{Deserialize, Serialize};
 use serde_qs::web::QsQuery;
-use uuid::Uuid;
 
 use crate::{
     authentication::AuthUser,
@@ -22,7 +21,7 @@ pub fn router() -> Router<AppState> {
 pub struct SearchQuery {
     /// The words to search for
     pub q: String,
-    pub after_bookmark_id: Option<Uuid>,
+    pub page: Option<i64>,
 }
 
 async fn get_search(
@@ -35,7 +34,7 @@ async fn get_search(
         &mut tx,
         &query.q,
         auth_user.ap_user_id,
-        query.after_bookmark_id,
+        query.page.unwrap_or(0),
     )
     .await?;
     let mut layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
