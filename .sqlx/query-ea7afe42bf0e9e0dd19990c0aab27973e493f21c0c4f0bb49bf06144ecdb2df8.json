@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        delete from archives\n        where bookmark_id = $1;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ea7afe42bf0e9e0dd19990c0aab27973e493f21c0c4f0bb49bf06144ecdb2df8"
+}
