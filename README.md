@@ -55,6 +55,10 @@ Install the rust toolchain, version `1.88.0` or later. Then build the ties binar
 cargo build --release
 ```
 
+If `git` is installed, a version description will automatically be included by reading the current repository state.
+You can set the environment variable `TIES_VERSION_DESCRIPTION` when building to override this with your own version description.
+If the envionment variable is not set and `git` is not available, the description will be set to the current crate version in `Cargo.toml`.
+
 ### Running the Server Binary
 
 ties is deployed using a single binary.

@@ -9,7 +9,7 @@ use url::Url;
 #[cfg(debug_assertions)]
 use crate::insert_demo_data::insert_demo_data;
 use crate::{
-    archive, db, federation,
+    archive, built_version, db, federation,
     forms::users::CreateUser,
     oidc,
     server::{self, AppState},
@@ -83,6 +83,8 @@ enum Command {
         #[clap(subcommand)]
         command: DbCommand,
     },
+    /// Print the ties version to stdout.
+    Version,
     #[cfg(debug_assertions)]
     /// Put some demo data into the database
     InsertDemoData {
@@ -160,6 +162,8 @@ pub async fn run() -> Result<()> {
             demo_mode,
             oidc_args,
         } => {
+            tracing::info!("You're running ties {}", built_version::describe_version());
+
             let pool = db::pool(&cli.config.database_url).await?;
 
             db::migrate(&pool, &base_url, None).await?;
@@ -193,6 +197,9 @@ pub async fn run() -> Result<()> {
         } => {
             let pool = db::pool(&cli.config.database_url).await?;
             db::migrate(&pool, &base_url, None).await?;
+        }
+        Command::Version => {
+            println!("{}", built_version::describe_version());
         }
         #[cfg(debug_assertions)]
         Command::InsertDemoData {

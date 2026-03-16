@@ -4,8 +4,10 @@ use uuid::Uuid;
 
 use super::layout;
 use crate::{
+    built_version,
     db::{AppTx, layout::AuthedInfo},
     response_error::ResponseResult,
+    views::content::BULLET,
 };
 
 pub struct Data<'a> {
@@ -57,7 +59,7 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
             div(class("border-t border-black"), ()),
             div(class("border-t border-neutral-700"), ()),
             div(
-                class("px-4 flex flex-col w-full items-center"),
+                class("px-4 flex flex-col w-full items-center text-center"),
                 [
                     header(
                         class("mt-12 mx-4 mb-6"),
@@ -128,6 +130,7 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                     ),
                     bookmarklet_section(data),
                     // TODO add social links here
+                    bottom_info(),
                 ],
             ),
         ],
@@ -193,5 +196,22 @@ fn bookmarklet(base_url: &Url) -> Element {
             )),
         ],
         "Add to ties",
+    )
+}
+
+fn bottom_info() -> Element {
+    p(
+        class("text-sm flex gap-x-1 p-4 text-neutral-400 mt-8"),
+        [
+            span((), format!("ties {}", built_version::describe_version())),
+            span((), BULLET),
+            a(
+                [
+                    href("https://github.com/raffomania/ties"),
+                    class("underline"),
+                ],
+                "Source",
+            ),
+        ],
     )
 }

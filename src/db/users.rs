@@ -147,7 +147,7 @@ pub async fn create_if_not_exists(
             insert(tx, create, base_url).await?
         }
         Ok(actual_user) => {
-            tracing::info!("Admin user '{username}' already exists");
+            tracing::debug!("Admin user '{username}' exists, not creating");
             actual_user
         }
         Err(other) => return Err(other),

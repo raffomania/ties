@@ -17,6 +17,7 @@ mod routes;
 pub mod server;
 mod views;
 
+mod built_version;
 mod date_time;
 mod federation;
 mod htmf_response;
