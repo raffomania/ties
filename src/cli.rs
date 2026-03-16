@@ -20,19 +20,16 @@ use crate::{
 struct Cli {
     #[command(subcommand)]
     command: Command,
-
-    #[clap(flatten)]
-    config: SharedConfig,
 }
 
 #[derive(Args, Debug)]
 struct SharedConfig {
-    #[clap(env, long, hide_env_values = true)]
+    #[clap(env, long, hide_env_values = true, help_heading = Some("Required Options"))]
     database_url: String,
     /// Public URL the server is reachable at.
     /// This forms the domain part of user handles, e.g. "rafael@ties.pub", and
     /// cannot be changed once the first user has been created.
-    #[clap(long, env)]
+    #[clap(long, env, help_heading = Some("Required Options"))]
     base_url: Url,
 }
 
@@ -42,15 +39,15 @@ pub struct OidcArgs {
     /// To use OIDC, all options beginning with `oidc` must be set.
     /// We support RS*, PS*, or HS* signature algorithms.
     /// Configure your redirect URL to be `{base_url}/login_oidc_redirect`.
-    #[clap(long, env, required = false)]
+    #[clap(long, env, required = false, help_heading = Some("OIDC"))]
     pub oidc_client_id: String,
     // TODO use redact::Secret for this
-    #[clap(hide_env_values = true, long, env, required = false)]
+    #[clap(hide_env_values = true, long, env, required = false, help_heading = Some("OIDC"))]
     pub oidc_client_secret: redact::Secret<String>,
-    #[clap(long, env, required = false)]
+    #[clap(long, env, required = false, help_heading = Some("OIDC"))]
     pub oidc_issuer_url: String,
     /// This will be displayed on the login page.
-    #[clap(long, env, required = false)]
+    #[clap(long, env, required = false, help_heading = Some("OIDC"))]
     pub oidc_issuer_name: String,
 }
 
@@ -59,27 +56,33 @@ enum Command {
     /// Migrate the database, then start the server
     Start {
         #[clap(flatten)]
+        config: SharedConfig,
+
+        #[clap(flatten)]
         listen: ListenArgs,
         /// TLS cert location.
         /// If set, requires `tls-key` to be set as well.
         /// If both `tls-key` and `tls-cert` are unset, no TLS is used.
-        #[clap(long, env, requires = "tls_key")]
+        #[clap(long, env, requires = "tls_key", help_heading = Some("TLS"))]
         tls_cert: Option<PathBuf>,
         /// TLS key location.
         /// If set, requires `tls-cert` to be set as well.
         /// If both `tls-key` and `tls-cert` are unset, no TLS is used.
-        #[clap(long, env, requires = "tls_cert")]
+        #[clap(long, env, requires = "tls_cert", help_heading = Some("TLS"))]
         tls_key: Option<PathBuf>,
         #[clap(flatten)]
         admin_credentials: AdminCredentials,
         /// Replace the login page with an anonymous one-click signup and delete
         /// all data periodically.
-        #[clap(long, env, default_value = "false")]
+        #[clap(long, env, default_value = "false", help_heading = Some("Misc"))]
         demo_mode: bool,
         #[clap(flatten)]
         oidc_args: Option<OidcArgs>,
     },
     Db {
+        #[clap(flatten)]
+        config: SharedConfig,
+
         #[clap(subcommand)]
         command: DbCommand,
     },
@@ -89,6 +92,9 @@ enum Command {
     /// Put some demo data into the database
     InsertDemoData {
         #[clap(flatten)]
+        config: SharedConfig,
+
+        #[clap(flatten)]
         dev_user_credentials: AdminCredentials,
     },
 }
@@ -96,13 +102,14 @@ enum Command {
 #[derive(Args, Debug)]
 #[group(multiple = true, requires_all = ["username", "password"])]
 struct AdminCredentials {
-    #[clap(env = "ADMIN_USERNAME", long = "admin_username")]
+    #[clap(env = "ADMIN_USERNAME", long = "admin_username", help_heading = Some("Users"))]
     /// Create an admin user if it does not exist yet.
     username: Option<String>,
     #[clap(
         env = "ADMIN_PASSWORD",
         long = "admin_password",
-        hide_env_values = true
+        hide_env_values = true,
+        help_heading = Some("Users")
     )]
     /// Password for the admin user.
     password: Option<redact::Secret<String>>,
@@ -130,11 +137,11 @@ enum DbCommand {
 #[group(required = true, multiple = true)]
 pub struct ListenArgs {
     /// Format: `ip:port`.
-    #[clap(long, env, value_name = "SOCKET_ADDRESS")]
+    #[clap(long, env, value_name = "SOCKET_ADDRESS", help_heading = Some("Required Options"))]
     pub listen: Option<SocketAddr>,
     /// Take a socket using the systemd socket passing protocol and listen on
     /// it. If set, will override the `listen` argument.
-    #[clap(long, env)]
+    #[clap(long, env, help_heading = Some("Required Options"))]
     pub listenfd: bool,
 }
 
@@ -152,7 +159,6 @@ pub async fn run() -> Result<()> {
 
     tracing::debug!("{cli:#?}");
 
-    let base_url = cli.config.base_url;
     match cli.command {
         Command::Start {
             listen: listen_address,
@@ -161,10 +167,15 @@ pub async fn run() -> Result<()> {
             tls_key,
             demo_mode,
             oidc_args,
+            config:
+                SharedConfig {
+                    base_url,
+                    database_url,
+                },
         } => {
             tracing::info!("You're running ties {}", built_version::describe_version());
 
-            let pool = db::pool(&cli.config.database_url).await?;
+            let pool = db::pool(&database_url).await?;
 
             db::migrate(&pool, &base_url, None).await?;
 
@@ -194,8 +205,13 @@ pub async fn run() -> Result<()> {
         }
         Command::Db {
             command: DbCommand::Migrate,
+            config:
+                SharedConfig {
+                    database_url,
+                    base_url,
+                },
         } => {
-            let pool = db::pool(&cli.config.database_url).await?;
+            let pool = db::pool(&database_url).await?;
             db::migrate(&pool, &base_url, None).await?;
         }
         Command::Version => {
@@ -204,8 +220,13 @@ pub async fn run() -> Result<()> {
         #[cfg(debug_assertions)]
         Command::InsertDemoData {
             dev_user_credentials,
+            config:
+                SharedConfig {
+                    database_url,
+                    base_url,
+                },
         } => {
-            let pool = db::pool(&cli.config.database_url).await?;
+            let pool = db::pool(&database_url).await?;
             insert_demo_data(
                 &pool,
                 Option::<CreateUser>::from(dev_user_credentials),
