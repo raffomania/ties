@@ -70,6 +70,13 @@ enum Command {
         /// If both `tls-key` and `tls-cert` are unset, no TLS is used.
         #[clap(long, env, requires = "tls_cert")]
         tls_key: Option<PathBuf>,
+        /// Address to listen on for plain HTTP when TLS is enabled.
+        /// Any HTTP request received on this address will be permanently
+        /// redirected to the HTTPS `base-url`.
+        /// Format: `ip:port`, e.g. `0.0.0.0:80`.
+        /// Ignored when TLS is not configured.
+        #[clap(long, env, value_name = "SOCKET_ADDRESS", requires = "tls_cert")]
+        http_redirect_listen: Option<std::net::SocketAddr>,
         #[clap(flatten)]
         admin_credentials: AdminCredentials,
         /// Replace the login page with an anonymous one-click signup and delete
@@ -157,6 +164,7 @@ pub async fn run() -> Result<()> {
             admin_credentials,
             tls_cert,
             tls_key,
+            http_redirect_listen,
             demo_mode,
             oidc_args,
         } => {
@@ -186,7 +194,7 @@ pub async fn run() -> Result<()> {
                 archive_queue,
             })
             .await?;
-            server::start(listen_address, base_url.clone(), app, tls_cert, tls_key).await?;
+            server::start(listen_address, base_url.clone(), app, tls_cert, tls_key, http_redirect_listen).await?;
         }
         Command::Db {
             command: DbCommand::Migrate,

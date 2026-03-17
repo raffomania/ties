@@ -1,8 +1,8 @@
-use std::{path::PathBuf, time::Duration};
+use std::{net::SocketAddr, path::PathBuf, time::Duration};
 
 use activitypub_federation::config::{FederationConfig, FederationMiddleware};
 use anyhow::{Context, anyhow};
-use axum::Router;
+use axum::{Router, extract::State, response::Redirect};
 use axum_server::tls_rustls::RustlsConfig;
 use listenfd::ListenFd;
 use sqlx::PgPool;
@@ -96,6 +96,7 @@ pub async fn start(
     app: Router,
     tls_cert: Option<PathBuf>,
     tls_key: Option<PathBuf>,
+    http_redirect_listen: Option<SocketAddr>,
 ) -> anyhow::Result<()> {
     let handle = axum_server::Handle::new();
 
@@ -124,6 +125,21 @@ pub async fn start(
         tracing::info!("Listening on {listening_on}");
         tracing::info!("Access the server at {base_url}");
 
+        if let Some(redirect_addr) = http_redirect_listen {
+            let redirect_base_url = base_url.clone();
+            tracing::info!("HTTP→HTTPS redirect listener on {redirect_addr}");
+            tokio::spawn(async move {
+                let redirect_app = Router::new()
+                    .fallback(http_to_https_redirect)
+                    .with_state(redirect_base_url);
+                if let Ok(listener) = tokio::net::TcpListener::bind(redirect_addr).await {
+                    let _ = axum::serve(listener, redirect_app).await;
+                } else {
+                    tracing::error!("Failed to bind HTTP redirect listener on {redirect_addr}");
+                }
+            });
+        }
+
         let config = RustlsConfig::from_pem_file(cert, key).await?;
         axum_server::from_tcp_rustls(listener.into_std()?, config)?
             .handle(handle)
@@ -141,6 +157,24 @@ pub async fn start(
     }
 
     Ok(())
+}
+
+/// Handler for the plain-HTTP redirect server. Permanently redirects every
+/// incoming request to the same path on the HTTPS `base_url`.
+async fn http_to_https_redirect(
+    uri: axum::http::Uri,
+    State(base_url): State<Url>,
+) -> Redirect {
+    let path_and_query = uri
+        .path_and_query()
+        .map(axum::http::uri::PathAndQuery::as_str)
+        .unwrap_or("/");
+    let redirect_url = format!(
+        "{}{}",
+        base_url.as_str().trim_end_matches('/'),
+        path_and_query
+    );
+    Redirect::permanent(&redirect_url)
 }
 
 async fn shutdown_signal<A>(handle: axum_server::Handle<A>, graceful: bool)
