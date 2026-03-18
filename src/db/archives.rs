@@ -51,6 +51,26 @@ pub async fn insert_pending(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult
     Ok(archive)
 }
 
+pub async fn insert_pending_for_all_unarchived(tx: &mut AppTx) -> ResponseResult<u64> {
+    let result = sqlx::query!(
+        r#"
+            insert into archives
+            (bookmark_id, status)
+            select bookmarks.id, $1
+            from bookmarks
+            where not exists (
+                select id from archives
+                where archives.bookmark_id = bookmarks.id
+            )
+        "#,
+        Status::Pending as Status
+    )
+    .execute(&mut **tx)
+    .await?;
+
+    Ok(result.rows_affected())
+}
+
 pub async fn update(
     tx: &mut AppTx,
     archive_id: Uuid,

@@ -96,3 +96,20 @@ async fn flaky_test_archive_queue_dangling_pending() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test_log::test(tokio::test)]
+async fn can_insert_archives_for_unarchived_bookmarks() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+
+    let user = app.create_test_user().await;
+    let bookmark = app.create_bookmark(&user, "https://rafa.ee", "test").await;
+
+    let mut tx = app.tx().await;
+    db::archives::insert_pending_for_all_unarchived(&mut tx).await?;
+    let archive = db::archives::by_bookmark_id(&mut tx, bookmark.id)
+        .await?
+        .unwrap();
+    assert_eq!(archive.status, db::archives::Status::Pending);
+
+    Ok(())
+}

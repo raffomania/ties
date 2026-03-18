@@ -190,6 +190,14 @@ pub async fn run() -> Result<()> {
 
             let oidc_state = oidc::State::initialize(&base_url, oidc_args).await;
 
+            let mut tx = pool.begin().await?;
+            tracing::debug!("Adding pending archives for all unarchived bookmarks...");
+            let inserted = db::archives::insert_pending_for_all_unarchived(&mut tx).await?;
+            if inserted > 0 {
+                tracing::info!("Inserted pending archive jobs for {inserted} bookmarks");
+            }
+            tx.commit().await?;
+
             let archive_queue = archive::QueueHandle::new(pool.clone());
 
             let app = server::app(AppState {

@@ -143,7 +143,7 @@ start-test-database:
 test *args: start-test-database
     # Migrate the test database so we can compile the tests using SQLX_OFFLINE=false,
     # which avoids needless recompilations
-    cargo run -- --database-url=${DATABASE_URL_TEST} db migrate
+    cargo run -- db --database-url=${DATABASE_URL_TEST} migrate
 
     DATABASE_URL=${DATABASE_URL_TEST} cargo test {{ args }}
 

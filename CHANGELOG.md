@@ -10,11 +10,20 @@ linkblocks is now named **ties**!
 - For development environments, if you want to use the new recommended development URL of `ties.localhost`, you'll have to update `BASE_URL` in your `.env` file, `rm -r ./development_cert` and run `just development cert`.
 - The backend will now make requests to external hosts based on user input. [SSRF](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) protection is in place. Nonetheless, please consider how this may interact with your server-side networking setup, and make sure the ties backend does not have network access to private resources.
 
-### Highlights
+### 📚 Bookmark Archiving
 
-- 📚 Bookmarked websites are now fetched, converted into a readable version, and saved in the database. Click a bookmark headline to view its archived text. Media and other resources such as images, styles or scripts are not archived.
-- 🔗 Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
-- 🔎 Search through bookmark titles using the search bar at the top of every page.
+Bookmarked websites are now fetched, converted into a readable version, and saved in the database. Click a bookmark headline to view its archived text.
+Media and other resources such as images, styles or scripts are not archived.
+
+When you update to this release and start the server, all your existing bookmarks will be automatically archived in the background.
+
+### 🔗 Backlinks
+
+Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
+
+### 🔎 Bookmark Search
+
+Search through bookmark titles, URLs and archived text content using the search bar at the top of every page.
 
 ### Features
 

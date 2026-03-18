@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            insert into archives\n            (bookmark_id, status)\n            select bookmarks.id, $1\n            from bookmarks\n            where not exists (\n                select id from archives\n                where archives.bookmark_id = bookmarks.id\n            )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "archive_status",
+            "kind": {
+              "Enum": [
+                "Success",
+                "Error",
+                "Pending"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "230ba3dfbe2f9d881b7f08eb3b643c33c18be3a4eaecc4de04c70f3ad4a6ca5c"
+}
