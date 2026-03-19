@@ -8,6 +8,7 @@ const PAGE_SIZE: i64 = 50;
 
 pub struct Results {
     pub bookmarks: Vec<Result>,
+    pub lists: Vec<ListResult>,
     pub previous_page: Option<i64>,
     pub next_page: Option<i64>,
     pub total_count: i64,
@@ -17,6 +18,13 @@ pub struct Result {
     pub title: String,
     pub bookmark_id: Uuid,
     pub bookmark_url: String,
+    pub rank: Option<f32>,
+}
+
+pub struct ListResult {
+    pub title: String,
+    pub id: Uuid,
+    pub rank: Option<f32>,
 }
 
 pub async fn search(
@@ -30,11 +38,30 @@ pub async fn search(
     let bookmarks = query_as!(
         Result,
         r#"
-            select title, url as bookmark_url, id as bookmark_id
+            select title, url as bookmark_url, id as bookmark_id, ts_rank('{0.0, 1.0, 0.4, 1.0}'::float4[], bookmarks.search, plainto_tsquery($1), 16) as rank
             from bookmarks
             where bookmarks.search @@ plainto_tsquery($1)
                 and bookmarks.ap_user_id = $2
-            order by ts_rank('{0.0, 1.0, 0.4, 1.0}'::float4[], bookmarks.search, plainto_tsquery($1)) desc
+            order by rank desc
+            limit $3
+            offset $4
+        "#,
+        term,
+        ap_user_id,
+        PAGE_SIZE,
+        page * PAGE_SIZE
+    )
+    .fetch_all(&mut **tx)
+    .await?;
+
+    let lists = query_as!(
+        ListResult,
+        r#"
+            select title, id, ts_rank('{0.0, 0.0, 0.0, 1.0}'::float4[], lists.search, plainto_tsquery($1), 16) as rank
+            from lists
+            where lists.search @@ plainto_tsquery($1)
+                and lists.ap_user_id = $2
+            order by rank desc
             limit $3
             offset $4
         "#,
@@ -66,6 +93,7 @@ pub async fn search(
 
     Ok(Results {
         bookmarks,
+        lists,
         previous_page,
         next_page,
         total_count,

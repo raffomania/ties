@@ -58,7 +58,7 @@ pub async fn insert(
         insert into lists
         (ap_user_id, title, content, private)
         values ($1, $2, $3, $4)
-        returning *"#,
+        returning id, created_at, ap_user_id, title, content, private, pinned"#,
         ap_user_id,
         create_list.title,
         create_list.content,
@@ -88,7 +88,7 @@ pub async fn by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<List> {
     let list = query_as!(
         List,
         r#"
-        select * from lists
+        select id, created_at, ap_user_id, title, content, private, pinned from lists
         where id = $1
         "#,
         list_id,
@@ -107,7 +107,7 @@ pub async fn pointing_to_list(
     let list = query_as!(
         List,
         r#"
-        select * from lists
+        select id, created_at, ap_user_id, title, content, private, pinned from lists
         where exists (
             select null from links
             where links.dest_list_id = $1
@@ -132,7 +132,7 @@ pub async fn pointing_to_bookmark(
     let list = query_as!(
         List,
         r#"
-        select * from lists
+        select id, created_at, ap_user_id, title, content, private, pinned from lists
         where exists (
             select null from links
             where links.dest_bookmark_id = $1
@@ -176,7 +176,7 @@ pub async fn list_by_id(tx: &mut AppTx, list_ids: &[Uuid]) -> ResponseResult<Vec
     let list = query_as!(
         List,
         r#"
-        select * from lists
+        select id, created_at, ap_user_id, title, content, private, pinned from lists
         where id = any($1)
         "#,
         list_ids,
@@ -191,7 +191,7 @@ pub async fn list_pinned_by_user(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseRe
     let lists = query_as!(
         List,
         r#"
-        select * from lists
+        select id, created_at, ap_user_id, title, content, private, pinned from lists
         where ap_user_id = $1 and pinned
         "#,
         ap_user_id,
@@ -208,7 +208,7 @@ pub async fn list_public_by_user(
 ) -> ResponseResult<Vec<ListWithMetadata>> {
     let lists = query!(
         r#"
-        select lists.* as l,
+        select lists.id, lists.created_at, lists.ap_user_id, lists.title, lists.content, lists.private, lists.pinned,
             ap_users.username,
             count(links.dest_bookmark_id) as "linked_bookmark_count!",
             count(links.dest_list_id) as "linked_list_count!"
@@ -250,7 +250,7 @@ pub async fn search(tx: &mut AppTx, term: &str, ap_user_id: Uuid) -> ResponseRes
     let lists = query_as!(
         List,
         r#"
-            select *
+            select id, created_at, ap_user_id, title, content, private, pinned
             from lists
             where (lists.title ilike '%' || $1 || '%')
             and lists.ap_user_id = $2
@@ -269,7 +269,7 @@ pub async fn list_recent(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Vec
     let lists = query_as!(
         List,
         r#"
-            select lists.*
+            select lists.id, lists.created_at, lists.ap_user_id, lists.title, lists.content, lists.private, lists.pinned
             from lists
             left join links as src_links on lists.id = src_links.src_list_id
             left join links as dest_links on lists.id = dest_links.dest_list_id
@@ -326,7 +326,7 @@ pub async fn set_private(tx: &mut AppTx, list_id: Uuid, private: bool) -> Respon
         update lists
         set private = $1
         where id = $2
-        returning *
+        returning id, created_at, ap_user_id, title, content, private, pinned
         "#,
         private,
         list_id,
@@ -344,7 +344,7 @@ pub async fn set_pinned(tx: &mut AppTx, list_id: Uuid, pinned: bool) -> Response
         update lists
         set pinned = $1
         where id = $2
-        returning *
+        returning id, created_at, ap_user_id, title, content, private, pinned
         "#,
         pinned,
         list_id,

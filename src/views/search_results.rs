@@ -2,7 +2,10 @@ use htmf::{element::Element, prelude_inline::*};
 
 use crate::{
     db,
-    views::{content, layout},
+    views::{
+        content::{self},
+        layout,
+    },
 };
 
 pub struct Data {
@@ -30,6 +33,13 @@ fn results(data: &Data) -> Element {
                 .bookmarks
                 .iter()
                 .map(|r| list_item(r, data))
+                .collect::<Vec<_>>(),
+        ),
+        fragment(
+            data.results
+                .lists
+                .iter()
+                .map(|r| list_item_list(r))
                 .collect::<Vec<_>>(),
         ),
         pagination(data),
@@ -95,8 +105,23 @@ fn list_item_bookmark(result: &db::search::Result) -> Element {
                 ),
                 href(format!("/bookmarks/{}", result.bookmark_id)),
             ],
-            &result.title,
+            format!("{:?}: {}", &result.rank, &result.title),
         ),
         content::link_url(&result.bookmark_url),
     ])
+}
+
+fn list_item_list(result: &db::search::ListResult) -> Element {
+    // TODO show owning user if it's different than this list's owner
+    // https://github.com/raffomania/ties/issues/152
+    fragment([a(
+        [
+            class(
+                "block overflow-hidden font-semibold leading-8 hover:text-fuchsia-300 \
+                 text-ellipsis whitespace-nowrap",
+            ),
+            href(format!("/lists/{}", result.id)),
+        ],
+        format!("{:?}: {}", &result.rank, &result.title),
+    )])
 }
