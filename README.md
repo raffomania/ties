@@ -32,7 +32,7 @@ It's getting harder and harder to find good web pages. When you do find good one
 ## 🤝 Contributing
 
 We are looking for contributors!
-See [the contributing guide](CONTRIBUTING.MD) to get started.
+See [the contributing guide](CONTRIBUTING.md) to get started.
 
 
 ## 🚀 Installation and Configuration
