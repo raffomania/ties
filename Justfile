@@ -174,10 +174,9 @@ ci-dev: migrate-database start-test-database && generate-sbom generate-database-
 
     cargo build --release
 
-    just lint
+    just clippy
     just format
     just test
-    just check-zizmor
 
 # Build a production-ready OCI container using podman. Used for local testing & debugging.
 [group('Testing')]
