@@ -1,5 +1,7 @@
 # ties Changelog
 
+*Note: This file does not contain any LLM-generated text.*
+
 ## Unreleased
 
 linkblocks is now named **ties**!
@@ -17,13 +19,13 @@ Media and other resources such as images, styles or scripts are not archived.
 
 When you update to this release and start the server, all your existing bookmarks will be automatically archived in the background.
 
-### 🔗 Backlinks
-
-Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
-
 ### 🔎 Bookmark Search
 
 Search through bookmark titles, URLs and archived text content using the search bar at the top of every page.
+
+### 🔗 Backlinks
+
+Lists now have a "Backlinks" section at the top, allowing you to quickly navigate through your knowledge graph.
 
 ### Features
 
@@ -31,17 +33,22 @@ Search through bookmark titles, URLs and archived text content using the search 
 - Move logout button to index page to make sidebar less noisy.
 - Add the ties logo to the login and index pages, and add a favicon.
 - Use a darker background for page header sections to distinguish them from pages' main content.
+- Add the ties version and a link to the source code at the bottom of the start page.
+- Options in the CLI help are now grouped by category.
+- There's a new `version` CLI command for printing the version of ties you're running.
 
 ### Bugfixes
 
 - Fix missing spaces around some labels in the UI ([#206](https://github.com/raffomania/ties/issues/206))
 - Fix the incorrect link to the page for installing the bookmarklet by moving the installation instructions to the start page.
 - Fix demo mode not deleting data from all tables.
+- Remove old container before building new one in `just build-podman-container` task.
 
 ### Docs
 
 - Mention the `latest` tag in the deployment guide.
 - In the deployment guide and CLI help, mention that it's not supported to change the `BASE_URL` once accounts have been created.
+- Add a contribution guide.
 
 ### Internals
 
@@ -51,6 +58,8 @@ Search through bookmark titles, URLs and archived text content using the search 
 - Decrease the time it takes to reload the server in watch mode.
 - Check formatting in CI.
 - Disable htmf formatter and return unformatted HTML in debug mode as well. The formatter introduced whitespace changes that resulted in rendering differences between debug and release modes.
+- Replace our own `serde_qs` query extractor wrapper with the one provided by `serde_qs`.
+- Install CA Certificates in the container to allow making TLS network requests.
 
 ## 0.1.0
 
