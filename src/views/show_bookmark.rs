@@ -23,17 +23,21 @@ pub fn view(
         username,
     }: Data,
 ) -> Element {
+    let is_owner = layout
+        .authed_info
+        .as_ref()
+        .is_some_and(|info| info.ap_user_id == bookmark.ap_user_id);
+
     layout::layout(
         fragment([
             header(
                 class("bg-neutral-900 px-4 pt-3 pb-4"),
                 [
-                    h1(class("text-2xl tracking-tight font-bold"), &bookmark.title),
-                    status(&bookmark, archive.as_ref(), &username),
+                    h1(class("text-3xl tracking-tight font-bold"), &bookmark.title),
                     p(
                         class(
                             "w-full overflow-hidden hover:text-fuchsia-300 whitespace-nowrap \
-                             text-ellipsis mt-4",
+                             text-ellipsis text-neutral-300",
                         ),
                         a(
                             href(&bookmark.url),
@@ -44,6 +48,8 @@ pub fn view(
                             ],
                         ),
                     ),
+                    status(&bookmark, archive.as_ref(), &username),
+                    archive_button(bookmark.id, "Re-archive", archive.as_ref(), is_owner),
                     backlink_section(&backlinks),
                 ],
             ),
@@ -51,14 +57,7 @@ pub fn view(
             div(class("border-b border-neutral-700"), ()),
             div(
                 id("archive-contents"),
-                archive_contents(
-                    archive.as_ref(),
-                    bookmark.id,
-                    layout
-                        .authed_info
-                        .as_ref()
-                        .is_some_and(|info| info.ap_user_id == bookmark.ap_user_id),
-                ),
+                archive_contents(archive.as_ref(), bookmark.id, is_owner),
             ),
         ]),
         &layout,
@@ -82,7 +81,7 @@ fn status(bookmark: &db::Bookmark, archive: Option<&db::Archive>, username: &str
     let created_at = content::format_date(bookmark.created_at);
 
     div(
-        class("flex flex-wrap text-sm gap-x-1 text-neutral-400"),
+        class("flex flex-wrap text-sm gap-x-1 text-neutral-400 mb-4"),
         [
             p((), format!("bookmarked by {username} on {created_at}")),
             archive_status.map_or(nothing(), |status| {
@@ -92,7 +91,16 @@ fn status(bookmark: &db::Bookmark, archive: Option<&db::Archive>, username: &str
     )
 }
 
-fn archive_button(bookmark_id: Uuid, label: &str) -> Element {
+fn archive_button(
+    bookmark_id: Uuid,
+    label: &str,
+    archive: Option<&db::Archive>,
+    is_owner: bool,
+) -> Element {
+    if !is_owner || archive.is_some_and(|a| a.status == db::archives::Status::Pending) {
+        return nothing();
+    }
+
     form(
         [
             action(format!("/bookmarks/{bookmark_id}/archive")),
@@ -117,11 +125,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
                     class("text-neutral-500 italic text-sm"),
                     "Not archived yet.",
                 ),
-                if is_owner {
-                    archive_button(bookmark_id, "Archive now")
-                } else {
-                    nothing()
-                },
+                archive_button(bookmark_id, "Archive now", archive, is_owner),
             ],
         );
     };
@@ -166,11 +170,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
                     class("text-orange-300 text-sm italic"),
                     format!("Could not archive this page: {error}"),
                 ),
-                if is_owner {
-                    archive_button(bookmark_id, "Retry archiving")
-                } else {
-                    nothing()
-                },
+                archive_button(bookmark_id, "Retry archiving", Some(archive), is_owner),
             ],
         );
     };
@@ -198,7 +198,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
     .collect::<Vec<_>>();
 
     section(
-        class("pb-4 mt-4"),
+        class("mt-4"),
         [
             h2(
                 class("font-bold mb-0.5 text-sm tracking-tight flex gap-1"),
