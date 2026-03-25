@@ -33,6 +33,7 @@ SPDX-License-Identifier = "AGPL-3.0-only"
 path = [
     "**.md",
     "doc/*.svg",
+    "doc/img/screenshot*",
     "assets/logo_text.*",
     "assets/logo_icon_only.*",
     "assets/favicon.*",

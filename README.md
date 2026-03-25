@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/logo_icon_only.svg" width="150" />
+    <img src="./assets/logo_icon_only.svg" width="150" />
 </p>
 
 # ties
@@ -13,6 +13,19 @@ It's getting harder and harder to find good web pages. When you do find good one
 🔭 ties is in an exploratory phase where we're trying out different ways to make it work well. You can try it out, but big and small things might change with every update.
 
 [Try our demo here.](https://demo.ties.pub)
+
+<p align="center">
+    <a href="doc/img/screenshot_index.png">
+        <img alt="screenshot of the start page" src="doc/img/screenshot_index.png" height=500 />
+    </a>
+    <br>
+    <a href="doc/img/screenshot_list.png">
+        <img alt="screenshot of the start page" src="doc/img/screenshot_list.png" height=200 />
+    </a>
+    <a href="doc/img/screenshot_bookmark.png">
+        <img alt="screenshot of the start page" src="doc/img/screenshot_bookmark.png" height=200 />
+    </a>
+</p>
 
 ## 🌟 Vision
 
