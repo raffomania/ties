@@ -22,7 +22,7 @@ It's getting harder and harder to find good web pages. When you do find good one
 - Annotate, highlight and discuss web pages together with your friends.
 - Mark users as trusted whose standards for web pages match yours - and then search through all trusted bookmarks to find good pages on a specific topic. Add trusted users of your trusted users to your search range to cast a wider net.
 
-[See this blog post for more on the vision behind ties.](https://www.rafa.ee/articles/introducing-linkblocks-federated-bookmark-manager/)
+[See this blog post for more on the vision behind ties](https://www.rafa.ee/articles/introducing-linkblocks-federated-bookmark-manager/), and [our docs on core values and goals](doc/values-goals.md).
 
 ## 📖 Related Reading
 
