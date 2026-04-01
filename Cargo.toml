@@ -12,8 +12,8 @@ anyhow = { version = "1.0.102" }
 argon2 = "0.5.3"
 axum = { version = "0.8.8", features = ["macros", "tracing"] }
 axum-server = { version = "0.8.0", features = ["tls-rustls-no-provider"] }
-clap = { version = "4.5.60", features = ["derive", "env", "cargo"] }
-fake = { version = "4.4.0", default-features = false }
+clap = { version = "4.6.0", features = ["derive", "env", "cargo"] }
+fake = { version = "5.1.0", default-features = false }
 friendly-zoo = "1.1.0"
 garde = { version = "0.22.1", default-features = false, features = [
     "derive",
@@ -27,7 +27,7 @@ rand = { version = "0.10.0" }
 serde = "1.0.228"
 serde-aux = { version = "4.7.0", default-features = false }
 serde_json = "1.0.149"
-serde_qs = { version = "1.0.0", features = ["axum"] }
+serde_qs = { version = "1.1.0", features = ["axum"] }
 sqlx = { version = "0.8.6", features = [
     "runtime-tokio",
     "postgres",
@@ -49,7 +49,7 @@ tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.8", features = ["tracing", "trace"] }
 tower-sessions = { version = "0.14" }
 tracing = "0.1.44"
-tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.22.0", features = ["v4", "serde"] }
 visdom = "1.0.4"
 tower-sessions-sqlx-store = { version = "0.15.0", features = ["postgres"] }
