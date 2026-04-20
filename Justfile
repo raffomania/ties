@@ -245,7 +245,7 @@ check-example-docker-compose:
 # Check GitHub Actions workflows for security problems.
 [group('Code Quality')]
 check-zizmor:
-    RUST_LOG=INFO zizmor --strict-collection --pedantic .
+    RUST_LOG=INFO cargo bin zizmor --strict-collection --pedantic .
 
 [group('Code Quality')]
 verify-msrv:
