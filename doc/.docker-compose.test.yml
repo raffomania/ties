@@ -8,6 +8,3 @@ services:
       - BASE_URL=http://localhost:3000
       - ADMIN_USERNAME=testuser
       - ADMIN_PASSWORD=testpassword
-  db:
-    healthcheck:
-      interval: 2s
