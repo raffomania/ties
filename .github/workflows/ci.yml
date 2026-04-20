@@ -83,6 +83,8 @@ jobs:
 
       - run: cargo bin just check-zizmor
 
+      - run: cargo bin just check-example-docker-compose
+
       - name: Check for file changes
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
