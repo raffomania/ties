@@ -181,14 +181,13 @@ ci-dev: migrate-database start-test-database && generate-sbom generate-database-
 # Build a production-ready OCI container using podman. Used for local testing & debugging.
 [group('Testing')]
 build-podman-container target="release":
-    #!/bin/sh
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     [[ "{{ target }}" == "debug" ]] && cargo_flag="" || cargo_flag="--{{ target }}"
     cargo build $cargo_flag
 
-    # The action below appends to the manifest if it already exists,
-    # so clean that up beforehand
-    podman manifest rm -i ties
-    podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/{{ target }}
+    podman build --tag ties -f Containerfile target/{{ target }}
 
 [group('Testing')]
 build-and-check-container: build-podman-container verify-podman-container
