@@ -28,17 +28,13 @@ async fn assets(Path(path): Path<PathBuf>) -> ResponseResult<(HeaderMap, &'stati
 
     let mime_type = get_mime(&path)?;
 
-    #[expect(clippy::from_iter_instead_of_collect)]
-    let headers = HeaderMap::from_iter(
-        [(
-            header::CONTENT_TYPE,
-            mime_type
-                .to_string()
-                .parse()
-                .context("Failed to convert mime type to header")?,
-        )]
-        .into_iter(),
-    );
+    let headers = HeaderMap::from_iter([(
+        header::CONTENT_TYPE,
+        mime_type
+            .to_string()
+            .parse()
+            .context("Failed to convert mime type to header")?,
+    )]);
 
     Ok((headers, body))
 }
@@ -48,17 +44,13 @@ async fn railwind_generated_css() -> ResponseResult<(HeaderMap, &'static [u8])> 
 
     let mime_type = mime_guess::mime::TEXT_CSS;
 
-    #[expect(clippy::from_iter_instead_of_collect)]
-    let headers = HeaderMap::from_iter(
-        [(
-            header::CONTENT_TYPE,
-            mime_type
-                .to_string()
-                .parse()
-                .context("Failed to convert mime type to header")?,
-        )]
-        .into_iter(),
-    );
+    let headers = HeaderMap::from_iter([(
+        header::CONTENT_TYPE,
+        mime_type
+            .to_string()
+            .parse()
+            .context("Failed to convert mime type to header")?,
+    )]);
 
     Ok((headers, body))
 }

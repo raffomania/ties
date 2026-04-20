@@ -168,7 +168,7 @@ impl FromRequestParts<AppState> for AuthUser {
             utf8_percent_encode(redirect_after_login, percent_encoding::NON_ALPHANUMERIC)
                 .to_string();
 
-        let redirect_to = format!("/login?previous_uri={redirect_after_login}",);
+        let redirect_to = format!("/login?previous_uri={redirect_after_login}");
         let error_redirect = Redirect::to(&redirect_to);
 
         let session = Session::from_request_parts(req, state).await.map_err(|e| {
