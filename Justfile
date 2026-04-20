@@ -248,8 +248,8 @@ check-zizmor:
     RUST_LOG=INFO zizmor --strict-collection --pedantic .
 
 [group('Code Quality')]
-verify-msrv: (ensure-command "cargo-msrv")
-    cargo msrv verify
+verify-msrv:
+    cargo bin cargo-msrv verify
 
 # Diagnose potential problems in the development environment.
 [group('Setup')]
