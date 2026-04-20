@@ -49,10 +49,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e # master
-        with:
-          components: clippy
-          toolchain: stable
+        run: rustup install stable
 
       - name: Setup rust cache
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2
@@ -138,10 +135,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e # master
-        with:
-          toolchain: nightly
-          components: "rustfmt"
+        run: rustup install nightly -c rustfmt
 
       - name: Setup rust cache
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2
@@ -182,9 +176,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@0b1efabc08b657293548b77fb76cc02d26091c7e # master
-        with:
-          toolchain: stable
+        run: rustup install stable
 
       - name: Setup rust cache
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2
