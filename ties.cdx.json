@@ -8690,7 +8690,7 @@
       "version": "0.6.2"
     },
     {
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.9",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.10",
       "description": "Web PKI X.509 Certificate Verification.",
       "externalReferences": [
         {
@@ -8701,7 +8701,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53"
+          "content": "df33b2b81ac578cabaf06b89b0631153a3f416b0a886e8a7a1707fb51abbd1ef"
         }
       ],
       "licenses": [
@@ -8710,10 +8710,10 @@
         }
       ],
       "name": "rustls-webpki",
-      "purl": "pkg:cargo/rustls-webpki@0.103.9",
+      "purl": "pkg:cargo/rustls-webpki@0.103.10",
       "scope": "required",
       "type": "library",
-      "version": "0.103.9"
+      "version": "0.103.10"
     },
     {
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.37",
@@ -14910,7 +14910,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.29",
         "registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.37",
         "registry+https://github.com/rust-lang/crates.io-index#rustls-native-certs@0.8.3",
-        "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.9"
+        "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.10"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#rustls-platform-verifier@0.6.2"
     },
@@ -14921,7 +14921,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#rustls-pki-types@1.14.0",
         "registry+https://github.com/rust-lang/crates.io-index#untrusted@0.9.0"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.9"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.10"
     },
     {
       "dependsOn": [
@@ -14929,7 +14929,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.3",
         "registry+https://github.com/rust-lang/crates.io-index#ring@0.17.14",
         "registry+https://github.com/rust-lang/crates.io-index#rustls-pki-types@1.14.0",
-        "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.9",
+        "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.10",
         "registry+https://github.com/rust-lang/crates.io-index#subtle@2.6.1",
         "registry+https://github.com/rust-lang/crates.io-index#zeroize@1.8.2"
       ],
