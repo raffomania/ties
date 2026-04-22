@@ -4,10 +4,14 @@ use axum::{
 };
 use thiserror::Error;
 
+use crate::htmf_response::HtmfResponse;
+
 pub type ResponseResult<T> = core::result::Result<T, ResponseError>;
 
 #[derive(Debug, Error)]
 pub enum ResponseError {
+    #[error("Form had errors")]
+    InvalidForm(HtmfResponse),
     #[error("Not Found")]
     NotFound,
     #[error("Authentication Failed")]
@@ -22,8 +26,12 @@ pub enum ResponseError {
 
 impl IntoResponse for ResponseError {
     fn into_response(self) -> Response {
-        tracing::error!("{self:?}");
+        if !matches!(self, ResponseError::InvalidForm(_)) {
+            tracing::error!("{self:?}");
+        }
+
         match self {
+            ResponseError::InvalidForm(htmf_response) => htmf_response.into_response(),
             ResponseError::NotFound => (StatusCode::NOT_FOUND, self.to_string()).into_response(),
             ResponseError::NotAuthenticated => Redirect::to("/login").into_response(),
             ResponseError::Anyhow(_)

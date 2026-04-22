@@ -58,25 +58,19 @@ async fn into_option_does_not_convert_other_errs_to_none() {
         ResponseError::FederationError(activitypub_federation::error::Error::Other(
             "test error".into(),
         )),
+        ResponseError::Anyhow(anyhow::anyhow!("foo")),
+        ResponseError::InvalidForm(crate::htmf_response::HtmfResponse(
+            htmf::declare_inline::nothing(),
+        )),
     ];
 
     for error in test_cases {
-        let expected_error_type = match &error {
-            ResponseError::NotAuthenticated => "NotAuthenticated",
-            ResponseError::UrlParseError(_) => "UrlParseError",
-            ResponseError::FederationError(_) => "FederationError",
-            ResponseError::NotFound | ResponseError::Anyhow(_) => unreachable!(),
-        };
+        let error_description = error.to_string();
         let result: ResponseResult<()> = Err(error);
         let actual = response_error::into_option(result);
         assert!(
-            matches!(
-                &actual,
-                Err(ResponseError::NotAuthenticated
-                    | ResponseError::UrlParseError(_)
-                    | ResponseError::FederationError(_))
-            ),
-            "Expected {expected_error_type} error to be propagated, got {actual:?}"
+            actual.is_err(),
+            "Expected {error_description} error to be propagated, got {actual:?}"
         );
     }
 }

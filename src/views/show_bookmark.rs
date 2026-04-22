@@ -3,7 +3,10 @@ use uuid::Uuid;
 
 use crate::{
     db,
-    views::{content, layout},
+    views::{
+        content::{self, help_icon},
+        layout,
+    },
 };
 
 pub struct Data {
@@ -49,7 +52,22 @@ pub fn view(
                         ),
                     ),
                     status(&bookmark, archive.as_ref(), &username),
-                    archive_button(bookmark.id, "Re-archive", archive.as_ref(), is_owner),
+                    div(
+                        class("flex gap-2"),
+                        [
+                            archive_button(
+                                bookmark.id,
+                                if archive.is_some() {
+                                    "Re-archive"
+                                } else {
+                                    "Archive"
+                                },
+                                archive.as_ref(),
+                                is_owner,
+                            ),
+                            edit_button(&bookmark, is_owner),
+                        ],
+                    ),
                     backlink_section(&backlinks),
                 ],
             ),
@@ -61,6 +79,22 @@ pub fn view(
             ),
         ]),
         &layout,
+    )
+}
+
+fn edit_button(bookmark: &db::Bookmark, is_owner: bool) -> Element {
+    if !is_owner {
+        return nothing();
+    }
+
+    a(
+        [
+            class(
+                "text-neutral-300 hover:bg-neutral-700 border rounded border-neutral-700 py-1 px-4",
+            ),
+            href(format!("/bookmarks/{}/edit", bookmark.id)),
+        ],
+        "Edit",
     )
 }
 
@@ -108,8 +142,7 @@ fn archive_button(
         ],
         button(
             class(
-                "text-sm text-neutral-400 hover:bg-neutral-700 border rounded border-neutral-700 \
-                 py-2 px-4",
+                "text-neutral-300 hover:bg-neutral-700 border rounded border-neutral-700 py-1 px-4",
             ),
             label,
         ),
@@ -208,17 +241,11 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
         class("mt-4"),
         [
             h2(
-                class("font-bold mb-0.5 text-sm tracking-tight flex gap-1"),
                 [
-                    span((), "Backlinks"),
-                    span(
-                        [
-                            title_attr("Backlinks are lists that point to this bookmark."),
-                            class("text-neutral-400 hover:text-neutral-200 cursor-default text-sm"),
-                        ],
-                        "🛈",
-                    ),
+                    class("font-bold mb-0.5 text-sm tracking-tight flex gap-1"),
+                    title_attr("Backlinks are lists that point to this bookmark."),
                 ],
+                [span((), "Backlinks"), help_icon()],
             ),
             p((), link_elems),
         ],

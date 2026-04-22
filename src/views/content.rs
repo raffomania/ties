@@ -1,5 +1,5 @@
 use anyhow::Context;
-use htmf::prelude_inline::*;
+use htmf::{prelude_inline::*};
 use time::{OffsetDateTime, format_description};
 
 pub static BULLET: &str = "∙";
@@ -11,6 +11,15 @@ pub fn link_url(url: &str) -> Element {
              whitespace-nowrap text-ellipsis",
         ),
         a(href(url), url),
+    )
+}
+
+pub fn help_icon() -> Element {
+    span(
+        [class(
+            "text-neutral-400 hover:text-neutral-200 cursor-default text-sm",
+        )],
+        "🛈",
     )
 }
 

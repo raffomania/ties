@@ -218,15 +218,16 @@ pub async fn list_by_list(
     Ok(results)
 }
 
-pub async fn delete_by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Link> {
+pub async fn delete_by_id(tx: &mut AppTx, id: Uuid, user_id: Uuid) -> ResponseResult<Link> {
     let link = query_as!(
         Link,
         r#"
         delete from links
-        where id = $1
+        where id = $1 and user_id = $2
         returning *
         "#,
-        id
+        id,
+        user_id
     )
     .fetch_one(&mut **tx)
     .await?;

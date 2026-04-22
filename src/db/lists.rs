@@ -250,10 +250,17 @@ pub async fn search(tx: &mut AppTx, term: &str, ap_user_id: Uuid) -> ResponseRes
     let lists = query_as!(
         List,
         r#"
-            select *
+            select lists.*
             from lists
+            left join links as src_links on lists.id = src_links.src_list_id
+            left join links as dest_links on lists.id = dest_links.dest_list_id
             where (lists.title ilike '%' || $1 || '%')
             and lists.ap_user_id = $2
+            group by lists.id
+            -- Show lists with recent incoming or outgoing links first
+            order by
+                greatest(max(dest_links.created_at), max(src_links.created_at)) desc nulls last,
+                max(lists.created_at) desc
             limit 10
         "#,
         term,
@@ -275,9 +282,9 @@ pub async fn list_recent(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Vec
             left join links as dest_links on lists.id = dest_links.dest_list_id
             where lists.ap_user_id = $1
             group by lists.id
+            -- Show lists with recent incoming or outgoing links first
             order by
-                max(src_links.created_at) desc nulls last,
-                max(dest_links.created_at) nulls last,
+                greatest(max(dest_links.created_at), max(src_links.created_at)) desc nulls last,
                 max(lists.created_at) desc
             limit 500
         "#,

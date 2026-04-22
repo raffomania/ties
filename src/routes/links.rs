@@ -152,9 +152,10 @@ async fn get_create(
 
 async fn delete_by_id(
     extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
     Path(id): Path<Uuid>,
 ) -> ResponseResult<HeaderMap> {
-    db::links::delete_by_id(&mut tx, id).await?;
+    db::links::delete_by_id(&mut tx, id, auth_user.user_id).await?;
 
     tx.commit().await?;
 

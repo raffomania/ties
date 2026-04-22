@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select lists.*\n            from lists\n            left join links as src_links on lists.id = src_links.src_list_id\n            left join links as dest_links on lists.id = dest_links.dest_list_id\n            where (lists.title ilike '%' || $1 || '%')\n            and lists.ap_user_id = $2\n            group by lists.id\n            -- Show lists with recent incoming or outgoing links first\n            order by\n                greatest(max(dest_links.created_at), max(src_links.created_at)) desc nulls last,\n                max(lists.created_at) desc\n            limit 10\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "private",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "pinned",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "ap_user_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4316fcc1eb524644a9f5cb60c8e5228cb2584433ab0e58c1764f44da6f600876"
+}

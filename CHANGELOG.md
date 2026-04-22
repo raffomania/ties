@@ -12,6 +12,11 @@ _Released on 2026-05-07_
 
 - Ties now requires a minimum Rust version of 1.91.0 to compile.
 
+### Better Bookmark Creation & Editing
+
+- New page for editing bookmark titles (including the option to use the fetched title from the remote site), as well as quickly adding/removing them to lists.
+- Updated bookmark titles are sent to federating servers.
+
 ### Docs
 
 - Add a small note to the README explaining that we use REUSE for specifying licenses, and that the code is licensed under AGPL.
@@ -24,7 +29,6 @@ _Released on 2026-05-07_
 ### Internals
 
 - Upgrade dependencies (the new versions contain a few security fixes, although none of the fixes are necessary for ties due to the way we use the dependencies).
-- Enable dependabot pull requests for github actions, update all github actions dependencies.
 - Remove github actions caching for release builds entirely to reduce the potential for cache poisoning attacks. Previously, the cache would get written, but not read, when doing release builds.
 
 ## 0.2.0

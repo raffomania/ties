@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        delete from links\n        where id = $1 and user_id = $2\n        returning *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "src_list_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "dest_bookmark_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "dest_list_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "0411f95092b864a7b9f321ab244b1a867d22ceb7f90035d8c6f7a1798914f88f"
+}

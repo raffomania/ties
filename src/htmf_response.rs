@@ -1,5 +1,6 @@
 use axum::response::{Html, IntoResponse};
 
+#[derive(Debug)]
 pub struct HtmfResponse(pub htmf::element::Element);
 
 impl From<htmf::element::Element> for HtmfResponse {

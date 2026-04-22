@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select links.id as \"link_id\", lists.title as \"list_title\", lists.private as \"list_private\"\n        from links\n        join lists on links.src_list_id = lists.id\n        where links.dest_bookmark_id = $1\n            and links.user_id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "link_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "list_title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "list_private",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "643cfd5ef9eaa6923d1008c87f0ed34676248ef859f995ea405acb5b7838dca5"
+}

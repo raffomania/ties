@@ -40,6 +40,8 @@ pub struct Json {
     /// Hashtags derived from the public lists this bookmark belongs to
     #[serde(rename = "tag", default)]
     pub tags: Vec<Hashtag>,
+    #[serde(default, with = "time::serde::iso8601::option")]
+    pub updated: Option<OffsetDateTime>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -158,6 +160,7 @@ impl Object for db::Bookmark {
             },
             attachments,
             tags,
+            updated: None,
         })
     }
 
