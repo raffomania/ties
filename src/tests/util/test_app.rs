@@ -31,7 +31,7 @@ pub struct TestApp {
 impl TestApp {
     pub async fn new() -> Self {
         let port = NEXT_TEST_APP_PORT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let base_url = Url::parse(&format!("http://localhost:{port}",))
+        let base_url = Url::parse(&format!("http://localhost:{port}"))
             .expect("Failed to parse URL for test instance");
         let pool = super::db::new_test_pool().await;
 

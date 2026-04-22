@@ -93,7 +93,6 @@ pub fn view(
                 ]),
                 search(data),
                 errors.view("root"),
-                // TODO Refresh whole page in case there's a new list in the sidebar
                 button([
                     class("bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded mt-4 self-end"),
                     attr("hx-post", "/bookmarks/create"),
