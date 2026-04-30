@@ -47,13 +47,13 @@ tokio = { version = "1.50.0", features = [
 ] }
 tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.8", features = ["tracing", "trace"] }
-tower-sessions = { version = "0.14" }
+tower-sessions = { version = "0.15" }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.22.0", features = ["v4", "serde"] }
 visdom = "1.0.4"
 tower-sessions-sqlx-store = { version = "0.15.0", features = ["postgres"] }
-rustls = { version = "0.23.37", default-features = false, features = ["ring"] }
+rustls = { version = "0.23.39", default-features = false, features = ["ring"] }
 htmf = { git = "https://github.com/raffomania/htmf", features = [
     "pretty-print",
 ] }
