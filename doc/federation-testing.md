@@ -8,8 +8,6 @@ The easiest way to test federation features with Mastodon is to expose a local d
 - serveo
 - localhost.run
 
-When using this approach, **do not** run the `insert-demo-data` script, as it will add users with unsafe passwords that could lead to your environment getting compromised.
-
 1. Wipe your local database using `just wipe-database`.
 1. Run the forwarding tool of your choice, forwarding the port specified in `.env`.
 1. Put the public domain you're assigned into `BASE_URL` in `.env`. Depending on your forwarding tool, you might need to turn off TLS.

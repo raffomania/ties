@@ -187,7 +187,8 @@ async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {
         } else {
             let create_user = CreateUser {
                 username,
-                password: "testpassword".to_string(),
+                // random string with 20 chars
+                password: 20.fake(),
             };
 
             db::users::insert(tx, create_user, base_url).await?
