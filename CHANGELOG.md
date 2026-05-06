@@ -2,6 +2,15 @@
 
 *Note: This file does not contain any LLM-generated text.*
 
+## 0.2.1 (Unreleased)
+
+[You can now support ties development via GitHub Sponsors!](https://github.com/sponsors/raffomania)
+
+### Bugfixes
+
+- Fix the example docker-compose file not working because of a left-over healthcheck declaration. Thanks for the report, @gromit!
+- Upgrade dependencies (the new versions contain a few security fixes, although none of the fixes are necessary for ties due to the way we use the dependencies).
+
 ## 0.2.0
 
 _Released on 2026-03-20_
