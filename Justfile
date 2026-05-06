@@ -163,7 +163,7 @@ insert-demo-data: migrate-database
     cargo run -- insert-demo-data
 
 # Run most of the CI checks locally. Convenient to check for errors before pushing.
-[group('Development')]
+[group('Checks')]
 ci-dev: migrate-database start-test-database && generate-sbom generate-database-info
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -172,11 +172,17 @@ ci-dev: migrate-database start-test-database && generate-sbom generate-database-
     # Prevent full recompilations in the normal dev setup which has different rustflags
     export CARGO_TARGET_DIR="target_ci"
 
-    cargo build --release
-
     just clippy
     just format
     just test
+
+[group('Development')]
+build-release:
+    cargo build --release
+
+[group('Development')]
+benchmark-hot-compilation:
+    bin/benchmark-hot-compilation.sh
 
 # Build a production-ready OCI container using podman. Used for local testing & debugging.
 [group('Testing')]
@@ -198,29 +204,29 @@ build-and-check-container: build-podman-container verify-podman-container
 verify-podman-container:
     podman run --rm --entrypoint "" localhost/ties ls /etc/ssl/certs/ca-certificates.crt
 
-[group('Code Quality')]
+[group('Checks')]
 clippy *args:
     cargo clippy {{ args }} -- -D warnings
 
-[group('Code Quality')]
+[group('Checks')]
 fix-lints *args: reuse-lint
     cargo clippy --fix {{ args }}
     cargo fix --allow-staged --all-targets
 
-[group('Code Quality')]
+[group('Checks')]
 reuse-lint: (ensure-command "reuse")
     reuse --root . lint
 
-[group('Code Quality')]
+[group('Checks')]
 format:
     cargo +nightly fmt --all
 
-[group('Code Quality')]
+[group('Checks')]
 format-lint:
     cargo +nightly fmt --all --check
 
 # Run the pre-commit hook script.
-[group('Code Quality')]
+[group('Checks')]
 pre-commit:
     ./pre-commit.sh
 
@@ -229,10 +235,10 @@ install-git-hooks:
     ln -srf bin/pre-commit.sh .git/hooks/pre-commit
 
 # Run extended checks that are not part of the normal CI pipeline.
-[group('Code Quality')]
+[group('Checks')]
 check-extended: verify-msrv build-and-check-container check-example-docker-compose check-zizmor
 
-[group('Code Quality')]
+[group('Checks')]
 check-example-docker-compose:
     #!/usr/bin/env bash
 
@@ -243,11 +249,11 @@ check-example-docker-compose:
     docker-compose -f doc/docker-compose.yml down
 
 # Check GitHub Actions workflows for security problems.
-[group('Code Quality')]
+[group('Checks')]
 check-zizmor:
     RUST_LOG=INFO cargo bin zizmor --strict-collection --pedantic .
 
-[group('Code Quality')]
+[group('Checks')]
 verify-msrv:
     cargo bin cargo-msrv verify
 
@@ -263,6 +269,36 @@ doctor:
 
     [[ -f .env ]] || echo ".env file is missing. Please copy .env.example and adjust it for your environment."
 
+[group('Publish')]
+release: (ensure-command "jq") generate-sbom build-release
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "There are unstaged or uncommitted changes. Aborting release." >&2
+        exit 1
+    fi
+
+    tag=$(git tag --points-at HEAD)
+
+    if [[ -z "$tag" ]]; then
+        echo "No tag found pointing at HEAD. Aborting release." >&2
+        exit 1
+    fi
+
+    if [[ "$tag" != v* ]]; then
+        echo "Tag '$tag' does not start with 'v'. Aborting release." >&2
+        exit 1
+    fi
+
+    version=${tag#v}
+
+    API_JSON=$(printf '{"tag_name": "%s","target_commitish": "master","name": "%s","body": "Release of version %s","draft": true,"prerelease": false}' "$tag" "$version" "$version")
+    response=$(curl --data "$API_JSON" https://api.github.com/repos/raffomania/ties/releases?access_token=:access_token)
+    upload_url=$(echo "$response" | jq -r '.upload_url' | sed 's/{.*}//')
+
+    curl --request POST --data-binary "@target/release/ties" "${upload_url}?name=ties-${version}" -H "Authorization: token :access_token" -H "Content-Type: application/octet-stream"
+
 [private]
 ensure-command +command:
     #!/usr/bin/env bash
@@ -276,6 +312,3 @@ ensure-command +command:
             exit 1
         fi
     done
-
-benchmark-hot-compilation:
-    bin/benchmark-hot-compilation.sh
