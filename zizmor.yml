@@ -1,0 +1,5 @@
+rules:
+  cache-poisoning:
+    ignore:
+      # Somehow, an inline comment didn't work for ignoring this rule, so we're doing it here.
+      - ci.yml

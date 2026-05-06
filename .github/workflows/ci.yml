@@ -24,8 +24,6 @@ jobs:
     name: Build & Lint
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      packages: write # For uploading the container to GHCR
 
     services:
       postgres:
@@ -56,9 +54,6 @@ jobs:
         with:
           # For cargo-run-bin
           cache-directories: ".bin"
-          # Prevent cache poisoning attacks for release workflow
-          # zizmor: ignore[cache-poisoning]
-          lookup-only: ${{ (startsWith(github.ref_name, 'v') && github.ref_type == 'tag') }}
 
       - name: Install REUSE tool
         run: pipx install reuse
@@ -94,34 +89,6 @@ jobs:
           fi
 
       - run: cargo build --release --locked
-
-      # Release in the same job to prevent slow copying of build artifacts between jobs
-      # TODO: this will still run if the tests fail
-      - name: podman login
-        env:
-          USER: ${{ github.actor }}
-          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: podman login --username "$USER" --password "$PASSWORD" ghcr.io
-
-      - run: podman system migrate
-
-      - name: podman build linux/amd64
-        run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
-
-      - name: Verify container image
-        run: cargo bin just verify-podman-container
-
-      - name: podman manifest push latest
-        run: podman manifest push ties ghcr.io/raffomania/ties:latest
-        if: github.ref == 'refs/heads/main'
-
-      # For the release job
-      - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: (startsWith(github.ref_name, 'v') && github.ref_type == 'tag')
-        with:
-          name: ties
-          path: target/release/ties
 
   format-nightly:
     name: Check Formatting (nightly)
@@ -198,22 +165,21 @@ jobs:
       packages: write # For uploading the container to GHCR
       contents: write # For creating a GitHub release
     needs: [test, build-lint, format-nightly]
-    # Run for tags only
-    if: (startsWith(github.ref_name, 'v') && github.ref_type == 'tag')
+    # Run for tags and main branch pushes
+    if: (startsWith(github.ref_name, 'v') && github.ref_type == 'tag') || github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
-      - name: Download release binary artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ties
-          path: target/release
+      - run: cargo build --release --locked
 
       - name: podman build linux/amd64
         run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
+
+      - name: Verify container image
+        run: cargo bin just verify-podman-container
 
       - name: podman login
         env:
@@ -221,8 +187,13 @@ jobs:
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: podman login --username "$USER" --password "$PASSWORD" ghcr.io
 
+      - name: podman manifest push latest
+        if: github.ref == 'refs/heads/main'
+        run: podman manifest push ties ghcr.io/raffomania/ties:latest
+
       - name: Get version from tag
         id: extract_version
+        if: github.ref_type == 'tag'
         run: |
           version=${GITHUB_REF_NAME#v}
           version=${version//test-release/}
@@ -231,6 +202,7 @@ jobs:
 
       - uses: sean0x42/markdown-extract@7b185cbe85263116bbf741e739e7198ba86465dc # v2
         id: changelog_entry
+        if: github.ref_type == 'tag'
         with:
           file: CHANGELOG.md
           pattern: ${{ steps.extract_version.outputs.version }}
@@ -239,6 +211,7 @@ jobs:
       # Preparations complete: create release and push container
 
       - name: Create GitHub release
+        if: github.ref_type == 'tag'
         env:
           TITLE: ${{ steps.extract_version.outputs.version }}
           NOTES: ${{ steps.changelog_entry.outputs.markdown }}
@@ -247,8 +220,8 @@ jobs:
         run: gh release create --draft --notes "$NOTES" --title "$TITLE" "$TAG" target/release/ties
 
       - name: podman manifest push tag version
+        if: ${{ !contains(github.ref_name, 'test-release') && github.ref_type == 'tag' }}
         run: podman manifest push ties ghcr.io/raffomania/ties:${STEPS_EXTRACT_VERSION_OUTPUTS_VERSION}
-        if: ${{ !contains(github.ref_name, 'test-release') }}
         env:
           # Prevent code injection by using an env var which is subject to normal shell quoting rules
           STEPS_EXTRACT_VERSION_OUTPUTS_VERSION: ${{ steps.extract_version.outputs.version }}

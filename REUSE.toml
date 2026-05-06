@@ -17,6 +17,7 @@ path = [
     "Containerfile",
     ".gitignore",
     ".gitattributes",
+    "zizmor.yml",
     ".editorconfig",
     ".vscode/settings.json",
     "tailwind.config.js",
