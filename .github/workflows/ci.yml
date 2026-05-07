@@ -91,7 +91,7 @@ jobs:
       - run: cargo build --release --locked
 
       - name: podman build linux/amd64
-        run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
+        run: podman build --platform linux/amd64 --tag ties -f Containerfile target/release
 
       - name: Verify container image
         run: cargo bin just verify-podman-container
@@ -182,7 +182,7 @@ jobs:
       - run: cargo build --release --locked
 
       - name: podman build linux/amd64
-        run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
+        run: podman build --platform linux/amd64 --tag ties -f Containerfile target/release
 
       - name: podman login
         env:
@@ -192,7 +192,7 @@ jobs:
 
       - name: podman manifest push latest
         if: github.ref == 'refs/heads/main'
-        run: podman manifest push ties ghcr.io/raffomania/ties:latest
+        run: podman image push ties ghcr.io/raffomania/ties:latest
 
       - name: Get version from tag
         id: extract_version
@@ -224,7 +224,7 @@ jobs:
 
       - name: podman manifest push tag version
         if: ${{ !contains(github.ref_name, 'test-release') && github.ref_type == 'tag' }}
-        run: podman manifest push ties ghcr.io/raffomania/ties:${STEPS_EXTRACT_VERSION_OUTPUTS_VERSION}
+        run: podman image push ties ghcr.io/raffomania/ties:${STEPS_EXTRACT_VERSION_OUTPUTS_VERSION}
         env:
           # Prevent code injection by using an env var which is subject to normal shell quoting rules
           STEPS_EXTRACT_VERSION_OUTPUTS_VERSION: ${{ steps.extract_version.outputs.version }}
