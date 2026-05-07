@@ -115,12 +115,9 @@ jobs:
         with:
           # For cargo-run-bin
           cache-directories: ".bin"
-          # Prevent cache poisoning attacks for release workflow
-          # zizmor: ignore[cache-poisoning]
-          lookup-only: ${{ (startsWith(github.ref_name, 'v') && github.ref_type == 'tag') }}
 
       - name: Install cargo-run-bin
-        run: cargo install cargo-run-bin
+        run: cargo install --locked cargo-run-bin
 
       - run: cargo bin just format-lint
 
@@ -154,12 +151,14 @@ jobs:
       - name: Setup rust cache
         uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2
         with:
-          # Prevent cache poisoning attacks for release workflow
-          # zizmor: ignore[cache-poisoning]
-          lookup-only: ${{ (startsWith(github.ref_name, 'v') && github.ref_type == 'tag') }}
+          # For cargo-run-bin
+          cache-directories: ".bin"
 
-      - name: cargo test
-        run: cargo test
+      - name: Install cargo-run-bin
+        run: cargo install --locked cargo-run-bin
+
+      - name: cargo nextest
+        run: cargo bin cargo-nextest run
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
           SQLX_OFFLINE: true
@@ -179,6 +178,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Release build. This job intentionally does not
+      # use a cache to prevent cache poisoning attacks.
       - run: cargo build --release --locked
 
       - name: podman build linux/amd64

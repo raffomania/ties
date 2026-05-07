@@ -140,18 +140,18 @@ start-test-database:
     podman wait --condition=healthy ties_postgres_test
 
 [group('Testing')]
-test *args: start-test-database
+test *args: start-database start-test-database
     # Migrate the test database so we can compile the tests using SQLX_OFFLINE=false,
     # which avoids needless recompilations
     cargo run -- db --database-url=${DATABASE_URL_TEST} migrate
 
-    DATABASE_URL=${DATABASE_URL_TEST} cargo test {{ args }}
+    DATABASE_URL=${DATABASE_URL_TEST} cargo bin cargo-nextest run {{ args }}
 
 [group('Testing')]
 test-flaky *args: start-test-database generate-database-info
-    # SQLX_OFFLINE: Without it, `cargo test` would compile against the test db
+    # SQLX_OFFLINE: Without it, the call below would compile against the test db
     # which is always empty and only migrated inside the tests themselves.
-    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo test {{ args }} -- --ignored
+    DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo bin cargo-nextest run --run-ignored=only {{ args }}
 
 [group('Development')]
 development-cert: (ensure-command "mkcert")

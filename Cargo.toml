@@ -105,6 +105,7 @@ sqlx-cli = { version = "0.8.6", locked = true, bins = ["sqlx"] }
 cargo-cyclonedx = { version = "0.5.9", locked = true }
 zizmor = { version = "1.24.1", locked = true }
 cargo-msrv = { version = "0.19.3", locked = true }
+cargo-nextest = { version = "0.9.133", locked = true }
 
 [profile.dev.package]
 insta.opt-level = 3

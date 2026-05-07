@@ -1,5 +1,3 @@
-use std::sync::atomic::AtomicUsize;
-
 use axum::{Router, http::StatusCode};
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
@@ -17,20 +15,22 @@ use crate::{
 const TEST_USER_USERNAME: &str = "testuser";
 const TEST_USER_PASSWORD: &str = "testpassword";
 
-static NEXT_TEST_APP_PORT: AtomicUsize = AtomicUsize::new(4041);
-
 pub struct TestApp {
     pub logged_in_cookie: Option<String>,
     pub router: Router,
     pub pool: Pool<Postgres>,
     pub base_url: Url,
     pub state: AppState,
-    pub port: usize,
+    pub listener: std::sync::Mutex<Option<TcpListener>>,
 }
 
 impl TestApp {
     pub async fn new() -> Self {
-        let port = NEXT_TEST_APP_PORT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("Failed to bind listener");
+        let port = listener.local_addr().unwrap().port();
+
         let base_url = Url::parse(&format!("http://localhost:{port}"))
             .expect("Failed to parse URL for test instance");
         let pool = super::db::new_test_pool().await;
@@ -56,7 +56,7 @@ impl TestApp {
             logged_in_cookie: None,
             base_url,
             state,
-            port,
+            listener: std::sync::Mutex::new(Some(listener)),
         }
     }
 
@@ -166,10 +166,14 @@ impl TestApp {
         self.logged_in_cookie = Some(cookie.to_string());
     }
 
+    /// Will panic if run twice.
     pub async fn serve(&self) {
-        let listener = TcpListener::bind(format!("localhost:{}", self.port))
-            .await
-            .unwrap();
+        let listener = self
+            .listener
+            .lock()
+            .unwrap()
+            .take()
+            .expect("Listener for TestApp was None, did you call `serve()` twice?");
         let router = self.router.clone();
 
         tokio::spawn(async move {
