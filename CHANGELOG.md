@@ -15,7 +15,7 @@ _Released on 2026-05-07_
 
 ### Bugfixes
 
-- Fix the example docker-compose file not working because of a left-over healthcheck declaration. Thanks for the report, @gromit!
+- Fix the example docker-compose file not working because of a left-over healthcheck declaration. Thanks for the report, @christian-heusel!
 
 ### Internals
 
