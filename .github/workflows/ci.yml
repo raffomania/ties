@@ -90,6 +90,12 @@ jobs:
 
       - run: cargo build --release --locked
 
+      - name: podman build linux/amd64
+        run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
+
+      - name: Verify container image
+        run: cargo bin just verify-podman-container
+
   format-nightly:
     name: Check Formatting (nightly)
     runs-on: ubuntu-latest
@@ -177,9 +183,6 @@ jobs:
 
       - name: podman build linux/amd64
         run: podman build --format docker --platform linux/amd64 --manifest ties -f Containerfile target/release
-
-      - name: Verify container image
-        run: cargo bin just verify-podman-container
 
       - name: podman login
         env:
