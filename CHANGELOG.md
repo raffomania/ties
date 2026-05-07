@@ -6,10 +6,20 @@
 
 [You can now support ties development via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
+### Docs
+
+- Add a small note to the README explaining that we use REUSE for specifying licenses, and that the code is licensed under AGPL.
+- Add a document outlining [Values and Goals](https://github.com/raffomania/ties/blob/main/doc/values-goals.md) of the project.
+
 ### Bugfixes
 
 - Fix the example docker-compose file not working because of a left-over healthcheck declaration. Thanks for the report, @gromit!
+
+### Internals
+
 - Upgrade dependencies (the new versions contain a few security fixes, although none of the fixes are necessary for ties due to the way we use the dependencies).
+- Enable dependabot pull requests for github actions, update all github actions dependencies.
+- Remove github actions caching for release builds entirely to reduce the potential for cache poisoning attacks. Previously, the cache would get written, but not read, when doing release builds.
 
 ## 0.2.0
 
