@@ -37,7 +37,7 @@ fn main() {
         .into_iter()
         .map(|e| e.expect("Error while searching for views"))
         .filter(|e| e.file_type().is_file())
-        .map(|entry| entry.into_path())
+        .map(walkdir::DirEntry::into_path)
         .collect();
 
     let sources = paths

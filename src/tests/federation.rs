@@ -58,7 +58,7 @@ async fn can_resolve_user() -> Result<()> {
         webfinger::Resource::from_name_and_url(user.username, &app_a.base_url)?,
     )
     .await?;
-    app_a.serve().await;
+    app_a.serve();
 
     let app_b = TestApp::new().await;
     let ap_cx_b = app_b.state.federation_config.to_request_data();
@@ -84,7 +84,7 @@ async fn can_resolve_bookmark() -> Result<()> {
         .create_bookmark(&user, "https://rafa.ee", "test")
         .await;
 
-    app_a.serve().await;
+    app_a.serve();
     let ap_cx_b = app_b.state.federation_config.to_request_data();
     // Check that instance B can resolve user on instance A
     let app_b_bookmark = bookmark.ap_id.dereference(&ap_cx_b).await?;
@@ -108,7 +108,7 @@ async fn can_resolve_webfinger() -> Result<()> {
         webfinger::Resource::from_name_and_url(user.username, &app.base_url)?,
     )
     .await?;
-    app.serve().await;
+    app.serve();
 
     let actor: db::ApUser = webfinger_resolve_actor(
         &format!("testa@{}", app.state.federation_config.domain()),
@@ -135,8 +135,8 @@ async fn can_follow_undo_follow() -> Result<()> {
     let ap_user_b = db::ap_users::read_by_id(&mut tx_b, user_b.ap_user_id).await?;
     drop(tx_b);
 
-    app_a.serve().await;
-    app_b.serve().await;
+    app_a.serve();
+    app_b.serve();
     let ap_cx_a = app_a.state.federation_config.to_request_data();
 
     // Create a Follow activity that we'll undo

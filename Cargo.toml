@@ -6,6 +6,12 @@ license = "AGPL-3.0-or-later"
 publish = false
 rust-version = "1.88.0"
 
+[profile.dev.package]
+insta.opt-level = 3
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
 [dependencies]
 itertools = "0.14.0"
 anyhow = { version = "1.0.102" }
@@ -106,6 +112,3 @@ cargo-cyclonedx = { version = "0.5.9", locked = true }
 zizmor = { version = "1.24.1", locked = true }
 cargo-msrv = { version = "0.19.3", locked = true }
 cargo-nextest = { version = "0.9.133", locked = true }
-
-[profile.dev.package]
-insta.opt-level = 3

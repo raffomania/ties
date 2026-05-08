@@ -1,3 +1,5 @@
+allow-unwrap-in-tests = true
+
 [[disallowed-types]]
 path = "axum::extract::Query"
 reason = "Use serde_qs::axum::QsQuery instead"

@@ -106,7 +106,7 @@ async fn profile_remote_user() -> anyhow::Result<()> {
     .await?;
 
     // Fetch the user from B and store it in A's db
-    app_b.serve().await;
+    app_b.serve();
     let ap_cx_a = app_a.state.federation_config.to_request_data();
     user_to_show_ap_user.ap_id.dereference(&ap_cx_a).await?;
 

@@ -167,7 +167,7 @@ impl TestApp {
     }
 
     /// Will panic if run twice.
-    pub async fn serve(&self) {
+    pub fn serve(&self) {
         let listener = self
             .listener
             .lock()
