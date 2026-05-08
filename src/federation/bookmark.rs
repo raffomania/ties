@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct BookmarkJson {
+pub struct Json {
     pub id: ObjectId<db::Bookmark>,
     #[serde(rename = "type")]
     pub kind: NoteType,
@@ -28,22 +28,22 @@ pub struct BookmarkJson {
     /// The title
     pub name: Option<String>,
     #[serde(default)]
-    pub(crate) attachments: Vec<Link>,
+    pub attachments: Vec<Link>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct Link {
+pub struct Link {
     href: String,
     media_type: Option<String>,
     #[serde(rename = "type")]
     kind: LinkType,
 }
 
-impl TryFrom<BookmarkJson> for InsertBookmark {
+impl TryFrom<Json> for InsertBookmark {
     type Error = anyhow::Error;
 
-    fn try_from(value: BookmarkJson) -> Result<Self, Self::Error> {
+    fn try_from(value: Json) -> Result<Self, Self::Error> {
         let first_attachment = value.attachments.first();
         let url = if let Some(attachment) = first_attachment.cloned() {
             Some(attachment.href)
@@ -69,7 +69,7 @@ impl TryFrom<BookmarkJson> for InsertBookmark {
 #[async_trait::async_trait]
 impl Object for db::Bookmark {
     type DataType = super::Context;
-    type Kind = BookmarkJson;
+    type Kind = Json;
     type Error = ResponseError;
 
     async fn read_from_id(
@@ -97,7 +97,7 @@ impl Object for db::Bookmark {
             r#"<p>{}</p><a href="{}">{}</p>"#,
             self.title, self.url, self.url
         );
-        Ok(BookmarkJson {
+        Ok(Json {
             id: self.ap_id,
             kind: NoteType::Note,
             attributed_to: author.ap_id,

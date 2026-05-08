@@ -70,7 +70,7 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
 
-      - run: cargo bin just clippy
+      - run: cargo bin just clippy-lint
 
       - run: cargo bin just reuse-lint
 

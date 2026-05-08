@@ -8,7 +8,7 @@ use super::AppTx;
 use crate::{db, forms::links::CreateLink, response_error::ResponseResult};
 
 #[derive(FromRow, Debug)]
-#[expect(dead_code)]
+#[expect(dead_code, reason = "Kept for reference on the DB schema")]
 pub struct Link {
     pub id: Uuid,
     pub created_at: OffsetDateTime,
@@ -61,10 +61,6 @@ impl LinkDestination {
 
 pub struct LinkWithContent {
     pub id: Uuid,
-    #[expect(dead_code)]
-    pub created_at: OffsetDateTime,
-    #[expect(dead_code)]
-    pub user_id: Uuid,
 
     pub dest: LinkDestinationWithChildren,
 }
@@ -170,8 +166,6 @@ pub async fn list_by_list(
         r#"
         select
             links.id as link_id,
-            links.created_at as link_created_at,
-            links.user_id as link_user_id,
 
             case when lists.id is not null then
                 jsonb_build_object(
@@ -216,8 +210,6 @@ pub async fn list_by_list(
             let dest: LinkDestinationWithChildren = serde_json::from_value(row.dest.into())?;
             Ok(LinkWithContent {
                 id: row.link_id,
-                created_at: row.link_created_at,
-                user_id: row.link_user_id,
                 dest,
             })
         })

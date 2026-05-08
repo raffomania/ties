@@ -13,7 +13,7 @@ struct User {
 
 pub async fn migrate(tx: &mut PgTransaction<'_>, base_url: &Url) -> Result<()> {
     let users_without_ap_user =
-        sqlx::query(r"select id, username from users where ap_user_id is null")
+        sqlx::query("select id, username from users where ap_user_id is null")
             .fetch_all(&mut **tx)
             .await?;
 
@@ -30,7 +30,7 @@ async fn new_ap_user(base_url: &Url, user: User, tx: &mut PgTransaction<'_>) -> 
     let create_user = CreateApUser::new_local(base_url, username)?;
 
     let id: Uuid = sqlx::query(
-        r"
+        "
             insert into ap_users
             (
                 id,

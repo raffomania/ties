@@ -21,7 +21,7 @@ pub struct CreateBookmark {
     pub actor: ObjectId<db::ApUser>,
     #[serde(deserialize_with = "deserialize_one_or_many")]
     pub to: Vec<Url>,
-    pub object: federation::BookmarkJson,
+    pub object: federation::Json,
     #[serde(rename = "type")]
     pub kind: CreateType,
     pub id: Url,

@@ -75,8 +75,7 @@ impl CreateApUser {
     }
 }
 
-// Currently only used in insert-demo-data script
-#[allow(dead_code)]
+#[allow(dead_code, reason = "Currently only used in insert-demo-data script")]
 #[derive(Validate)]
 pub struct UpdateApUser {
     #[garde(length(max = 100))]

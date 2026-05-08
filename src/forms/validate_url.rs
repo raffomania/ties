@@ -1,4 +1,4 @@
-#![allow(unused_imports)]
+#![allow(unused_imports, reason = "Used by garde's macros")]
 pub use garde::rules::*; // re-export garde's rules
 
 pub mod length {

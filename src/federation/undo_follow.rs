@@ -19,15 +19,15 @@ use crate::{
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UndoFollow {
-    pub(crate) actor: ObjectId<db::ApUser>,
+    pub actor: ObjectId<db::ApUser>,
     /// For compatibility with platforms that always expect to receive the
     /// recipient field
     #[serde(deserialize_with = "deserialize_skip_error", default)]
-    pub(crate) to: Option<[ObjectId<db::ApUser>; 1]>,
-    pub(crate) object: federation::Follow,
+    pub to: Option<[ObjectId<db::ApUser>; 1]>,
+    pub object: federation::Follow,
     #[serde(rename = "type")]
-    pub(crate) kind: UndoType,
-    pub(crate) id: Url,
+    pub kind: UndoType,
+    pub id: Url,
 }
 
 impl UndoFollow {

@@ -1,4 +1,7 @@
-#![expect(clippy::inconsistent_digit_grouping)]
+#![expect(
+    clippy::inconsistent_digit_grouping,
+    reason = "Used to format migration timestamps like dates"
+)]
 
 use anyhow::Result;
 use sqlx::Row;
@@ -8,7 +11,7 @@ use uuid::Uuid;
 use crate::{db, forms::users::CreateUser};
 
 #[test_log::test(tokio::test)]
-async fn test_generate_missing_ap_users_migration() -> Result<()> {
+async fn generate_missing_ap_users_migration() -> Result<()> {
     // Create a test database pool without running migrations
     let pool = super::util::db::new_test_pool().await;
     let base_url = Url::parse("http://localhost:3000")?;
@@ -88,7 +91,7 @@ async fn test_generate_missing_ap_users_migration() -> Result<()> {
 }
 
 #[test_log::test(tokio::test)]
-async fn test_generate_missing_bookmark_ap_ids_migration() -> Result<()> {
+async fn generate_missing_bookmark_ap_ids_migration() -> Result<()> {
     // Create a test database pool without running migrations
     let pool = super::util::db::new_test_pool().await;
     let base_url = Url::parse("http://localhost:3000")?;

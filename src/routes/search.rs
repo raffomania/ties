@@ -18,7 +18,7 @@ pub fn router() -> Router<AppState> {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct SearchQuery {
+pub struct Query {
     /// The words to search for
     pub q: String,
     pub page: Option<i64>,
@@ -28,7 +28,7 @@ async fn get_search(
     auth_user: AuthUser,
     extract::Tx(mut tx): extract::Tx,
 
-    QsQuery(query): QsQuery<SearchQuery>,
+    QsQuery(query): QsQuery<Query>,
 ) -> ResponseResult<HtmfResponse> {
     let results = db::search::search(
         &mut tx,

@@ -45,7 +45,10 @@ impl TryFrom<CreateBookmark> for InsertBookmark {
     }
 }
 
-#[expect(clippy::trivially_copy_pass_by_ref)]
+#[expect(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "This signature is dictated by garde"
+)]
 fn not_empty(value: &str, _: &()) -> garde::Result {
     if value.is_empty() {
         Err(garde::Error::new("cannot be empty"))

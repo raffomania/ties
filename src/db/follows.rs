@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{db::AppTx, response_error::ResponseResult};
 
-#[expect(dead_code)]
+#[expect(dead_code, reason = "Kept for reference on the DB schema")]
 #[derive(FromRow, Debug)]
 pub struct Follow {
     pub id: Uuid,

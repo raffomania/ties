@@ -8,8 +8,7 @@ use uuid::Uuid;
 use super::{AppTx, LinkDestination};
 use crate::response_error::ResponseResult;
 
-// We'll use this for global search later
-#[expect(dead_code)]
+#[expect(dead_code, reason = "We'll use this for global search later")]
 pub async fn search(
     tx: &mut AppTx,
     term: &str,

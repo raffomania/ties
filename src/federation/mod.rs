@@ -11,7 +11,7 @@ pub mod undo_follow;
 pub mod webfinger;
 
 pub use accept::Accept;
-pub use bookmark::BookmarkJson;
+pub use bookmark::Json;
 pub use context::{Context, Data};
 pub use create_bookmark::CreateBookmark;
 pub use follow::Follow;

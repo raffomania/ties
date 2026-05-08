@@ -13,25 +13,22 @@ use crate::{
 };
 
 #[derive(FromRow, Debug)]
+#[allow(dead_code, reason = "Kept as reference on the DB schema.")]
 pub struct User {
     pub id: Uuid,
 
     // TODO this is only used in tests so far, which breaks
     // `#[expect(dead_code)]` for some reason
-    #[allow(dead_code)]
     pub username: String,
 
     // Password-based login data
     pub password_hash: Option<String>,
 
     // SSO-related data
-    #[expect(dead_code)]
     pub email: Option<String>,
-    #[expect(dead_code)]
     pub oidc_id: Option<String>,
 
     // ActivityPub data
-    #[allow(dead_code)]
     pub ap_user_id: Uuid,
 }
 

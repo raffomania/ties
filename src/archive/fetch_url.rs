@@ -81,7 +81,7 @@ pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive:
         .get("content-type")
         .ok_or(archive::Error::UnexpectedInternal)?
         .to_str()
-        .map_err(|_| archive::Error::UnexpectedInternal)?
+        .map_err(|_err| archive::Error::UnexpectedInternal)?
         .to_string();
     if !content_type.starts_with("text/html") {
         return Err(archive::Error::UnsupportedContentType { content_type });
@@ -106,8 +106,8 @@ async fn limited_body_to_text(response: reqwest::Response) -> Result<String, arc
 
     let full = BodyExt::collect(limited_body)
         .await
-        .map(|buf| buf.to_bytes())
-        .map_err(|_| archive::Error::UnexpectedInternal)?;
+        .map(http_body_util::Collected::to_bytes)
+        .map_err(|_err| archive::Error::UnexpectedInternal)?;
 
     let (text, _, _) = encoding.decode(&full);
 

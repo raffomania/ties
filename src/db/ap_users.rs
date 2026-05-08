@@ -103,8 +103,7 @@ pub async fn insert(tx: &mut AppTx, create_user: CreateApUser) -> ResponseResult
     Ok(user)
 }
 
-// Currently only used in insert-demo-data script
-#[allow(dead_code)]
+#[allow(dead_code, reason = "used in insert_demo_data script")]
 pub async fn update(tx: &mut AppTx, id: Uuid, update: UpdateApUser) -> ResponseResult<ApUser> {
     let user = query_as!(
         ApUserRow,

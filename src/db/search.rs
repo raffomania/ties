@@ -41,7 +41,7 @@ pub async fn search(
         term,
         ap_user_id,
         PAGE_SIZE,
-        page * PAGE_SIZE
+        page.saturating_mul(PAGE_SIZE)
     )
     .fetch_all(&mut **tx)
     .await?;
@@ -59,10 +59,10 @@ pub async fn search(
     .await?
     .count;
 
-    let previous_page = (page > 0).then_some(page - 1);
+    let previous_page = (page > 0).then_some(page.saturating_sub(1));
 
-    let next_page_exists = total_count > (page + 1) * PAGE_SIZE;
-    let next_page = next_page_exists.then_some(page + 1);
+    let next_page_exists = total_count > (page.saturating_add(1)).saturating_mul(PAGE_SIZE);
+    let next_page = next_page_exists.then_some(page.saturating_add(1));
 
     Ok(Results {
         bookmarks,

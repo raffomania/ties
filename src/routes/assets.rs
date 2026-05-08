@@ -80,8 +80,8 @@ mod tests {
                 get_mime(asset.path())?;
             }
 
-            for dir in ASSETS_DIR.dirs() {
-                check_dir(dir)?;
+            for subdir in dir.dirs() {
+                check_dir(subdir)?;
             }
 
             Ok(())

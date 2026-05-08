@@ -1,8 +1,3 @@
-#![deny(clippy::unwrap_used)]
-#![deny(clippy::expect_used)]
-#![expect(clippy::missing_errors_doc)]
-#![expect(clippy::redundant_closure_for_method_calls)]
-
 mod archive;
 mod authentication;
 pub mod cli;

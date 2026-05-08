@@ -45,37 +45,43 @@ impl Queue {
         }
     }
 
-    async fn process(mut self) {
+    async fn run_loop(mut self) {
         tracing::debug!("Starting");
 
         while !self.receiver.is_closed() {
-            // Process all incoming messages with high priority.
-            while let Ok(message) = self.receiver.try_recv() {
-                self.receive_message(message).await;
-            }
-
-            tracing::debug!("Processed all high-priority tasks");
-
-            // No incoming messages at the moment, process an arbitrary pending bookmark if
-            // it exists.
-            let pending_archive_id = self.get_pending_archive_id().await;
-
-            if let Some(pending_archive_id) = pending_archive_id {
-                tracing::debug!("Found dangling pending archive");
-                let _ = self.archive(pending_archive_id).await;
-            }
-
-            // No work at the moment: wait for new messages to come in
-            if self.receiver.is_empty() && pending_archive_id.is_none() {
-                tracing::debug!("No archiving to do, waiting...");
-
-                if let Some(msg) = self.receiver.recv().await {
-                    self.receive_message(msg).await;
-                }
-            }
+            self.tick().await;
         }
 
         tracing::debug!("Exiting");
+    }
+
+    async fn tick(&mut self) {
+        // Process all incoming messages with high priority.
+        while let Ok(message) = self.receiver.try_recv() {
+            self.receive_message(message).await;
+        }
+
+        tracing::debug!("Processed all high-priority tasks");
+
+        // No incoming messages at the moment, process an arbitrary pending bookmark if
+        // it exists.
+        let pending_archive_id = self.get_pending_archive_id().await;
+
+        if let Some(pending_archive_id) = pending_archive_id {
+            tracing::debug!("Found dangling pending archive");
+            if let Err(e) = self.archive(pending_archive_id).await {
+                tracing::error!(?e);
+            }
+        }
+
+        // No work at the moment: wait for new messages to come in
+        if self.receiver.is_empty() && pending_archive_id.is_none() {
+            tracing::debug!("No archiving to do, waiting...");
+
+            if let Some(msg) = self.receiver.recv().await {
+                self.receive_message(msg).await;
+            }
+        }
     }
 
     async fn receive_message(&mut self, message: Message) {
@@ -84,7 +90,9 @@ impl Queue {
             Message::ArchiveBookmark(task) => {
                 let archive = self.archive(task.archive_id).await;
 
-                let _ = task.respond_to.send(archive);
+                if let Err(e) = task.respond_to.send(archive) {
+                    tracing::error!(?e);
+                }
             }
         }
     }
@@ -92,7 +100,8 @@ impl Queue {
     async fn get_pending_archive_id(&mut self) -> Option<Uuid> {
         let mut tx = self.db_pool.begin().await.ok()?;
         let pending_id = db::archives::find_one_pending(&mut tx).await.ok()?;
-        let _ = tx.commit().await;
+        // If transaction doesn't commit, return `None`
+        tx.commit().await.ok()?;
 
         pending_id
     }
@@ -110,7 +119,9 @@ impl Queue {
         let archive = self.save_archive(&mut tx, &pending, &article).await;
         match &archive {
             Ok(archive) => {
-                let _ = self.processed_archive_id_sender.send(archive.id);
+                // Notifying receivers of completed archives is low-priority, so errors can be
+                // ignored.
+                let _err = self.processed_archive_id_sender.send(archive.id);
             }
             Err(_) => {
                 tracing::error!(?archive, "Could not save archive");
@@ -165,7 +176,7 @@ impl QueueHandle {
         let (processed_archive_id_sender, _) = broadcast::channel(200);
 
         let queue = Queue::new(receiver, db_pool, processed_archive_id_sender.clone());
-        tokio::spawn(queue.process());
+        tokio::spawn(queue.run_loop());
 
         Self {
             sender,
@@ -181,7 +192,9 @@ impl QueueHandle {
             respond_to: send,
         });
 
-        let _ = self.sender.try_send(msg);
+        if let Err(e) = self.sender.try_send(msg) {
+            tracing::error!(?e);
+        }
     }
 
     /// Wait for the given archive id to be processed.

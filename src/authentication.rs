@@ -27,6 +27,7 @@ pub fn hash_password(password: &String) -> ResponseResult<String> {
     let argon2 = argon2::Argon2::new(
         argon2::Algorithm::default(),
         argon2::Version::default(),
+        #[expect(clippy::unwrap_in_result, reason = "test code")]
         argon2::Params::new(
             // Speed up tests by using the minimum cost params.
             argon2::Params::MIN_M_COST,
@@ -177,7 +178,7 @@ impl FromRequestParts<AppState> for AuthUser {
 
         let redirect_after_login = uri
             .path_and_query()
-            .map(|pq| pq.as_str())
+            .map(axum::http::uri::PathAndQuery::as_str)
             .unwrap_or_default();
         let redirect_after_login =
             utf8_percent_encode(redirect_after_login, percent_encoding::NON_ALPHANUMERIC)

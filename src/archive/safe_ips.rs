@@ -8,7 +8,10 @@ use std::{
 use anyhow::anyhow;
 
 // TODO: are these completely replaceable by std helper methods on IpAddr?
-#[allow(clippy::unwrap_used)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "It's a fixed list of known working values."
+)]
 static BLOCKED_IPV4_NETS: LazyLock<Vec<ipnet::Ipv4Net>> = LazyLock::new(|| {
     vec![
         // Loopback (127.0.0.0/8)
@@ -40,7 +43,10 @@ static BLOCKED_IPV4_NETS: LazyLock<Vec<ipnet::Ipv4Net>> = LazyLock::new(|| {
     ]
 });
 
-#[allow(clippy::unwrap_used)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "It's a fixed list of known working values."
+)]
 static BLOCKED_IPV6_NETS: LazyLock<Vec<ipnet::Ipv6Net>> = LazyLock::new(|| {
     vec![
         // Loopback (::1)
@@ -120,12 +126,10 @@ impl reqwest::dns::Resolve for SafeDnsResolver {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
-
     use super::*;
 
     #[test]
-    fn test_loopback_blocked() {
+    fn loopback_blocked() {
         assert!(!is_safe("127.0.0.1".parse().unwrap()));
         assert!(!is_safe("127.0.0.2".parse().unwrap()));
         assert!(!is_safe("127.255.255.255".parse().unwrap()));
@@ -133,7 +137,7 @@ mod tests {
     }
 
     #[test]
-    fn test_private_networks_blocked() {
+    fn private_networks_blocked() {
         // 10.0.0.0/8
         assert!(!is_safe("10.0.0.1".parse().unwrap()));
         assert!(!is_safe("10.255.255.255".parse().unwrap()));
@@ -150,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn test_link_local_blocked() {
+    fn link_local_blocked() {
         // IPv4 link-local (includes cloud metadata endpoints)
         assert!(!is_safe("169.254.0.1".parse().unwrap()));
         assert!(!is_safe("169.254.169.254".parse().unwrap())); // AWS/GCP metadata
@@ -161,14 +165,14 @@ mod tests {
     }
 
     #[test]
-    fn test_ipv6_private_blocked() {
+    fn ipv6_private_blocked() {
         // Unique local addresses (fc00::/7)
         assert!(!is_safe("fc00::1".parse().unwrap()));
         assert!(!is_safe("fd00::1".parse().unwrap()));
     }
 
     #[test]
-    fn test_ipv4_mapped_ipv6_blocked() {
+    fn ipv4_mapped_ipv6_blocked() {
         // ::ffff:127.0.0.1
         assert!(!is_safe("::ffff:127.0.0.1".parse().unwrap()));
         // ::ffff:10.0.0.1
@@ -178,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn test_public_ips_allowed() {
+    fn public_ips_allowed() {
         assert!(is_safe("8.8.8.8".parse().unwrap())); // Google DNS
         assert!(is_safe("1.1.1.1".parse().unwrap())); // Cloudflare DNS
         assert!(is_safe("93.184.216.34".parse().unwrap())); // example.com
@@ -188,14 +192,14 @@ mod tests {
     }
 
     #[test]
-    fn test_multicast_blocked() {
+    fn multicast_blocked() {
         assert!(!is_safe("224.0.0.1".parse().unwrap()));
         assert!(!is_safe("239.255.255.255".parse().unwrap()));
         assert!(!is_safe("ff02::1".parse().unwrap()));
     }
 
     #[test]
-    fn test_documentation_ranges_blocked() {
+    fn documentation_ranges_blocked() {
         assert!(!is_safe("192.0.2.1".parse().unwrap()));
         assert!(!is_safe("198.51.100.1".parse().unwrap()));
         assert!(!is_safe("203.0.113.1".parse().unwrap()));
@@ -203,7 +207,7 @@ mod tests {
     }
 
     #[test]
-    fn test_special_ranges_blocked() {
+    fn special_ranges_blocked() {
         // Current network
         assert!(!is_safe("0.0.0.0".parse().unwrap()));
         // Broadcast

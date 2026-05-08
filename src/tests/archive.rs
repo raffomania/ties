@@ -7,10 +7,10 @@ async fn flaky_test_get_website() -> anyhow::Result<()> {
     assert!(!text.is_empty());
 
     let image_err = archive::fetch_url_as_text("https://www.rafa.ee/portrait.jpg").await;
-    assert!(image_err.is_err());
+    image_err.unwrap_err();
 
     let blocked_ip_err = archive::fetch_url_as_text("https://localhost:8080").await;
-    assert!(blocked_ip_err.is_err());
+    blocked_ip_err.unwrap_err();
 
     let text = archive::fetch_url_as_text("https://google.com").await?;
     dbg!(&text);

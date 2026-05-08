@@ -12,6 +12,64 @@ insta.opt-level = 3
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 
+restriction = { level = "warn", priority = -1 }
+
+# Disable a bunch of restrictions that don't make sense for ties
+missing_docs_in_private_items = { level = "allow" }
+arbitrary_source_item_ordering = { level = "allow" }
+question_mark_used = { level = "allow" }
+implicit_return = { level = "allow" }
+single_call_fn = { level = "allow" }
+str_to_string = { level = "allow" }
+blanket_clippy_restriction_lints = { level = "allow" }
+shadow_reuse = { level = "allow" }
+pattern_type_mismatch = { level = "allow" }
+doc_paragraphs_missing_punctuation = { level = "allow" }
+min_ident_chars = { level = "allow" }
+mod_module_files = { level = "allow" }
+self_named_module_files = { level = "allow" }
+pub_use = { level = "allow" }
+cfg_not_test = { level = "allow" }
+partial_pub_fields = { level = "allow" }
+error_impl_error = { level = "allow" }
+unused_trait_names = { level = "allow" }
+std_instead_of_core = { level = "allow" }
+float_arithmetic = { level = "allow" }
+# Used extensively in sqlx macros
+as_conversions = { level = "allow" }
+# These are tricky to use with conditional compilation
+allow_attributes = { level = "allow" }
+pub_with_shorthand = { level = "allow" }
+missing_trait_methods = { level = "allow" }
+default_numeric_fallback = { level = "allow" }
+shadow_unrelated = { level = "allow" }
+missing_inline_in_public_items = { level = "allow" }
+needless_raw_strings = { level = "allow" }
+panic_in_result_fn = { level = "allow" }
+allow_attributes_without_reason = { level = "allow" }
+single_char_lifetime_names = { level = "allow" }
+non_ascii_literal = { level = "allow" }
+iter_over_hash_type = { level = "allow" }
+
+# TODO: go over each of these and decide which to deny.
+# These are currently failing for our codebase but we chose to allow them
+# so we can blanket-enable other restriction lints.
+cognitive_complexity = { level = "allow" }
+renamed_function_params = { level = "allow" }
+redundant_closure_for_method_calls = { level = "allow" }
+exhaustive_structs = { level = "allow" }
+missing_errors_doc = { level = "allow" }
+map_err_ignore = { level = "allow" }
+print_stdout = { level = "allow" }
+semicolon_outside_block = { level = "allow" }
+integer_division_remainder_used = { level = "allow" }
+infinite_loop = { level = "allow" }
+impl_trait_in_params = { level = "allow" }
+arithmetic_side_effects = { level = "allow" }
+module_name_repetitions = { level = "allow" }
+absolute_paths = { level = "allow" }
+unreachable = { level = "allow" }
+
 [dependencies]
 itertools = "0.14.0"
 anyhow = { version = "1.0.102" }

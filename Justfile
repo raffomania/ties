@@ -174,7 +174,7 @@ ci-dev: migrate-database start-test-database && generate-sbom generate-database-
 
     cargo build --release
 
-    just clippy
+    just clippy-lint
     just format
     just test
 
@@ -198,13 +198,13 @@ verify-podman-container:
     podman run --rm --entrypoint "" localhost/ties ls /etc/ssl/certs/ca-certificates.crt
 
 [group('Code Quality')]
-clippy *args:
+clippy-lint *args:
     cargo clippy {{ args }} -- -D warnings
 
 [group('Code Quality')]
 fix-lints *args: reuse-lint
     cargo clippy --fix {{ args }}
-    cargo fix --allow-staged --all-targets
+    cargo fix --allow-staged --allow-dirty --all-targets
 
 [group('Code Quality')]
 reuse-lint: (ensure-command "reuse")

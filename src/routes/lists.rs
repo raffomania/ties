@@ -44,8 +44,8 @@ async fn get_show(
     let list = db::lists::by_id(&mut tx, list_id).await?;
     let backlinks = db::lists::pointing_to_list(&mut tx, list_id, maybe_ap_user_id).await?;
 
-    match auth_user {
-        Some(ref user) => {
+    match &auth_user {
+        Some(user) => {
             if list.private && list.ap_user_id != user.ap_user_id {
                 return Err(ResponseError::NotFound);
             }

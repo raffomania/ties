@@ -65,7 +65,7 @@ async fn into_option_does_not_convert_other_errs_to_none() {
             ResponseError::NotAuthenticated => "NotAuthenticated",
             ResponseError::UrlParseError(_) => "UrlParseError",
             ResponseError::FederationError(_) => "FederationError",
-            _ => unreachable!(),
+            ResponseError::NotFound | ResponseError::Anyhow(_) => unreachable!(),
         };
         let result: ResponseResult<()> = Err(error);
         let actual = response_error::into_option(result);

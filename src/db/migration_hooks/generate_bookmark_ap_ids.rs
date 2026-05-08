@@ -9,7 +9,7 @@ struct Bookmark {
 }
 
 pub async fn migrate(tx: &mut PgTransaction<'_>, base_url: &Url) -> Result<()> {
-    let bookmarks_without_ap_id = sqlx::query(r"select id from bookmarks where ap_id is null")
+    let bookmarks_without_ap_id = sqlx::query("select id from bookmarks where ap_id is null")
         .fetch_all(&mut **tx)
         .await?;
 
@@ -19,7 +19,7 @@ pub async fn migrate(tx: &mut PgTransaction<'_>, base_url: &Url) -> Result<()> {
             .join("/ap/bookmark/")?
             .join(&bookmark.id.to_string())?;
         sqlx::query(
-            r"
+            "
             update bookmarks
             set ap_id = $1
             where id = $2

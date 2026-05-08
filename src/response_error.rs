@@ -4,7 +4,7 @@ use axum::{
 };
 use thiserror::Error;
 
-pub type ResponseResult<T> = std::result::Result<T, ResponseError>;
+pub type ResponseResult<T> = core::result::Result<T, ResponseError>;
 
 #[derive(Debug, Error)]
 pub enum ResponseError {
@@ -40,12 +40,16 @@ pub fn into_option<T>(result: ResponseResult<T>) -> ResponseResult<Option<T>> {
     match result {
         Ok(val) => Ok(Some(val)),
         Err(ResponseError::NotFound) => Ok(None),
-        Err(e) => Err(e),
+        Err(err) => Err(err),
     }
 }
 
 impl From<sqlx::Error> for ResponseError {
     fn from(value: sqlx::Error) -> Self {
+        #[expect(
+            clippy::wildcard_enum_match_arm,
+            reason = "It's explicitly wanted to catch all future variants as well."
+        )]
         match value {
             sqlx::Error::RowNotFound => Self::NotFound,
             other => Self::Anyhow(other.into()),

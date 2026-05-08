@@ -54,7 +54,7 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
             cookie_inactivity_limit,
         ));
 
-    #[allow(unused_mut)]
+    #[allow(unused_mut, reason = "used below in conditionally compiled code")]
     let mut router = Router::new()
         .merge(routes::users::router())
         .merge(routes::index::router())
@@ -85,7 +85,7 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
 
         router = router
             .layer(LiveReloadLayer::new().request_predicate(not_htmx_request_livereload_predicate));
-    }
+    };
 
     Ok(router.with_state(state))
 }

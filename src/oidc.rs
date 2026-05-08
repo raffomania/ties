@@ -1,7 +1,8 @@
-use anyhow::{Context, anyhow};
+use anyhow::{Context as _, anyhow};
 use openidconnect::{
     AccessTokenHash, AuthenticationFlow, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
-    IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope,
+    IssuerUrl, Nonce, OAuth2TokenResponse as _, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl,
+    Scope,
     core::{CoreClient, CoreIdTokenVerifier, CoreProviderMetadata, CoreResponseType},
     reqwest,
     url::Url,
@@ -183,7 +184,10 @@ pub struct Config {
 }
 
 #[derive(Clone)]
-#[expect(clippy::large_enum_variant)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "It's expected since it works like an Option."
+)]
 pub enum State {
     NotConfigured,
     Configured(Config),
@@ -204,8 +208,8 @@ impl State {
                 tracing::info!("OIDC enabled.");
                 State::Configured(conf)
             }
-            Err(e) => {
-                tracing::info!("OIDC disabled: {e:?}");
+            Err(err) => {
+                tracing::info!("OIDC disabled: {err:?}");
                 State::NotConfigured
             }
         }

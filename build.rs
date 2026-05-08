@@ -12,6 +12,8 @@ fn git_cmd(args: &[&str]) -> Option<String> {
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
 }
 
+#[expect(clippy::unwrap_used, reason = "Panicking at compile time is fine")]
+#[expect(clippy::expect_used, reason = "Panicking at compile time is fine")]
 fn main() {
     // Without this, adding only a migration will not trigger a re-build
     // https://docs.rs/sqlx/latest/sqlx/macro.migrate.html#stable-rust-cargo-build-script
@@ -36,7 +38,7 @@ fn main() {
     let paths: Vec<_> = walkdir::WalkDir::new("src/views")
         .into_iter()
         .map(|e| e.expect("Error while searching for views"))
-        .filter(|e| e.file_type().is_file())
+        .filter(|e| !e.file_type().is_dir())
         .map(walkdir::DirEntry::into_path)
         .collect();
 

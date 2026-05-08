@@ -2,7 +2,7 @@ use pretty_assertions::assert_eq;
 
 use crate::{
     db::{self, bookmarks::InsertBookmark},
-    routes::search::SearchQuery,
+    routes::search::{self},
     tests::util::{request_builder::TestPage, test_app::TestApp},
 };
 
@@ -49,7 +49,7 @@ async fn search_finds_bookmarks_with_various_queries() -> anyhow::Result<()> {
     let search_results = home
         .fill_form(
             "form[action='/search']",
-            &SearchQuery {
+            &search::Query {
                 q: "Rust".to_string(),
                 page: None,
             },
