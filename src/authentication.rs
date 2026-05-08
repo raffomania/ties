@@ -23,6 +23,21 @@ pub fn hash_password(password: &String) -> ResponseResult<String> {
     let salt =
         argon2::password_hash::SaltString::generate(&mut argon2::password_hash::rand_core::OsRng);
 
+    #[cfg(test)]
+    let argon2 = argon2::Argon2::new(
+        argon2::Algorithm::default(),
+        argon2::Version::default(),
+        argon2::Params::new(
+            // Speed up tests by using the minimum cost params.
+            argon2::Params::MIN_M_COST,
+            argon2::Params::MIN_T_COST,
+            argon2::Params::MIN_P_COST,
+            None,
+        )
+        .unwrap(),
+    );
+
+    #[cfg(not(test))]
     let argon2 = argon2::Argon2::default();
 
     Ok(
