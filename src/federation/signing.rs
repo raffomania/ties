@@ -1,9 +1,10 @@
 use activitypub_federation::http_signatures::Keypair;
 use anyhow::Result;
 
-// Use a hardcoded keypair for testing since generating one for each test is slow.
+// Use a hardcoded keypair for testing since generating one for each test is
+// slow.
 #[cfg(test)]
-const PRIVATE_KEY: &str = "-----BEGIN PRIVATE KEY-----\n\
+const PRIVATE_KEY: &str = r#"-----BEGIN PRIVATE KEY-----\n\
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDM694SJDJe8ebG\n\
 l6MesbIzn/LZ5FO4ZeuM2grerkPxZ2FrWVM16Az5NFH4cySD7uTnzdQEjSkCx/OC\n\
 4fGlvcqVmzqtqcwI3wfjMI7ihclNcZG+ZYI9ucrbpWglPJeUr1ORkYswNOuGrw8P\n\
@@ -30,10 +31,10 @@ v3xdmKRxsGoGMwe5ZgKZtGyvxuR4KxiOeWWBUTSn8QKBgC7Y8QacsOEFT9KQ6aT7\n\
 HQIY5+Pf5CkiBV873MDZl3cd7F9z5WAcCv9EatoCeK1TWjkrHL7NRBz0djMVHSCG\n\
 YC8FTA5UGgdd1JwId59Tnj0tI4ynqKy8QS6x5U8SNGx1PhGzcfR8EDoocMP8Y3Wg\n\
 NibMISpyRl/tjPoQvtYPcvzb\n\
------END PRIVATE KEY-----";
+-----END PRIVATE KEY-----"#;
 
 #[cfg(test)]
-const PUBLIC_KEY: &str = "-----BEGIN PUBLIC KEY-----\n\
+const PUBLIC_KEY: &str = r#"-----BEGIN PUBLIC KEY-----\n\
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzOveEiQyXvHmxpejHrGy\n\
 M5/y2eRTuGXrjNoK3q5D8Wdha1lTNegM+TRR+HMkg+7k583UBI0pAsfzguHxpb3K\n\
 lZs6ranMCN8H4zCO4oXJTXGRvmWCPbnK26VoJTyXlK9TkZGLMDTrhq8PD4psqx2X\n\
@@ -41,7 +42,7 @@ lZs6ranMCN8H4zCO4oXJTXGRvmWCPbnK26VoJTyXlK9TkZGLMDTrhq8PD4psqx2X\n\
 svx9cHXluhcn/KM9FOYEy9Upp9MciTAwf3b1BnW0/ku9A0IXzQ+LLgrSkCrH6Qeu\n\
 JDZpp2dccP3oVkhMeSco9rT97EJtXVBbxlQ8LD3t2zxsM9E24M1X6LzgyrhmJCw0\n\
 dwIDAQAB\n\
------END PUBLIC KEY-----";
+-----END PUBLIC KEY-----"#;
 
 #[cfg(test)]
 pub fn generate_keypair() -> Result<Keypair> {
