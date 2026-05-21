@@ -52,6 +52,7 @@ allow_attributes_without_reason = { level = "allow" }
 single_char_lifetime_names = { level = "allow" }
 non_ascii_literal = { level = "allow" }
 iter_over_hash_type = { level = "allow" }
+doc_markdown = { level = "allow" }
 
 # TODO: go over each of these and decide which to deny.
 # These are currently failing for our codebase but we chose to allow them

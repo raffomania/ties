@@ -3,11 +3,13 @@ use std::{net::SocketAddr, path::PathBuf};
 use anyhow::{Result, anyhow};
 use clap::{Args, Parser, Subcommand};
 use garde::Validate;
-use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::EnvFilter;
 use url::Url;
 
 #[cfg(debug_assertions)]
 use crate::insert_demo_data::insert_demo_data;
+#[cfg(debug_assertions)]
+use crate::tracing_format::DevelopmentFormat;
 use crate::{
     archive, built_version, db, federation,
     forms::users::CreateUser,
@@ -146,10 +148,21 @@ pub struct ListenArgs {
 }
 
 pub async fn run() -> Result<()> {
-    tracing_subscriber::registry()
-        .with(EnvFilter::from_default_env())
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    #[cfg(debug_assertions)]
+    {
+        use tracing_subscriber::field::MakeExt;
+        tracing_subscriber::fmt()
+            .with_env_filter(EnvFilter::from_default_env())
+            .map_fmt_fields(|f| f.debug_alt())
+            .event_format(DevelopmentFormat::new())
+            .init();
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        tracing_subscriber::fmt()
+            .with_env_filter(EnvFilter::from_default_env())
+            .init();
+    }
 
     rustls::crypto::ring::default_provider()
         .install_default()

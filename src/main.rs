@@ -19,6 +19,8 @@ mod htmf_response;
 mod insert_demo_data;
 #[cfg(test)]
 mod tests;
+#[cfg(debug_assertions)]
+mod tracing_format;
 
 use anyhow::Result;
 
