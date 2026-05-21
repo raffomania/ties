@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{Context, Result, anyhow};
 use fake::Fake;
 use itertools::Itertools;
@@ -34,12 +36,15 @@ pub async fn insert_demo_data(
     }
 
     let mut public_lists = Vec::new();
-    let mut bookmarks = Vec::new();
+    let mut all_bookmarks = Vec::new();
+    let mut public_bookmarks = Vec::new();
+    let mut private_lists: HashMap<Uuid, Vec<_>> = HashMap::new();
 
     tracing::debug!("Creating bookmarks and lists...");
     for user in &users {
-        let mut private_lists = Vec::new();
-        bookmarks.append(&mut create_bookmarks(&mut tx, user, base_url).await?);
+        let bookmarks = create_bookmarks(&mut tx, user, base_url).await?;
+        all_bookmarks.append(&mut bookmarks.clone());
+        let mut lists = Vec::new();
 
         for _ in 0..100 {
             let content: Option<Vec<_>> = fake::faker::lorem::en::Paragraphs(1..3).fake();
@@ -56,38 +61,80 @@ pub async fn insert_demo_data(
             }
 
             if list.private {
-                private_lists.push(list);
+                lists.push(list);
             } else {
                 public_lists.push(list);
             }
         }
 
-        // Private-to-other links
+        // Private-to-private links
         for _ in 0..100 {
-            let src = private_lists
+            let src = lists
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to link from"))?
                 .id;
-            let dest = random_link_reference(&bookmarks, &public_lists)?;
+            let dest = random_link_reference(&bookmarks, &lists)?;
 
             let create_link = CreateLink { src, dest };
             db::links::insert(&mut tx, user.id, create_link).await?;
         }
+
+        private_lists.entry(user.id).or_default().append(&mut lists);
     }
 
-    tracing::debug!("Creating links between public lists...");
+    tracing::debug!("Creating links...");
     for user in users {
+        // Public-to-public links
+        // Here, we make bookmarks public by linking to them from public lists.
         for _ in 0..1000 {
             let src = public_lists
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to put into a link"))?
                 .id;
-            let dest = random_link_reference(&bookmarks, &public_lists)?;
+            let dest = random_link_reference(&all_bookmarks, &public_lists)?;
 
             let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user.id, create_link)
+            let link = db::links::insert(&mut tx, user.id, create_link)
                 .await
                 .context("Failed to insert link")?;
+
+            if let Some(id) = link.dest_bookmark_id {
+                public_bookmarks.push(id);
+            }
+        }
+    }
+
+    // Private-to-public links
+    // Here, we can only link to public bookmarks, and private bookmarks from the
+    // same user.
+    for (user_id, lists) in private_lists {
+        // list to public bookmark
+        for _ in 0..100 {
+            let src = lists
+                .choose(&mut rand::rng())
+                .ok_or(anyhow!("Found no random list to link from"))?
+                .id;
+            let dest = *public_bookmarks
+                .choose(&mut rand::rng())
+                .ok_or(anyhow!("Found no random bookmark"))?;
+
+            let create_link = CreateLink { src, dest };
+            db::links::insert(&mut tx, user_id, create_link).await?;
+        }
+
+        // list to public list
+        for _ in 0..100 {
+            let src = lists
+                .choose(&mut rand::rng())
+                .ok_or(anyhow!("Found no random list to link from"))?
+                .id;
+            let dest = public_lists
+                .choose(&mut rand::rng())
+                .ok_or(anyhow!("Found no public list"))?
+                .id;
+
+            let create_link = CreateLink { src, dest };
+            db::links::insert(&mut tx, user_id, create_link).await?;
         }
     }
 
