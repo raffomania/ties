@@ -58,22 +58,17 @@ pub async fn insert_demo_data(
             if list.private {
                 private_lists.push(list);
             } else {
-                // TODO also create some links from private to private lists of the same owner
-                // https://github.com/raffomania/ties/issues/148
                 public_lists.push(list);
             }
         }
 
-        // Private-to-private list links
+        // Private-to-other links
         for _ in 0..100 {
             let src = private_lists
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to link from"))?
                 .id;
-            let dest = private_lists
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random list to link to"))?
-                .id;
+            let dest = random_link_reference(&bookmarks, &public_lists)?;
 
             let create_link = CreateLink { src, dest };
             db::links::insert(&mut tx, user.id, create_link).await?;
