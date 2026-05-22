@@ -160,7 +160,7 @@ development-cert: (ensure-command "mkcert")
 
 [group('Development')]
 insert-demo-data: migrate-database
-    cargo run -- insert-demo-data
+    RUST_LOG="$RUST_LOG,sqlx=warn" cargo run -- insert-demo-data
 
 # Run most of the CI checks locally. Convenient to check for errors before pushing.
 [group('Development')]
