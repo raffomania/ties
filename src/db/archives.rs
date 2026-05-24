@@ -84,10 +84,7 @@ pub async fn update(
     .fetch_one(&mut **tx)
     .await?;
 
-    if let Ok(article) = article {
-        db::bookmarks::update_search_index(tx, archive.bookmark_id, Some(&article.text_content))
-            .await?;
-    }
+    db::bookmarks::update_search_index(tx, archive.bookmark_id).await?;
 
     Ok(archive)
 }

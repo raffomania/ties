@@ -87,7 +87,37 @@ pub async fn insert_local(
 
     // Update the search index to include the new URL, title etc.,
     // even though we don't have the archived text content yet.
-    update_search_index(tx, id, None).await?;
+    update_search_index(tx, id).await?;
+
+    bookmark.try_into()
+}
+
+pub struct UpdateBookmark {
+    pub title: String,
+}
+
+pub async fn update_local(
+    tx: &mut AppTx,
+    bookmark_id: Uuid,
+    update_bookmark: UpdateBookmark,
+    ap_user_id: Uuid,
+) -> ResponseResult<Bookmark> {
+    let bookmark = query_as!(
+        BookmarkRow,
+        r#"
+         update bookmarks
+         set title = $1
+         where id = $2 and ap_user_id = $3
+         returning id, created_at, ap_user_id, url, title, ap_id
+         "#,
+        update_bookmark.title,
+        bookmark_id,
+        ap_user_id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    update_search_index(tx, bookmark_id).await?;
 
     bookmark.try_into()
 }
@@ -233,12 +263,14 @@ pub async fn is_public(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<bool
 pub async fn update_search_index(
     tx: &mut AppTx,
     bookmark_id: Uuid,
-    text: Option<&str>,
 ) -> Result<(), crate::response_error::ResponseError> {
     // The query below adds both the whole URL to the index, as well as a
     // version where dots and slashes are replaced with spaces to allow queries
     // for individual parts of the URL (e.g. "github" will find URLs to
     // "github.com").
+    // TODO: the `to_tsvector` call on the extracted html is slow for large
+    // documents. Since we don't update the search index often, that's fine at
+    // the moment, but could be improved.
     sqlx::query!(
         r#"
                 -- ties:expected_slow
@@ -246,7 +278,7 @@ pub async fn update_search_index(
                 set search =
                     setweight(to_tsvector('english', bookmarks.title), 'A')
                     ||
-                    setweight(to_tsvector('english', $1), 'B')
+                    setweight(to_tsvector('english', coalesce((select archives.extracted_html from archives where archives.bookmark_id = bookmarks.id), '')), 'B')
                     ||
                     setweight(
                         to_tsvector('english',
@@ -254,9 +286,8 @@ pub async fn update_search_index(
                         ||
                         to_tsvector('english', bookmarks.url)
                     , 'C')
-                where id = $2
+                where bookmarks.id = $1
             "#,
-        text.unwrap_or(""),
         bookmark_id
     )
     .execute(&mut **tx)

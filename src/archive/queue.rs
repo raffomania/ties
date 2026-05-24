@@ -70,7 +70,7 @@ impl Queue {
         if let Some(pending_archive_id) = pending_archive_id {
             tracing::debug!("Found dangling pending archive");
             if let Err(e) = self.archive(pending_archive_id).await {
-                tracing::error!(?e);
+                tracing::error!(?e, "Failed to archive");
             }
         }
 
@@ -90,9 +90,9 @@ impl Queue {
             Message::ArchiveBookmark(task) => {
                 let archive = self.archive(task.archive_id).await;
 
-                if let Err(e) = task.respond_to.send(archive) {
-                    tracing::error!(?e);
-                }
+                // Code requesting the archive might not care about the result, so ignore any
+                // errors here.
+                let _e = task.respond_to.send(archive);
             }
         }
     }
@@ -193,7 +193,7 @@ impl QueueHandle {
         });
 
         if let Err(e) = self.sender.try_send(msg) {
-            tracing::error!(?e);
+            tracing::error!(?e, "Failed to request bookmark archive");
         }
     }
 

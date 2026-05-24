@@ -1,7 +1,11 @@
 use pretty_assertions::assert_eq;
 
 use crate::{
-    db::{self, bookmarks::InsertBookmark},
+    archive,
+    db::{
+        self,
+        bookmarks::{InsertBookmark, UpdateBookmark},
+    },
     routes::search::{self},
     tests::util::{request_builder::TestPage, test_app::TestApp},
 };
@@ -28,7 +32,7 @@ async fn search_finds_bookmarks_with_various_queries() -> anyhow::Result<()> {
     ];
 
     for title in &titles {
-        db::bookmarks::insert_local(
+        let bookmark = db::bookmarks::insert_local(
             &mut tx,
             user.ap_user_id,
             InsertBookmark {
@@ -41,6 +45,11 @@ async fn search_finds_bookmarks_with_various_queries() -> anyhow::Result<()> {
             &app.base_url,
         )
         .await?;
+
+        let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+        let article = archive::make_readable(app.base_url.clone(), "<body>bodytext</body>");
+        assert_eq!(article.as_ref().unwrap().text_content, "bodytext");
+        db::archives::update(&mut tx, archive.id, &article).await?;
     }
 
     tx.commit().await?;
@@ -83,6 +92,17 @@ async fn search_finds_bookmarks_with_various_queries() -> anyhow::Result<()> {
     let html = search_results.dom.htmls();
     assert!(html.contains("C++ Programming Guide"));
     assert!(!html.contains("Python Tutorial"));
+
+    // Test article body
+    let search_results = app.req().get("/search?q=bodytext").await.test_page().await;
+    let html = search_results.dom.htmls();
+
+    let results_count = titles.iter().filter(|&title| html.contains(title)).count();
+    assert_eq!(
+        results_count,
+        titles.len(),
+        "Searching for bodytext should show all bookmarks",
+    );
 
     Ok(())
 }
@@ -204,6 +224,65 @@ async fn search_preserves_query_in_pagination() -> anyhow::Result<()> {
 
     // Check that the search query is preserved in the pagination form
     assert!(search_results.dom.html().contains(r#"value="Rust""#));
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn update_bookmark_updates_search_index() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let user = app.create_test_user().await;
+    app.login_test_user().await;
+
+    let mut tx = app.tx().await;
+    let bookmark = db::bookmarks::insert_local(
+        &mut tx,
+        user.ap_user_id,
+        InsertBookmark {
+            url: "https://example.com/renamed-bookmark".to_string(),
+            title: "Original Title".to_string(),
+        },
+        &app.base_url,
+    )
+    .await?;
+    tx.commit().await?;
+
+    // Verify the bookmark is found by its original title
+    let search_results = app.req().get("/search?q=Original").await.test_page().await;
+    let html = search_results.dom.htmls();
+    assert!(
+        html.contains("Original Title"),
+        "should find bookmark by original title before rename"
+    );
+
+    // Rename the bookmark
+    let mut tx = app.tx().await;
+    db::bookmarks::update_local(
+        &mut tx,
+        bookmark.id,
+        UpdateBookmark {
+            title: "Updated Title".to_string(),
+        },
+        bookmark.ap_user_id,
+    )
+    .await?;
+    tx.commit().await?;
+
+    // Verify the bookmark is found by the new title
+    let search_results = app.req().get("/search?q=Updated").await.test_page().await;
+    let html = search_results.dom.htmls();
+    assert!(
+        html.contains("Updated Title"),
+        "should find bookmark by new title after rename"
+    );
+
+    // Verify the old title no longer appears in search
+    let search_results = app.req().get("/search?q=Original").await.test_page().await;
+    let html = search_results.dom.htmls();
+    assert!(
+        !html.contains("Original Title"),
+        "should not find bookmark by old title after rename"
+    );
 
     Ok(())
 }
