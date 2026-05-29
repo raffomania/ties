@@ -1,0 +1,93 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select id, bookmark_id, created_at, status as \"status: _\", error as \"error: Json<archive::Error>\", extracted_title, extracted_html, byline, lang, site_name, published_time as \"published_time: OffsetDateTime\"\n        from archives\n        where id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "bookmark_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "status: _",
+        "type_info": {
+          "Custom": {
+            "name": "archive_status",
+            "kind": {
+              "Enum": [
+                "Success",
+                "Error",
+                "Pending"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "error: Json<archive::Error>",
+        "type_info": "Json"
+      },
+      {
+        "ordinal": 5,
+        "name": "extracted_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "extracted_html",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "byline",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "lang",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "site_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "published_time: OffsetDateTime",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "54cf47e00b6d33d6980398e8d6dfa0cc96b2df80780d962468317c2ffaf822e2"
+}

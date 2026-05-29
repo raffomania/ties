@@ -1,4 +1,5 @@
 use url::Url;
+use time::{Date, OffsetDateTime, Time};
 
 use crate::{archive, db, tests::util::test_app::TestApp};
 
@@ -75,7 +76,13 @@ async fn flaky_test_archive_queue() -> anyhow::Result<()> {
     let app = TestApp::new().await;
 
     let user = app.create_test_user().await;
-    let bookmark = app.create_bookmark(&user, "https://rafa.ee", "test").await;
+    let bookmark = app
+        .create_bookmark(
+            &user,
+            "https://kottke.org/26/05/andor-gave-us-one-of-tvs-best-monologues",
+            "test",
+        )
+        .await;
 
     let mut tx = app.tx().await;
 
@@ -93,6 +100,21 @@ async fn flaky_test_archive_queue() -> anyhow::Result<()> {
         .await?
         .unwrap();
     assert_eq!(archive.status, db::archives::Status::Success);
+    assert_eq!(archive.byline, Some("Jason Kottke".to_string()));
+    assert_eq!(archive.site_name, Some("kottke.org".to_string()));
+    assert_eq!(archive.lang, Some("en".to_string()));
+    assert!(archive.error.is_none());
+    assert_eq!(
+        archive.extracted_title,
+        Some("Andor Gave Us One Of TV’s Best Monologues".to_string())
+    );
+    assert_eq!(
+        archive.published_time,
+        Some(OffsetDateTime::new_utc(
+            Date::from_calendar_date(2026, time::Month::May, 29)?,
+            Time::from_hms(18, 8, 50)?
+        ))
+    );
 
     Ok(())
 }

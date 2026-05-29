@@ -105,7 +105,10 @@ sqlx = { version = "0.8.6", features = [
 ], default-features = false }
 thiserror = "2.0.18"
 openidconnect = "4.0.1"
-time = { version = "0.3.47", default-features = false, features = ["serde"] }
+time = { version = "0.3.47", default-features = false, features = [
+    "serde",
+    "parsing",
+] }
 tokio = { version = "1.50.0", features = [
     "macros",
     "rt-multi-thread",
