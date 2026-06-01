@@ -17,6 +17,14 @@ pub fn base_document(children: impl IntoElements) -> Element {
                 link([rel("stylesheet"), href("/assets/railwind.css")]),
                 link([rel("stylesheet"), href("/assets/prose.css")]),
                 script(src("/assets/htmx.1.9.9.js")),
+                meta([
+                    name("htmx-config"),
+                    content(
+                        r#"{
+                            "scrollIntoViewOnBoost": false
+                        }"#,
+                    ),
+                ]),
                 meta([name("color-scheme"), content("dark")]),
                 meta([
                     name("viewport"),
