@@ -21,6 +21,11 @@ run *args: development-cert migrate-database
 generate-database-info: start-database (migrate-database "false")
     cargo bin sqlx-cli prepare -- --all-targets
 
+[doc("Check that metadata for verifying SQL queries at compile time is up-to-date.")]
+[group('Codegen')]
+check-database-info: start-database (migrate-database "false")
+    cargo bin sqlx-cli prepare --check -- --all-targets
+
 [group('Codegen')]
 generate-sbom:
     cargo bin cargo-cyclonedx --format json --describe binaries
@@ -164,7 +169,7 @@ insert-demo-data: migrate-database
 
 # Run most of the CI checks locally. Convenient to check for errors before pushing.
 [group('Development')]
-ci-dev: migrate-database start-test-database && generate-sbom generate-database-info
+ci-dev: migrate-database start-test-database && generate-sbom check-database-info
     #!/usr/bin/env bash
     set -euxo pipefail
 
