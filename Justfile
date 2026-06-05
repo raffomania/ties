@@ -137,6 +137,9 @@ migrate-database sqlx_offline=env("SQLX_OFFLINE", "true"): start-database
 exec-database-cli: start-database
     podman exec -ti -u postgres ties_postgres psql ${DATABASE_NAME}
 
+create-migration name: start-database (ensure-command "sqlx")
+    sqlx migrate add {{name}}
+
 [group('Testing')]
 start-test-database:
     #!/usr/bin/env bash
