@@ -59,7 +59,7 @@ pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive:
         .user_agent("ties")
         .dns_resolver(safe_ips::SafeDnsResolver)
         .redirect(redirect_policy)
-        .timeout(std::time::Duration::from_secs(60))
+        .timeout(std::time::Duration::from_mins(1))
         .build()?;
 
     let response = client.get(url).send().await?.error_for_status()?;

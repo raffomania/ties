@@ -8,6 +8,10 @@ _Released on 2026-05-07_
 
 [You can now support ties development via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
+### Breaking Changes
+
+- Ties now requires a minimum Rust version of 1.91.0 to compile.
+
 ### Docs
 
 - Add a small note to the README explaining that we use REUSE for specifying licenses, and that the code is licensed under AGPL.

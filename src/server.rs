@@ -34,7 +34,7 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
     tokio::task::spawn(
         session_store
             .clone()
-            .continuously_delete_expired(tokio::time::Duration::from_secs(6 * 60 * 60)),
+            .continuously_delete_expired(tokio::time::Duration::from_hours(6)),
     );
 
     if state.demo_mode {
@@ -183,7 +183,7 @@ where
 
 async fn periodically_wipe_all_data(pool: PgPool) -> anyhow::Result<()> {
     // interval: every hour
-    let period = tokio::time::Duration::from_secs(60 * 60);
+    let period = tokio::time::Duration::from_hours(1);
     let mut interval = tokio::time::interval(period);
     // First interval completes immediately, but we want to wait
     // before doing the first deletion to give users time

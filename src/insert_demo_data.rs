@@ -12,6 +12,7 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::{
+    archive,
     db::{self, AppTx, bookmarks::InsertBookmark},
     forms::{
         ap_users::UpdateApUser,
@@ -151,22 +152,81 @@ async fn create_bookmarks(
     let mut bookmarks = Vec::new();
 
     for _ in 0..500 {
-        let tld: String = fake::faker::internet::en::DomainSuffix().fake();
-        let word: String = fake::faker::lorem::en::Word().fake();
         let title: String = fake::faker::lorem::en::Words(1..5)
             .fake::<Vec<_>>()
             .join(" ");
         let insert_bookmark = InsertBookmark {
-            url: format!("https://{word}.{tld}"),
+            url: random_url()?,
             title,
         };
 
         let bookmark =
             db::bookmarks::insert_local(tx, user.ap_user_id, insert_bookmark, base_url).await?;
+        create_archive(tx, &bookmark).await?;
         bookmarks.push(bookmark);
     }
 
     Ok(bookmarks)
+}
+
+fn random_url() -> Result<String> {
+    [
+        "https://www.rafa.ee",
+        "https://github.com",
+        "https://wikipedia.org",
+        "https://duckduckgo.com",
+    ]
+    .choose(&mut rand::rng())
+    .map(ToString::to_string)
+    .context("Found no random URL")
+}
+
+async fn create_archive(tx: &mut AppTx, bookmark: &db::Bookmark) -> Result<db::Archive> {
+    let archive = db::archives::insert_pending(tx, bookmark.id).await?;
+
+    let article = if rand::random_bool(0.9) {
+        Ok(random_article(
+            bookmark.title.clone(),
+            bookmark.url.clone(),
+        )?)
+    } else {
+        // TODO derive fake::Dummy on archive::Error to get random errors here
+        // https://github.com/raffomania/ties/issues/333
+        Err(archive::Error::NotReadable)
+    };
+
+    let archive = db::archives::update(tx, archive.id, &article).await?;
+
+    Ok(archive)
+}
+
+fn random_article(title: String, url: String) -> Result<legible::Article> {
+    let content: Vec<_> = fake::faker::lorem::en::Paragraphs(1..100).fake();
+
+    Ok(legible::Article {
+        title,
+        byline: fake::faker::name::en::Name().fake(),
+        dir: None,
+        lang: Some("en".to_string()),
+        // TODO count graphemes instead
+        // https://github.com/raffomania/ties/issues/333
+        length: content.len(),
+        excerpt: Some(
+            content
+                .first()
+                .context("No first paragraph for random article")?
+                .clone(),
+        ),
+        text_content: content.clone().join("\n\n"),
+        content: content
+            .into_iter()
+            .map(|p| format!("<p>{p}</p>"))
+            .join("\n"),
+        site_name: Some(url),
+        // TODO use random date
+        // https://github.com/raffomania/ties/issues/333
+        published_time: None,
+    })
 }
 
 async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {

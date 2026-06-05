@@ -4,7 +4,7 @@ version = "0.2.1"
 edition = "2024"
 license = "AGPL-3.0-or-later"
 publish = false
-rust-version = "1.88.0"
+rust-version = "1.91.0"
 
 [profile.dev.package]
 insta.opt-level = 3
