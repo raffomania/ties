@@ -1,5 +1,7 @@
+use std::time::Duration;
+
 use anyhow::{Context, Result};
-use sqlx::PgPool;
+use sqlx::{ConnectOptions, PgPool, postgres::PgConnectOptions};
 
 pub mod all;
 pub mod ap_users;
@@ -33,9 +35,16 @@ pub async fn migrate(pool: &PgPool, base_url: &Url, up_to_version: Option<i64>) 
 }
 
 pub async fn pool(url: &str) -> Result<sqlx::PgPool> {
+    let mut connect_opts = PgConnectOptions::from_url(&url.parse()?)?;
+
+    if cfg!(debug_assertions) {
+        connect_opts =
+            connect_opts.log_slow_statements(log::LevelFilter::Warn, Duration::from_millis(20));
+    }
+
     sqlx::postgres::PgPoolOptions::new()
         .max_connections(5)
-        .connect(url)
+        .connect_with(connect_opts)
         .await
         .context("Failed to create database connection pool")
 }

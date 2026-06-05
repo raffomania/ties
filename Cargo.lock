@@ -4245,6 +4245,7 @@ dependencies = [
  "itertools 0.14.0",
  "legible",
  "listenfd",
+ "log",
  "mime_guess",
  "openidconnect",
  "percent-encoding",

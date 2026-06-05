@@ -147,6 +147,8 @@ easy-cast = "0.5.4"
 http-body-util = "0.1.3"
 encoding_rs = "0.8.35"
 derive_more = { version = "2.1.1", features = ["debug"] }
+# For passing LogLevels to sqlx
+log = "0.4.29"
 
 [patch.crates-io]
 activitypub_federation = { git = "https://github.com/raffomania/activitypub-federation-rust", branch = "update-axum" }
