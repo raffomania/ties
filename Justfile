@@ -101,10 +101,11 @@ stop-database:
 
 # This sets SQLX_OFFLINE=true: when migrating an empty db, checking queries against
 # it would fail during compilation
-[doc("Delete the whole development database and create a new, empty one.")]
+[doc("Delete the whole development database, create a new one and migrate it.")]
 [group('Database')]
-wipe-database: stop-database && (migrate-database "true")
-    podman rm --ignore ties_postgres
+wipe-database: && (migrate-database "true")
+    podman exec -u postgres ties_postgres psql -c "DROP DATABASE ${DATABASE_NAME}"
+    podman exec -u postgres ties_postgres psql -c "CREATE DATABASE ${DATABASE_NAME}"
 
 # Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
 [doc("Migrate the database.")]
