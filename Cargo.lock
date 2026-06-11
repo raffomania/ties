@@ -987,6 +987,7 @@ dependencies = [
  "quote",
  "rustc_version",
  "syn 2.0.117",
+ "unicode-xid",
 ]
 
 [[package]]
@@ -4229,6 +4230,7 @@ dependencies = [
  "axum-server",
  "chrono",
  "clap",
+ "derive_more",
  "easy-cast",
  "encoding_rs",
  "enum_delegate",

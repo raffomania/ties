@@ -11868,6 +11868,41 @@
       "version": "0.2.2"
     },
     {
+      "author": "erick.tryzelaar <erick.tryzelaar@gmail.com>, kwantam <kwantam@gmail.com>, Manish Goregaokar <manishsmail@gmail.com>",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#unicode-xid@0.2.6",
+      "description": "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31. ",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://unicode-rs.github.io/unicode-xid"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/unicode-rs/unicode-xid"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/unicode-rs/unicode-xid"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "unicode-xid",
+      "purl": "pkg:cargo/unicode-xid@0.2.6",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.6"
+    },
+    {
       "author": "Brian Smith <brian@briansmith.org>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#untrusted@0.9.0",
       "description": "Safe, fast, zero-panic, zero-crashing, zero-allocation parsing of untrusted inputs in Rust.",
@@ -12801,6 +12836,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#axum-server@0.8.0",
         "registry+https://github.com/rust-lang/crates.io-index#chrono@0.4.44",
         "registry+https://github.com/rust-lang/crates.io-index#clap@4.6.1",
+        "registry+https://github.com/rust-lang/crates.io-index#derive_more@2.1.1",
         "registry+https://github.com/rust-lang/crates.io-index#easy-cast@0.5.4",
         "registry+https://github.com/rust-lang/crates.io-index#encoding_rs@0.8.35",
         "registry+https://github.com/rust-lang/crates.io-index#enum_delegate@0.2.0",
@@ -13427,7 +13463,8 @@
         "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
         "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
         "registry+https://github.com/rust-lang/crates.io-index#rustc_version@0.4.1",
-        "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
+        "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117",
+        "registry+https://github.com/rust-lang/crates.io-index#unicode-xid@0.2.6"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#derive_more-impl@2.1.1"
     },
@@ -15748,6 +15785,9 @@
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#unicode-width@0.2.2"
+    },
+    {
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#unicode-xid@0.2.6"
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#untrusted@0.9.0"

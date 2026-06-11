@@ -17,7 +17,7 @@ pub enum Status {
     Pending,
 }
 
-#[derive(sqlx::FromRow, Debug)]
+#[derive(sqlx::FromRow, derive_more::Debug)]
 pub struct Archive {
     pub id: Uuid,
 
@@ -26,6 +26,8 @@ pub struct Archive {
     pub created_at: OffsetDateTime,
     pub status: Status,
     pub error: Option<Json<archive::Error>>,
+
+    #[debug("{}", if extracted_html.is_some() { "Some(...)" } else { "None" })]
     pub extracted_html: Option<String>,
 }
 
