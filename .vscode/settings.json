@@ -1,4 +1,7 @@
 {
   "rust-analyzer.cargo.extraEnv": { "SQLX_OFFLINE": "false" },
-  "rust-analyzer.check.command": "clippy"
+  "rust-analyzer.check.command": "clippy",
+  "search.exclude": {
+    ".sqlx/**/*.json": true,
+  }
 }
