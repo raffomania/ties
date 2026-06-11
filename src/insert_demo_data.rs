@@ -81,6 +81,9 @@ pub async fn insert_demo_data(
         }
 
         private_lists.entry(user.id).or_default().append(&mut lists);
+
+        tx.commit().await?;
+        tx = pool.begin().await?;
     }
 
     tracing::debug!("Creating links...");
@@ -103,6 +106,9 @@ pub async fn insert_demo_data(
                 public_bookmarks.push(id);
             }
         }
+
+        tx.commit().await?;
+        tx = pool.begin().await?;
     }
 
     // Private-to-public links
@@ -137,6 +143,9 @@ pub async fn insert_demo_data(
             let create_link = CreateLink { src, dest };
             db::links::insert(&mut tx, user_id, create_link).await?;
         }
+
+        tx.commit().await?;
+        tx = pool.begin().await?;
     }
 
     tx.commit().await?;
