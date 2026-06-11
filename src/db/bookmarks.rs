@@ -241,6 +241,7 @@ pub async fn update_search_index(
     // "github.com").
     sqlx::query!(
         r#"
+                -- ties:expected_slow
                 update bookmarks
                 set search =
                     setweight(to_tsvector('english', bookmarks.title), 'A')

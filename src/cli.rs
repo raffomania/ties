@@ -151,10 +151,12 @@ pub async fn run() -> Result<()> {
     #[cfg(debug_assertions)]
     {
         use tracing_subscriber::field::MakeExt;
+
+        use crate::tracing_filter::SuppressExpectedSlow;
         tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::from_default_env())
             .map_fmt_fields(|f| f.debug_alt())
-            .event_format(DevelopmentFormat::new())
+            .event_format(SuppressExpectedSlow::new(DevelopmentFormat::new()))
             .init();
     }
     #[cfg(not(debug_assertions))]
