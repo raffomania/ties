@@ -24,21 +24,38 @@ generate-database-info: start-database (migrate-database "false")
 [doc("Check that metadata for verifying SQL queries at compile time is up-to-date.")]
 [group('Codegen')]
 check-database-info: start-database (migrate-database "false")
-    cargo bin sqlx-cli prepare --check -- --all-targets
+    cargo -q bin sqlx-cli prepare --check -- --all-targets
+
+[doc("Check that the SBOM is up-to-date.")]
+[group('Codegen')]
+check-sbom:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    tmpfile=$(mktemp)
+    just generate-sbom "$tmpfile"
+
+    if ! diff -q ties.cdx.json "$tmpfile" > /dev/null; then
+        echo "SBOM is out of date. Run 'just generate-sbom' to update it."
+        rm "$tmpfile"
+        exit 1
+    fi
+
+    rm "$tmpfile"
 
 [group('Codegen')]
-generate-sbom:
+generate-sbom output="ties.cdx.json":
     cargo bin cargo-cyclonedx --format json --describe binaries
     # Remove some fields that make the sbom non-reproducible.
     # https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/556
     # https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/514
-    jq --sort-keys '.components |= sort_by(.purl) | del(.serialNumber) | del(.metadata.timestamp) | del(..|select(type == "string" and test("^path\\+file")))' ties_bin.cdx.json > ties.cdx.json
+    jq --sort-keys '.components |= sort_by(.purl) | del(.serialNumber) | del(.metadata.timestamp) | del(..|select(type == "string" and test("^path\\+file")))' ties_bin.cdx.json > {{ output }}
     rm ties_bin.cdx.json
 
 [group('Database')]
 start-database:
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
 
     if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres; then
         echo "Database is running."
@@ -46,6 +63,7 @@ start-database:
     fi
 
     if ! podman inspect ties_postgres &> /dev/null; then
+        set -x
         podman create \
             --name ties_postgres \
             --health-cmd="pg_isready" \
@@ -111,7 +129,7 @@ wipe-database: && (migrate-database "true")
 [doc("Migrate the database.")]
 [group('Database')]
 migrate-database sqlx_offline=env("SQLX_OFFLINE", "true"): start-database
-    SQLX_OFFLINE={{ sqlx_offline }} cargo run -- db migrate
+    SQLX_OFFLINE={{ sqlx_offline }} RUST_LOG="sqlx=warn" cargo -q run -- db migrate
 
 [group('Database')]
 exec-database-cli: start-database
@@ -120,7 +138,7 @@ exec-database-cli: start-database
 [group('Testing')]
 start-test-database:
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
 
     if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres_test; then
         echo "Test database is running."
@@ -128,6 +146,7 @@ start-test-database:
     fi
 
     if ! podman inspect ties_postgres_test &> /dev/null; then
+        set -x
         podman create \
             --replace --name ties_postgres_test --image-volume tmpfs \
             --health-cmd pg_isready --health-interval 10s \
@@ -149,7 +168,7 @@ start-test-database:
 test *args: start-database start-test-database
     # Migrate the test database so we can compile the tests using SQLX_OFFLINE=false,
     # which avoids needless recompilations
-    cargo run -- db --database-url=${DATABASE_URL_TEST} migrate
+    RUST_LOG="sqlx=warn" cargo -q run -- db --database-url=${DATABASE_URL_TEST} migrate
 
     DATABASE_URL=${DATABASE_URL_TEST} cargo bin cargo-nextest run {{ args }}
 
@@ -168,21 +187,27 @@ development-cert: (ensure-command "mkcert")
 insert-demo-data: migrate-database
     RUST_LOG="$RUST_LOG,sqlx=warn" cargo run -- insert-demo-data
 
-# Run most of the CI checks locally. Convenient to check for errors before pushing.
+# Run most of the CI checks locally, but skip the release build. Convenient to check for errors before pushing.
 [group('Development')]
-ci-dev: migrate-database start-test-database && generate-sbom check-database-info
+ci-fast: check-database-info check-sbom && reuse-lint
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
 
     export RUSTFLAGS="-D warnings"
     # Prevent full recompilations in the normal dev setup which has different rustflags
     export CARGO_TARGET_DIR="target_ci"
+    export CARGO_TERM_QUIET="true"
 
-    cargo build --release
+    # Run just tasks here instead of as dependencies to pass the environment variables
+    just check-database-info
+    just check-sbom
+
+    cargo check
 
     just clippy-lint
-    just format
-    just test
+    just test --show-progress=only
+
+    just reuse-lint --quiet
 
 # Build a production-ready OCI container using podman. Used for local testing & debugging.
 [group('Testing')]
@@ -213,8 +238,8 @@ fix-lints *args: reuse-lint
     cargo fix --allow-staged --allow-dirty --all-targets
 
 [group('Code Quality')]
-reuse-lint: (ensure-command "reuse")
-    reuse --root . lint
+reuse-lint *args: (ensure-command "reuse")
+    reuse --root . lint {{args}}
 
 [group('Code Quality')]
 format:
