@@ -122,6 +122,8 @@ stop-database:
 [doc("Delete the whole development database, create a new one and migrate it.")]
 [group('Database')]
 wipe-database: && (migrate-database "true")
+    podman exec -u postgres ties_postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${DATABASE_NAME}' AND pid <> pg_backend_pid();"
+
     podman exec -u postgres ties_postgres psql -c "DROP DATABASE ${DATABASE_NAME}"
     podman exec -u postgres ties_postgres psql -c "CREATE DATABASE ${DATABASE_NAME}"
 
