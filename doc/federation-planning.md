@@ -4,6 +4,14 @@ This document serves as a technical plan for implementing federation in ties, in
 
 This is *not* a standard [FEDERATION.md](https://codeberg.org/fediverse/fep/src/branch/main/fep/67ff/fep-67ff.md) document, as it does not represent ties' current implementation.
 
+## General
+
+Activity IDs are of the form `{base_url}/ap/activity/{uuid}`.
+Activities are not stored and attempting to fetch them will return a 404.
+If this behavior turns out to cause problems, we'll change it.
+
+Unsent activities are only stored in memory and will disappear on server restart.
+
 ## Compatibility
 
 We currently aim for compatibility with Mastodon, Lemmy and Betula. As each of these services has a different feature set, compatibility means a lowest common denominator which both ties and the other service support.
