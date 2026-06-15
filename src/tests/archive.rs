@@ -1,5 +1,31 @@
+use url::Url;
+
 use crate::{archive, db, tests::util::test_app::TestApp};
 
+#[test]
+fn htmx_attributes_stripped() {
+    let malicious_html = r#"<html><head><title>Article</title></head><body>
+        <article>
+            <h1>Real Article Title</h1>
+            <p>Enough content to pass readability threshold and be extracted as the article body.</p>
+            <p>More text content here to ensure the article is long enough for extraction.</p>
+            <p>Continuing with more content to meet the minimum length requirements.</p>
+            <p hx-get="/bookmarks/some-id" hx-target="main" hx-swap="innerHTML" data-hx-post="/">
+            malicious element
+            </p>
+        </article>
+    </body></html>"#;
+
+    let base_url = Url::parse("https://evil.example.com").unwrap();
+    let article = archive::make_readable(base_url, malicious_html).unwrap();
+
+    assert!(article.content.contains("malicious element"));
+
+    assert!(!article.content.contains("hx-get"),);
+    assert!(!article.content.contains("data-hx-post"),);
+    assert!(!article.content.contains("hx-target"),);
+    assert!(!article.content.contains("hx-swap"),);
+}
 #[test_log::test(tokio::test)]
 #[ignore = "Test depends on an external resource and should only be run manually."]
 async fn flaky_test_get_website() -> anyhow::Result<()> {
