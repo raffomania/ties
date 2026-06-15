@@ -7,6 +7,7 @@ use activitypub_federation::{
 };
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 use url::Url;
 
 use crate::{
@@ -22,22 +23,54 @@ pub struct Json {
     pub kind: NoteType,
     pub attributed_to: ObjectId<db::ApUser>,
     pub to: Vec<Url>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub published: OffsetDateTime,
     /// Formatted content with the url inlined, for platforms that don't support
     /// link attachments
     pub content: Option<String>,
     /// The title
     pub name: Option<String>,
-    #[serde(default)]
+    /// Link to the bookmark's web view
+    pub url: Url,
+    /// The original markup the content was rendered from
+    // TODO for future description support
+    pub source: Source,
+    #[serde(rename = "attachment", default)]
     pub attachments: Vec<Link>,
+    /// Hashtags derived from the public lists this bookmark belongs to
+    #[serde(rename = "tag", default)]
+    pub tags: Vec<Hashtag>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Source {
+    pub content: String,
+    pub media_type: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Link {
     href: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     media_type: Option<String>,
     #[serde(rename = "type")]
     kind: LinkType,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Hashtag {
+    href: String,
+    name: String,
+    #[serde(rename = "type")]
+    kind: HashtagType,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum HashtagType {
+    Hashtag,
 }
 
 impl TryFrom<Json> for InsertBookmark {
@@ -97,14 +130,35 @@ impl Object for db::Bookmark {
             r#"<p>{}</p><a href="{}">{}</p>"#,
             self.title, self.url, self.url
         );
+        let followers = data.base_url.join("/followers")?;
+        let web_url = data.base_url.join(&self.path())?;
+
+        // None for public lists
+        let lists = db::lists::pointing_to_bookmark(&mut tx, self.id, None).await?;
+        let mut tags = Vec::with_capacity(lists.len());
+        for list in lists {
+            tags.push(Hashtag {
+                href: data.base_url.join(&list.path())?.to_string(),
+                name: format!("#{}", list.title),
+                kind: HashtagType::Hashtag,
+            });
+        }
+
         Ok(Json {
             id: self.ap_id,
             kind: NoteType::Note,
             attributed_to: author.ap_id,
-            to: vec![public()],
+            to: vec![public(), followers],
+            published: self.created_at,
             content: Some(content),
             name: Some(self.title),
+            url: web_url,
+            source: Source {
+                content: String::new(),
+                media_type: "text/plain".to_string(),
+            },
             attachments,
+            tags,
         })
     }
 

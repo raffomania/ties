@@ -85,7 +85,10 @@ async fn get_bookmark(
     let json_bookmark = bookmark
         .into_json(&state.federation_config.to_request_data())
         .await?;
-    Ok(FederationJson(WithContext::new_default(json_bookmark)))
+    Ok(FederationJson(WithContext::new(
+        json_bookmark,
+        federation::activity::hashtag_context(),
+    )))
 }
 
 #[derive(Deserialize)]

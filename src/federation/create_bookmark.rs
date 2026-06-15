@@ -1,10 +1,7 @@
 use activitypub_federation::{
     fetch::object_id::ObjectId,
     kinds::activity::CreateType,
-    protocol::{
-        helpers::deserialize_one_or_many,
-        verification::{verify_domains_match, verify_is_remote_object},
-    },
+    protocol::verification::{verify_domains_match, verify_is_remote_object},
     traits::{ActivityHandler, Object},
 };
 use serde::{Deserialize, Serialize};
@@ -19,8 +16,6 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct CreateBookmark {
     pub actor: ObjectId<db::ApUser>,
-    #[serde(deserialize_with = "deserialize_one_or_many")]
-    pub to: Vec<Url>,
     pub object: federation::Json,
     #[serde(rename = "type")]
     pub kind: CreateType,
@@ -34,25 +29,23 @@ impl CreateBookmark {
         context: &super::Data,
     ) -> ResponseResult<()> {
         let object = bookmark.into_json(context).await?;
-        let id = super::activity::generate_id(context)?;
+        // Add ?create to id. Activity id has to be distinct from object id.
+        let mut id = object.id.inner().clone();
+        id.set_query(Some("create"));
 
         let mut tx = context.db_pool.begin().await?;
         let followers = db::ap_users::list_followers(&mut tx, actor.id).await?;
-        let to = followers
-            .iter()
-            .map(|ap_user| ap_user.ap_id.clone().into_inner())
-            .collect();
         let create = CreateBookmark {
             actor: actor.ap_id.clone(),
-            to,
             object,
             kind: CreateType::Create,
             id,
         };
 
-        super::activity::send(
+        super::activity::send_with_context(
             actor,
             create,
+            super::activity::hashtag_context(),
             &followers.iter().collect::<Vec<_>>(),
             context,
         )
