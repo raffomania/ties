@@ -175,7 +175,14 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
         );
     };
 
-    div(class("prose prose-invert px-4"), unsafe_raw_html(html))
+    div(
+        [
+            class("prose prose-invert px-4"),
+            // Ammonia strips hx- and data-hx- attributes, but it can't hurt to be extra safe
+            attr("hx-disable", ""),
+        ],
+        unsafe_raw_html(html),
+    )
 }
 
 fn backlink_section(backlinks: &[db::List]) -> Element {
