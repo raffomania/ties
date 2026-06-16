@@ -29,9 +29,7 @@ impl CreateBookmark {
         context: &super::Data,
     ) -> ResponseResult<()> {
         let object = bookmark.into_json(context).await?;
-        // Add ?create to id. Activity id has to be distinct from object id.
-        let mut id = object.id.inner().clone();
-        id.set_query(Some("create"));
+        let id = super::activity::generate_id(context)?;
 
         let mut tx = context.db_pool.begin().await?;
         let followers = db::ap_users::list_followers(&mut tx, actor.id).await?;

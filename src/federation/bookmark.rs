@@ -130,7 +130,6 @@ impl Object for db::Bookmark {
             r#"<p>{}</p><a href="{}">{}</p>"#,
             self.title, self.url, self.url
         );
-        let followers = data.base_url.join("/followers")?;
         let web_url = data.base_url.join(&self.path())?;
 
         // None for public lists
@@ -148,7 +147,7 @@ impl Object for db::Bookmark {
             id: self.ap_id,
             kind: NoteType::Note,
             attributed_to: author.ap_id,
-            to: vec![public(), followers],
+            to: vec![public()],
             published: self.created_at,
             content: Some(content),
             name: Some(self.title),
