@@ -111,17 +111,15 @@ async fn post_create(
         .await?;
     }
 
-    if db::bookmarks::is_public(&mut tx, bookmark.id).await? {
-        federation::CreateBookmark::send_to_followers(
-            &db::ap_users::read_by_id(&mut tx, auth_user.ap_user_id).await?,
-            bookmark.clone(),
-            &federation_data,
-        )
-        .await?;
-    }
-
     let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
+    let is_public = db::bookmarks::is_public(&mut tx, bookmark.id).await?;
+    let ap_user = db::ap_users::read_by_id(&mut tx, auth_user.ap_user_id).await?;
     tx.commit().await?;
+
+    if is_public {
+        federation::CreateBookmark::send_to_followers(&ap_user, bookmark.clone(), &federation_data)
+            .await?;
+    }
 
     state.archive_queue.archive_in_background(archive.id);
 
