@@ -57,15 +57,17 @@ start-database:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres; then
+    container="${DATABASE_NAME}_postgres"
+
+    if podman ps --format "{{{{.Names}}" | grep -wq "$container"; then
         echo "Database is running."
         exit
     fi
 
-    if ! podman inspect ties_postgres &> /dev/null; then
+    if ! podman inspect "$container" &> /dev/null; then
         set -x
         podman create \
-            --name ties_postgres \
+            --name "$container" \
             --health-cmd="pg_isready" \
             --health-startup-cmd="pg_isready" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME} \
@@ -73,9 +75,9 @@ start-database:
             postgres
     fi
 
-    podman start ties_postgres
+    podman start "$container"
 
-    podman wait --condition=healthy ties_postgres
+    podman wait --condition=healthy "$container"
 
 [group('OIDC')]
 start-rauthy:
@@ -115,17 +117,17 @@ wipe-rauthy: stop-rauthy
 
 [group('Database')]
 stop-database:
-    podman stop --ignore ties_postgres
+    podman stop --ignore "${DATABASE_NAME}_postgres"
 
 # This sets SQLX_OFFLINE=true: when migrating an empty db, checking queries against
 # it would fail during compilation
 [doc("Delete the whole development database, create a new one and migrate it.")]
 [group('Database')]
 wipe-database: && (migrate-database "true")
-    podman exec -u postgres ties_postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${DATABASE_NAME}' AND pid <> pg_backend_pid();"
+    podman exec -u postgres "${DATABASE_NAME}_postgres" psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${DATABASE_NAME}' AND pid <> pg_backend_pid();"
 
-    podman exec -u postgres ties_postgres psql -c "DROP DATABASE ${DATABASE_NAME}"
-    podman exec -u postgres ties_postgres psql -c "CREATE DATABASE ${DATABASE_NAME}"
+    podman exec -u postgres "${DATABASE_NAME}_postgres" psql -c "DROP DATABASE ${DATABASE_NAME}" || true
+    podman exec -u postgres "${DATABASE_NAME}_postgres" psql -c "CREATE DATABASE ${DATABASE_NAME}"
 
 # Allows overriding the SQLX_OFFLINE environment variable using a justfile parameter.
 [doc("Migrate the database.")]
@@ -135,7 +137,7 @@ migrate-database sqlx_offline=env("SQLX_OFFLINE", "true"): start-database
 
 [group('Database')]
 exec-database-cli: start-database
-    podman exec -ti -u postgres ties_postgres psql ${DATABASE_NAME}
+    podman exec -ti -u postgres "${DATABASE_NAME}_postgres" psql ${DATABASE_NAME}
 
 create-migration name: start-database (ensure-command "sqlx")
     sqlx migrate add {{name}}
@@ -145,15 +147,15 @@ start-test-database:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    if podman ps --format "{{{{.Names}}" | grep -wq ties_postgres_test; then
+    if podman ps --format "{{{{.Names}}" | grep -wq "${DATABASE_NAME}_postgres_test"; then
         echo "Test database is running."
         exit
     fi
 
-    if ! podman inspect ties_postgres_test &> /dev/null; then
+    if ! podman inspect "${DATABASE_NAME}_postgres_test" &> /dev/null; then
         set -x
         podman create \
-            --replace --name ties_postgres_test --image-volume tmpfs \
+            --replace --name "${DATABASE_NAME}_postgres_test" --image-volume tmpfs \
             --health-cmd pg_isready --health-interval 10s \
             --health-startup-cmd="pg_isready" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME_TEST} \
@@ -165,9 +167,9 @@ start-test-database:
             -c autovacuum=off
     fi
 
-    podman start ties_postgres_test
+    podman start "${DATABASE_NAME}_postgres_test"
 
-    podman wait --condition=healthy ties_postgres_test
+    podman wait --condition=healthy "${DATABASE_NAME}_postgres_test"
 
 [group('Testing')]
 test *args: start-database start-test-database
