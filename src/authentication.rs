@@ -151,6 +151,16 @@ impl AuthUser {
             .context("Failed to load authenticated user id")?
             .ok_or(ResponseError::NotAuthenticated)?;
 
+        // if the session already has a certain age, extend its expiry
+        if session.expiry_age() < time::Duration::days(13) {
+            // We only call `set_expiry` to set the "modified" flag
+            // so a new expiry date is written to the DB,
+            // thus making the session live longer
+            session.set_expiry(Some(tower_sessions::Expiry::OnInactivity(
+                session.expiry_age(),
+            )));
+        }
+
         Ok(Self {
             user_id: value.user_id,
             ap_user_id: value.ap_user_id,
