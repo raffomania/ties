@@ -9,6 +9,7 @@ mod oidc;
 mod response_error;
 mod routes;
 pub mod server;
+mod session;
 mod views;
 
 mod built_version;

@@ -23,6 +23,7 @@ pub mod bookmarks;
 pub mod migration_hooks;
 pub use bookmarks::Bookmark;
 pub mod search;
+pub mod sessions;
 
 pub async fn migrate(pool: &PgPool, base_url: &Url, up_to_version: Option<i64>) -> Result<()> {
     tracing::info!("Migrating the database...");

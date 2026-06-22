@@ -8,38 +8,20 @@ use openidconnect::{
     url::Url,
 };
 use serde::{Deserialize, Serialize};
-use tower_sessions::Session;
 
 use crate::{cli::OidcArgs, response_error::ResponseResult};
 
-#[derive(Serialize, Deserialize)]
+/// Temporarily stored while OIDC users are in the signup process and don't have
+/// a normal user record yet.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AuthenticatedOidcUserInfo {
     pub oidc_id: String,
     pub email: String,
 }
 
-impl AuthenticatedOidcUserInfo {
-    const SESSION_KEY: &'static str = "oidc_user_info";
-
-    pub async fn save_in_session(self, session: &Session) -> ResponseResult<()> {
-        session
-            .insert(Self::SESSION_KEY, self)
-            .await
-            .context("Failed to insert oidc data into session")?;
-
-        Ok(())
-    }
-
-    pub async fn from_session(session: &Session) -> ResponseResult<Self> {
-        Ok(session
-            .get(Self::SESSION_KEY)
-            .await
-            .context("Failed to load oidc data from session")?
-            .context("oidc data not found in session")?)
-    }
-}
-
-#[derive(Serialize, Deserialize)]
+/// Temporarily stored in session when users start the login process. Read once
+/// we hear back from the OIDC provider.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LoginAttempt {
     pub nonce: Nonce,
     pub csrf_token: CsrfToken,
@@ -47,9 +29,18 @@ pub struct LoginAttempt {
     pub authorize_url: Url,
 }
 
-impl LoginAttempt {
-    const SESSION_KEY: &'static str = "oidc_login_attempt";
+impl Clone for LoginAttempt {
+    fn clone(&self) -> Self {
+        Self {
+            nonce: self.nonce.clone(),
+            csrf_token: self.csrf_token.clone(),
+            pkce_verifier: PkceCodeVerifier::new(self.pkce_verifier.secret().clone()),
+            authorize_url: self.authorize_url.clone(),
+        }
+    }
+}
 
+impl LoginAttempt {
     pub fn new(client: &ConfiguredClient) -> Self {
         let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -71,23 +62,6 @@ impl LoginAttempt {
             pkce_verifier,
             authorize_url,
         }
-    }
-
-    pub async fn save_in_session(self, session: &Session) -> ResponseResult<()> {
-        session
-            .insert(Self::SESSION_KEY, self)
-            .await
-            .context("Failed to insert login attempt into session")?;
-
-        Ok(())
-    }
-
-    pub async fn from_session(session: &Session) -> ResponseResult<Self> {
-        Ok(session
-            .get(Self::SESSION_KEY)
-            .await
-            .context("Failed to load oidc login attempt from session")?
-            .context("oidc login attempt not found in session")?)
     }
 
     pub async fn login(
