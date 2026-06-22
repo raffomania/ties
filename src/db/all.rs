@@ -8,7 +8,7 @@ pub async fn wipe_all_data(tx: &mut AppTx) -> ResponseResult<()> {
         r#"
         select schemaname as "schemaname!", tablename as "tablename!"
         from pg_tables
-        where schemaname in ('public', 'tower_sessions')
+        where schemaname = 'public'
         and tablename != '_sqlx_migrations';"#
     )
     .fetch_all(&mut **tx)

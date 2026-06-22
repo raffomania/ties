@@ -51,7 +51,7 @@ impl TestApp {
         };
 
         TestApp {
-            router: app(state.clone()).await.unwrap(),
+            router: app(state.clone()).unwrap(),
             pool,
             logged_in_cookie: None,
             base_url,

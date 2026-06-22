@@ -214,8 +214,7 @@ pub async fn run() -> Result<()> {
                 oidc_state,
                 federation_config: federation::config::new_config(pool, base_url.clone()).await?,
                 archive_queue,
-            })
-            .await?;
+            })?;
             server::start(listen_address, base_url.clone(), app, tls_cert, tls_key).await?;
         }
         Command::Db {

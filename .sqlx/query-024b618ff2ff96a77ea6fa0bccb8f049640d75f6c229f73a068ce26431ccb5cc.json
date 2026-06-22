@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select schemaname as \"schemaname!\", tablename as \"tablename!\"\n        from pg_tables\n        where schemaname = 'public'\n        and tablename != '_sqlx_migrations';",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "schemaname!",
+        "type_info": "Name"
+      },
+      {
+        "ordinal": 1,
+        "name": "tablename!",
+        "type_info": "Name"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "024b618ff2ff96a77ea6fa0bccb8f049640d75f6c229f73a068ce26431ccb5cc"
+}

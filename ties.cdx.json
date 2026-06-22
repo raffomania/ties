@@ -1741,37 +1741,6 @@
       "version": "0.9.6"
     },
     {
-      "author": "Sergio Benitez <sb@sergio.bz>, Alex Crichton <alex@alexcrichton.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#cookie@0.18.1",
-      "description": "HTTP cookie parsing and cookie jar management. Supports signed and private (encrypted, authenticated) jars. ",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/cookie"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/SergioBenitez/cookie-rs"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "4ddef33a339a91ea89fb53151bd0a4689cfce27055c291dfa69945475d22c747"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "cookie",
-      "purl": "pkg:cargo/cookie@0.18.1",
-      "scope": "required",
-      "type": "library",
-      "version": "0.18.1"
-    },
-    {
       "author": "RustCrypto Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#cpufeatures@0.2.17",
       "description": "Lightweight runtime CPU feature detection for aarch64, loongarch64, and x86/x86_64 targets,  with no_std support and support for mobile targets including Android and iOS ",
@@ -8438,68 +8407,6 @@
       "version": "0.17.14"
     },
     {
-      "author": "Evgeny Safronov <division494@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rmp-serde@1.3.1",
-      "description": "Serde support for MessagePack",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/rmp-serde"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/3Hren/msgpack-rust"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "72f81bee8c8ef9b577d1681a70ebbc962c232461e397b22c208c43c04b67a155"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "rmp-serde",
-      "purl": "pkg:cargo/rmp-serde@1.3.1",
-      "scope": "required",
-      "type": "library",
-      "version": "1.3.1"
-    },
-    {
-      "author": "Evgeny Safronov <division494@gmail.com>, Kornel <kornel@geekhood.net>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rmp@0.8.15",
-      "description": "Pure Rust MessagePack serialization implementation",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/rmp"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/3Hren/msgpack-rust"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "4ba8be72d372b2c9b35542551678538b562e7cf86c3315773cae48dfbfe7790c"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "rmp",
-      "purl": "pkg:cargo/rmp@0.8.15",
-      "scope": "required",
-      "type": "library",
-      "version": "0.8.15"
-    },
-    {
       "author": "Christopher Durham <cad97@cad97.com>, Dzmitry Malyshau <kvarkus@gmail.com>, Thomas Schaller <torkleyy@gmail.com>, Juniper Tyree <juniper.tyree@helsinki.fi>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#ron@0.8.1",
       "description": "Rusty Object Notation",
@@ -11092,37 +10999,6 @@
       "version": "1.52.1"
     },
     {
-      "author": "imbolc",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-cookies@0.11.0",
-      "description": "Cookie manager middleware for tower.",
-      "externalReferences": [
-        {
-          "type": "website",
-          "url": "https://github.com/imbolc/tower-cookies"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/imbolc/tower-cookies"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "151b5a3e3c45df17466454bb74e9ecedecc955269bdedbf4d150dfa393b55a36"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "tower-cookies",
-      "purl": "pkg:cargo/tower-cookies@0.11.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.11.0"
-    },
-    {
       "author": "Tower Maintainers <team@tower-rs.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.8",
       "description": "Tower middleware and utilities for HTTP clients and servers",
@@ -11253,138 +11129,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.3.3"
-    },
-    {
-      "author": "Max Countryman <hello@maxcountryman.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-core@0.14.0",
-      "description": "Core types and traits for tower-sessions.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/tower-sessions"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/maxcountryman/tower-sessions"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "ce8cce604865576b7751b7a6bc3058f754569a60d689328bb74c52b1d87e355b"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "tower-sessions-core",
-      "purl": "pkg:cargo/tower-sessions-core@0.14.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.14.0"
-    },
-    {
-      "author": "Max Countryman <hello@maxcountryman.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-memory-store@0.14.0",
-      "description": "Memory session store. Not for direct use; see the `tower-sessions` crate for details.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/tower-sessions"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/maxcountryman/tower-sessions"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "fb05909f2e1420135a831dd5df9f5596d69196d0a64c3499ca474c4bd3d33242"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "tower-sessions-memory-store",
-      "purl": "pkg:cargo/tower-sessions-memory-store@0.14.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.14.0"
-    },
-    {
-      "author": "Max Countryman <hello@maxcountryman.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-sqlx-store@0.15.0",
-      "description": "SQLx session stores for `tower-sessions`.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/tower-sessions-sqlx-store"
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/maxcountryman/tower-sessions-stores"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/maxcountryman/tower-sessions-stores"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "e054622079f57fc1a7d6a6089c9334f963d62028fe21dc9eddd58af9a78480b3"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "tower-sessions-sqlx-store",
-      "purl": "pkg:cargo/tower-sessions-sqlx-store@0.15.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.15.0"
-    },
-    {
-      "author": "Max Countryman <hello@maxcountryman.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions@0.14.0",
-      "description": "🥠 Sessions as a `tower` and `axum` middleware.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/tower-sessions"
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/maxcountryman/tower-sessions"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/maxcountryman/tower-sessions"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "43a05911f23e8fae446005fe9b7b97e66d95b6db589dc1c4d59f6a2d4d4927d3"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "tower-sessions",
-      "purl": "pkg:cargo/tower-sessions@0.14.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.14.0"
     },
     {
       "author": "Tower Maintainers <team@tower-rs.com>",
@@ -12871,8 +12615,6 @@
         "registry+https://github.com/rust-lang/crates.io-index#tower@0.5.3",
         "registry+https://github.com/rust-lang/crates.io-index#tower-http@0.6.8",
         "registry+https://github.com/rust-lang/crates.io-index#tower-livereload@0.10.3",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions@0.14.0",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-sqlx-store@0.15.0",
         "registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44",
         "registry+https://github.com/rust-lang/crates.io-index#tracing-subscriber@0.3.23",
         "registry+https://github.com/rust-lang/crates.io-index#url@2.5.8",
@@ -13254,14 +12996,6 @@
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#const-oid@0.9.6"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#percent-encoding@2.3.2",
-        "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
-        "registry+https://github.com/rust-lang/crates.io-index#version_check@0.9.5"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#cookie@0.18.1"
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#cpufeatures@0.2.17"
@@ -14216,8 +13950,7 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#scopeguard@1.2.0",
-        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
+        "registry+https://github.com/rust-lang/crates.io-index#scopeguard@1.2.0"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#lock_api@0.4.14"
     },
@@ -14847,19 +14580,6 @@
         "registry+https://github.com/rust-lang/crates.io-index#untrusted@0.9.0"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#ring@0.17.14"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#rmp@0.8.15",
-        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rmp-serde@1.3.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rmp@0.8.15"
     },
     {
       "dependsOn": [
@@ -15591,19 +15311,6 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#axum-core@0.5.6",
-        "registry+https://github.com/rust-lang/crates.io-index#cookie@0.18.1",
-        "registry+https://github.com/rust-lang/crates.io-index#futures-util@0.3.32",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
-        "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5",
-        "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-cookies@0.11.0"
-    },
-    {
-      "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#async-compression@0.4.41",
         "registry+https://github.com/rust-lang/crates.io-index#bitflags@2.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
@@ -15639,59 +15346,6 @@
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#axum-core@0.5.6",
-        "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
-        "registry+https://github.com/rust-lang/crates.io-index#futures@0.3.32",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
-        "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5",
-        "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.6",
-        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
-        "registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.149",
-        "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.18",
-        "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
-        "registry+https://github.com/rust-lang/crates.io-index#tokio@1.52.1",
-        "registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-core@0.14.0"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
-        "registry+https://github.com/rust-lang/crates.io-index#tokio@1.52.1",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-core@0.14.0"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-memory-store@0.14.0"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#rmp-serde@1.3.1",
-        "registry+https://github.com/rust-lang/crates.io-index#sqlx@0.8.6",
-        "registry+https://github.com/rust-lang/crates.io-index#thiserror@1.0.69",
-        "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-core@0.14.0"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-sqlx-store@0.15.0"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
-        "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
-        "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47",
-        "registry+https://github.com/rust-lang/crates.io-index#tokio@1.52.1",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-cookies@0.11.0",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-layer@0.3.3",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-service@0.3.3",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-core@0.14.0",
-        "registry+https://github.com/rust-lang/crates.io-index#tower-sessions-memory-store@0.14.0",
-        "registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#tower-sessions@0.14.0"
     },
     {
       "dependsOn": [

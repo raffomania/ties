@@ -8,7 +8,6 @@ use listenfd::ListenFd;
 use sqlx::PgPool;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-use tower_sessions::ExpiredDeletion;
 use url::Url;
 
 use crate::{
@@ -28,31 +27,12 @@ pub struct AppState {
     pub archive_queue: archive::QueueHandle,
 }
 
-pub async fn app(state: AppState) -> anyhow::Result<Router> {
-    let session_store = tower_sessions_sqlx_store::PostgresStore::new(state.pool.clone());
-    session_store.migrate().await?;
-    tokio::task::spawn(
-        session_store
-            .clone()
-            .continuously_delete_expired(tokio::time::Duration::from_hours(6)),
-    );
+pub fn app(state: AppState) -> anyhow::Result<Router> {
+    db::sessions::spawn_cleanup_task(&state.pool);
 
     if state.demo_mode {
         tokio::task::spawn(periodically_wipe_all_data(state.pool.clone()));
     }
-
-    let cookie_inactivity_limit = if state.demo_mode {
-        tower_sessions::cookie::time::Duration::hours(1)
-    } else {
-        tower_sessions::cookie::time::Duration::weeks(2)
-    };
-
-    let session_service = tower_sessions::SessionManagerLayer::new(session_store)
-        .with_secure(true)
-        .with_same_site(tower_sessions::cookie::SameSite::Lax)
-        .with_expiry(tower_sessions::Expiry::OnInactivity(
-            cookie_inactivity_limit,
-        ));
 
     #[allow(unused_mut, reason = "used below in conditionally compiled code")]
     let mut router = Router::new()
@@ -69,7 +49,6 @@ pub async fn app(state: AppState) -> anyhow::Result<Router> {
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
-                .layer(session_service)
                 .layer(FederationMiddleware::new(state.federation_config.clone())),
         );
 

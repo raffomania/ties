@@ -2,25 +2,32 @@ use anyhow::{Context, anyhow};
 use axum::{
     Router,
     extract::{Path, State},
+    http::{HeaderValue, header::SET_COOKIE},
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
 use garde::{Report, Validate};
 use serde::Deserialize;
 use serde_qs::web::{QsForm, QsQuery};
-use tower_sessions::Session;
 
 use crate::{
     authentication::{self, AuthUser},
     db,
+    db::sessions::Session,
     extract::{self},
     forms::users::{CreateOidcUser, Login, OidcLoginQuery, OidcSelectUsername},
     htmf_response::HtmfResponse,
     oidc::{self},
     response_error::{ResponseError, ResponseResult},
     server::AppState,
+    session,
     views::{self, layout, login, oidc_select_username},
 };
+
+/// Attach a `Set-Cookie` header (if present) to `res`.
+fn attach_cookie(res: &mut Response, cookie: HeaderValue) {
+    res.headers_mut().insert(SET_COOKIE, cookie);
+}
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -33,6 +40,7 @@ pub fn router() -> Router<AppState> {
         .route("/user/{username}", get(get_profile))
 }
 
+#[axum::debug_handler]
 async fn post_login(
     extract::Tx(mut tx): extract::Tx,
     session: Session,
@@ -49,29 +57,34 @@ async fn post_login(
     }
 
     let logged_in = authentication::login(&mut tx, session, &input.credentials).await;
-    if let Err(e) = logged_in {
-        tracing::debug!("{e:?}");
-        let mut errors = Report::new();
-        errors.append(
-            garde::Path::new("root"),
-            garde::Error::new("Username or password not correct"),
-        );
-        return Ok(HtmfResponse(login::login(&login::Template::new(
-            errors,
-            input,
-            state.oidc_state,
-        )))
-        .into_response());
-    }
-
+    let cookie = match logged_in {
+        Ok(cookie) => cookie,
+        Err(e) => {
+            tracing::debug!("{e:?}");
+            let mut errors = Report::new();
+            errors.append(
+                garde::Path::new("root"),
+                garde::Error::new("Username or password not correct"),
+            );
+            return Ok(HtmfResponse(login::login(&login::Template::new(
+                errors,
+                input,
+                state.oidc_state,
+            )))
+            .into_response());
+        }
+    };
+    tx.commit().await?;
     let redirect_to = input.previous_uri.unwrap_or(state.base_url);
-
-    Ok(Redirect::to(redirect_to.as_str()).into_response())
+    let mut res = Redirect::to(redirect_to.as_str()).into_response();
+    attach_cookie(&mut res, cookie);
+    Ok(res)
 }
 
 async fn get_login_oidc(
     State(state): State<AppState>,
-    session: Session,
+    mut session: Session,
+    extract::Tx(mut tx): extract::Tx,
 ) -> ResponseResult<Response> {
     // TODO: Store the CSRF and none states in a way that is more secure than this,
     // although the current method is already quite secure.
@@ -79,18 +92,24 @@ async fn get_login_oidc(
         .oidc_state
         .get_config()
         .context("OIDC client not configured")?;
+
     let attempt = oidc::LoginAttempt::new(&oidc_config.client);
     let authorize_url = attempt.authorize_url.clone();
-    attempt.save_in_session(&session).await?;
 
-    Ok(Redirect::to(authorize_url.as_str()).into_response())
+    session.contents.oidc_login_attempt = Some(attempt);
+    let cookie = session.persist(&mut tx).await?;
+    tx.commit().await?;
+
+    let mut res = Redirect::to(authorize_url.as_str()).into_response();
+    attach_cookie(&mut res, cookie);
+    Ok(res)
 }
 
 async fn get_login_oidc_redirect(
+    extract::Tx(mut tx): extract::Tx,
     session: Session,
     QsQuery(query): QsQuery<OidcLoginQuery>,
     state: State<AppState>,
-    extract::Tx(mut tx): extract::Tx,
 ) -> ResponseResult<Response> {
     let oidc_config = state
         .oidc_state
@@ -98,7 +117,12 @@ async fn get_login_oidc_redirect(
         .get_config()
         .context("OIDC not configured")?;
 
-    let oidc_session: oidc::LoginAttempt = oidc::LoginAttempt::from_session(&session).await?;
+    let oidc_session = session
+        .contents
+        .oidc_login_attempt
+        .clone()
+        .context("oidc login attempt not found in session")?;
+
     let authed_oidc_info = oidc_session
         .login(
             &oidc_config.client,
@@ -112,12 +136,23 @@ async fn get_login_oidc_redirect(
     match existing_user {
         // Authenticate existing users in session
         Ok(existing_user) => {
-            authentication::login_oidc_user(&session, &existing_user).await?;
-            Ok(Redirect::to("/").into_response())
+            let cookie = session
+                .persist_logged_in_user(&mut tx, &existing_user)
+                .await?;
+            tx.commit().await?;
+
+            let mut res = Redirect::to("/").into_response();
+            attach_cookie(&mut res, cookie);
+
+            Ok(res)
         }
         // Show new users a form to choose a username
         Err(ResponseError::NotFound) => {
-            authed_oidc_info.save_in_session(&session).await?;
+            let mut session = session.rotate(&mut tx).await?;
+            session.contents.oidc_user_info = Some(authed_oidc_info);
+            session.persist(&mut tx).await?;
+            tx.commit().await?;
+
             Ok(HtmfResponse(oidc_select_username::view(
                 views::oidc_select_username::Data::default(),
             ))
@@ -143,11 +178,15 @@ async fn post_login_oidc_redirect(
         .into_response());
     }
 
-    let authed_oidc_info = oidc::AuthenticatedOidcUserInfo::from_session(&session).await?;
+    let authed_oidc_info = session
+        .contents
+        .oidc_user_info
+        .as_ref()
+        .context("oidc data not found in session")?;
 
     let create_oidc_user = CreateOidcUser {
-        oidc_id: authed_oidc_info.oidc_id,
-        email: authed_oidc_info.email,
+        oidc_id: authed_oidc_info.oidc_id.clone(),
+        email: authed_oidc_info.email.clone(),
         username: input.username,
     };
 
@@ -155,9 +194,9 @@ async fn post_login_oidc_redirect(
         return Err(anyhow!("Invalid OIDC user data received").context(e).into());
     }
 
-    authentication::create_and_login_oidc_user(
+    let cookie = authentication::create_and_login_oidc_user(
         &mut tx,
-        &session,
+        session,
         create_oidc_user,
         &state.base_url,
     )
@@ -165,7 +204,9 @@ async fn post_login_oidc_redirect(
 
     tx.commit().await?;
 
-    Ok(Redirect::to("/").into_response())
+    let mut res = Redirect::to("/").into_response();
+    attach_cookie(&mut res, cookie);
+    Ok(res)
 }
 
 async fn post_login_demo(
@@ -173,10 +214,13 @@ async fn post_login_demo(
     session: Session,
     State(state): State<AppState>,
 ) -> ResponseResult<Response> {
-    authentication::create_and_login_temp_user(&mut tx, session, &state.base_url).await?;
+    let cookie =
+        authentication::create_and_login_temp_user(&mut tx, session, &state.base_url).await?;
     tx.commit().await?;
 
-    Ok(Redirect::to("/").into_response())
+    let mut res = Redirect::to("/").into_response();
+    attach_cookie(&mut res, cookie);
+    Ok(res)
 }
 
 #[derive(Deserialize)]
@@ -246,7 +290,11 @@ async fn get_profile(
     Ok(HtmfResponse(elem))
 }
 
-async fn logout(auth_user: AuthUser) -> ResponseResult<Redirect> {
-    auth_user.logout().await?;
-    Ok(Redirect::to("/login"))
+async fn logout(extract::Tx(mut tx): extract::Tx, session: Session) -> ResponseResult<Response> {
+    db::sessions::delete(&mut tx, session).await?;
+    tx.commit().await?;
+
+    let mut res = Redirect::to("/login").into_response();
+    attach_cookie(&mut res, session::clear_cookie_header()?);
+    Ok(res)
 }

@@ -2,18 +2,17 @@ use anyhow::{Context, anyhow};
 use argon2::PasswordVerifier;
 use axum::{
     extract::{FromRequestParts, OptionalFromRequestParts, OriginalUri},
-    http::request::Parts,
+    http::{HeaderValue, request::Parts},
     response::Redirect,
 };
 use garde::Validate;
 use percent_encoding::utf8_percent_encode;
 use serde::{Deserialize, Serialize};
-use tower_sessions::Session;
 use url::Url;
 use uuid::Uuid;
 
 use crate::{
-    db::{self, AppTx, User},
+    db::{self, AppTx, sessions::Session},
     forms::users::{CreateOidcUser, CreateUser, Credentials},
     response_error::{ResponseError, ResponseResult},
     server::AppState,
@@ -63,21 +62,23 @@ pub fn verify_password(user: &db::User, password: &str) -> ResponseResult<()> {
     Ok(())
 }
 
-pub async fn login(tx: &mut AppTx, session: Session, creds: &Credentials) -> ResponseResult<()> {
+pub async fn login(
+    tx: &mut AppTx,
+    session: Session,
+    creds: &Credentials,
+) -> ResponseResult<HeaderValue> {
     let user = db::users::by_username(tx, &creds.username).await?;
 
     verify_password(&user, &creds.password)?;
 
-    AuthUser::save_in_session(&session, &user).await?;
-
-    Ok(())
+    session.persist_logged_in_user(tx, &user).await
 }
 
 pub async fn create_and_login_temp_user(
     tx: &mut AppTx,
     session: Session,
     base_url: &Url,
-) -> ResponseResult<()> {
+) -> ResponseResult<HeaderValue> {
     let username =
         friendly_zoo::Zoo::new(friendly_zoo::Species::CustomDelimiter('_'), 1).generate();
     let password = Uuid::new_v4().to_string();
@@ -85,17 +86,15 @@ pub async fn create_and_login_temp_user(
     create.validate().context("Invalid demo user generated")?;
     let user = db::users::insert(tx, create, base_url).await?;
 
-    AuthUser::save_in_session(&session, &user).await?;
-
-    Ok(())
+    session.persist_logged_in_user(tx, &user).await
 }
 
 pub async fn create_and_login_oidc_user(
     tx: &mut AppTx,
-    session: &Session,
+    session: Session,
     create_oidc_user: CreateOidcUser,
     base_url: &Url,
-) -> ResponseResult<()> {
+) -> ResponseResult<HeaderValue> {
     let user = db::users::by_oidc_id(tx, &create_oidc_user.oidc_id).await;
 
     let user = match user {
@@ -106,64 +105,28 @@ pub async fn create_and_login_oidc_user(
         Err(_) => return Err(anyhow!("Failed to look up user by OIDC id").into()),
     };
 
-    AuthUser::save_in_session(session, &user).await?;
-
-    Ok(())
+    session.persist_logged_in_user(tx, &user).await
 }
 
-pub async fn login_oidc_user(session: &Session, user: &User) -> ResponseResult<()> {
-    AuthUser::save_in_session(session, user).await
-}
-
-#[derive(Debug)]
+/// Extractor for requiring a logged in user in routes.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AuthUser {
     pub user_id: Uuid,
     pub ap_user_id: Uuid,
-    session: Session,
-}
-
-#[derive(Serialize, Deserialize)]
-struct SessionValue {
-    user_id: Uuid,
-    ap_user_id: Uuid,
 }
 
 impl AuthUser {
-    const SESSION_KEY: &'static str = "auth_user";
-
-    pub async fn save_in_session(session: &Session, user: &db::User) -> ResponseResult<()> {
-        let value = SessionValue {
-            user_id: user.id,
-            ap_user_id: user.ap_user_id,
-        };
-        session
-            .insert(Self::SESSION_KEY, value)
-            .await
-            .context("Failed to insert id into session")?;
-
-        Ok(())
-    }
-
-    pub async fn from_session(session: Session) -> ResponseResult<Self> {
-        let value: SessionValue = session
-            .get(Self::SESSION_KEY)
-            .await
-            .context("Failed to load authenticated user id")?
+    pub fn from_session(session: &Session) -> ResponseResult<Self> {
+        let value = session
+            .contents
+            .auth_user
+            .as_ref()
             .ok_or(ResponseError::NotAuthenticated)?;
 
         Ok(Self {
             user_id: value.user_id,
             ap_user_id: value.ap_user_id,
-            session,
         })
-    }
-
-    pub async fn logout(self) -> ResponseResult<()> {
-        self.session
-            .remove::<SessionValue>(Self::SESSION_KEY)
-            .await
-            .context("Failed to remove user id from session")?;
-        Ok(())
     }
 }
 
@@ -188,11 +151,11 @@ impl FromRequestParts<AppState> for AuthUser {
         let error_redirect = Redirect::to(&redirect_to);
 
         let session = Session::from_request_parts(req, state).await.map_err(|e| {
-            tracing::error!("Failed to initialize session: {e:?}");
+            tracing::error!("{e:?}");
             error_redirect.clone()
         })?;
 
-        let auth_user = AuthUser::from_session(session).await;
+        let auth_user = AuthUser::from_session(&session);
         if let Err(ResponseError::NotAuthenticated) = auth_user {
             return Err(error_redirect);
         }
@@ -211,11 +174,9 @@ impl OptionalFromRequestParts<AppState> for AuthUser {
         req: &mut Parts,
         state: &AppState,
     ) -> std::result::Result<Option<Self>, Self::Rejection> {
-        let session = Session::from_request_parts(req, state)
-            .await
-            .map_err(|(_status, description)| anyhow!(description))?;
+        let session = Session::from_request_parts(req, state).await?;
 
-        let auth_user = AuthUser::from_session(session).await;
+        let auth_user = AuthUser::from_session(&session);
         if let Err(ResponseError::NotAuthenticated) = auth_user {
             return Ok(None);
         }
