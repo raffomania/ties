@@ -98,37 +98,42 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                     // TODO add intro text: what can you do with ties? How to get started?  Where
                     // to get help?
                     div(
-                        class(
-                            "flex flex-wrap gap-x-2 gap-y-4 justify-stretch pb-4 text-center \
-                             w-full max-w-xl",
-                        ),
+                        class("flex gap-2 flex-wrap flex-auto mb-2 w-full max-w-lg"),
                         [
-                            div(
-                                class("flex flex-col gap-2 flex-auto"),
-                                [
-                                    dash_button(href("/bookmarks/create"), "Add a bookmark"),
-                                    dash_button(href("/lists/create"), "Create a list"),
-                                ],
+                            dash_button(href("/bookmarks/create"), "Add a bookmark"),
+                            dash_button(href("/lists/create"), "Create a list"),
+                        ],
+                    ),
+                    div(
+                        [class("flex gap-2 flex-wrap flex-auto w-full max-w-lg")],
+                        [
+                            dash_button_small(
+                                href(format!("/user/{}", data.authed_info.username)),
+                                "View my profile",
                             ),
-                            div(
-                                class("flex flex-col gap-2 flex-auto"),
+                            form(
                                 [
-                                    dash_button(
-                                        href(format!("/user/{}", data.authed_info.username)),
-                                        "View my profile",
-                                    ),
-                                    form(
-                                        [action("/logout"), method("post")],
-                                        button(
-                                            class(
-                                                "w-full block p-4 border rounded \
-                                                 dark:border-neutral-700 border-neutral-300 \
-                                                 dark:hover:bg-neutral-700 hover:bg-neutral-100",
-                                            ),
-                                            "Logout",
-                                        ),
-                                    ),
+                                    action("/invites/create"),
+                                    method("post"),
+                                    class("basis-sm grow"),
                                 ],
+                                button(
+                                    [class(
+                                        "block w-full px-4 py-2 border rounded border-neutral-700 \
+                                         hover:bg-neutral-700",
+                                    )],
+                                    "Invite a user",
+                                ),
+                            ),
+                            form(
+                                [action("/logout"), method("post"), class("basis-sm grow")],
+                                button(
+                                    class(
+                                        "block w-full px-4 py-2 border rounded
+                                        dark:border-neutral-700 border-neutral-300                                              dark:hover:bg-neutral-700 hover:bg-neutral-100",
+                                    ),
+                                    "Logout",
+                                ),
                             ),
                         ],
                     ),
@@ -147,8 +152,21 @@ fn dash_button<C: Into<Element>>(attrs: Attrs, children: C) -> Element {
     a(
         [
             class(
-                "block px-8 py-4 w-full border rounded dark:border-neutral-700 border-neutral-300 \
-                 dark:hover:bg-neutral-700 hover:bg-neutral-100",
+                "block px-8 py-4 basis-sm grow border rounded dark:border-neutral-700 \
+                 border-neutral-300 dark:hover:bg-neutral-700 hover:bg-neutral-100",
+            ),
+            attrs,
+        ],
+        children,
+    )
+}
+
+fn dash_button_small<C: Into<Element>>(attrs: Attrs, children: C) -> Element {
+    a(
+        [
+            class(
+                "block px-8 py-2 basis-sm grow border rounded dark:border-neutral-700 \
+                 border-neutral-300 dark:hover:bg-neutral-700 hover:bg-neutral-100",
             ),
             attrs,
         ],
@@ -159,7 +177,7 @@ fn dash_button<C: Into<Element>>(attrs: Attrs, children: C) -> Element {
 pub fn bookmarklet_section(data: &Data) -> Element {
     fragment([
         header(
-            class("pt-8"),
+            class("mt-16"),
             [h2(class("font-bold"), "Install Bookmarklet")],
         ),
         section(

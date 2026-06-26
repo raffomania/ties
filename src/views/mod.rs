@@ -3,6 +3,7 @@
 pub mod base_document;
 pub mod content;
 pub mod create_bookmark;
+pub mod create_invite;
 pub mod create_link;
 pub mod create_list;
 pub mod edit_bookmark;
