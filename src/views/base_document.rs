@@ -1,9 +1,10 @@
-use htmf::{declare::*, element::Element, into_elements::IntoElements};
+use htmf::{declare::*, element::Element, into_attrs::IntoAttrs, into_elements::IntoElements};
 
 pub fn base_document(children: impl IntoElements) -> Element {
     document().with(
         html(class("w-full h-full"))
             .with(head([]).with([
+                // icons & title
                 link([
                     rel("icon"),
                     href("/assets/favicon.svg"),
@@ -13,9 +14,18 @@ pub fn base_document(children: impl IntoElements) -> Element {
                     rel("apple-touch-icon"),
                     href("/assets/apple-touch-icon.png"),
                 ]),
+                title_tag([]).with("ties"),
+                // styling
                 link([rel("stylesheet"), href("/assets/preflight.css")]),
                 link([rel("stylesheet"), href("/assets/railwind.css")]),
                 link([rel("stylesheet"), href("/assets/prose.css")]),
+                // Hide .js-only elements when JS is disabled.
+                noscript([]).with(Element::Tag {
+                    tag: "style",
+                    attrs: ().into_attrs(),
+                    children: ".js-only{display: none;}".into_elements(),
+                }),
+                // htmx
                 script(src("/assets/htmx.1.9.9.js")),
                 meta([
                     name("htmx-config"),
@@ -31,7 +41,6 @@ pub fn base_document(children: impl IntoElements) -> Element {
                     name("viewport"),
                     content("width=device-width,initial-scale=1"),
                 ]),
-                title_tag([]).with("ties"),
             ]))
             .with(
                 body(class(

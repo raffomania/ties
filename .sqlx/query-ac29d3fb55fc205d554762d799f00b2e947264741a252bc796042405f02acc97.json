@@ -32,6 +32,11 @@
         "ordinal": 5,
         "name": "ap_user_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "invited_by",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -45,7 +50,8 @@
       false,
       true,
       true,
-      false
+      false,
+      true
     ]
   },
   "hash": "ac29d3fb55fc205d554762d799f00b2e947264741a252bc796042405f02acc97"

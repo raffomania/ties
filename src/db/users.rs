@@ -17,9 +17,8 @@ use crate::{
 pub struct User {
     pub id: Uuid,
 
-    // TODO this is only used in tests so far, which breaks
-    // `#[expect(dead_code)]` for some reason
     pub username: String,
+    pub invited_by: Option<Uuid>,
 
     // Password-based login data
     pub password_hash: Option<String>,
