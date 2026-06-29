@@ -43,8 +43,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-          # For auto-setting the version description in `cargo build`
-          fetch-depth: 0
 
       - name: Setup Rust toolchain
         run: rustup install stable
@@ -177,6 +175,8 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
+          # For auto-setting the version description in `cargo build`
+          fetch-depth: 0
 
       # Release build. This job intentionally does not
       # use a cache to prevent cache poisoning attacks.
