@@ -1,5 +1,5 @@
-use url::Url;
 use time::{Date, OffsetDateTime, Time};
+use url::Url;
 
 use crate::{archive, db, tests::util::test_app::TestApp};
 

@@ -1,5 +1,5 @@
 use anyhow::Context;
-use htmf::{prelude_inline::*};
+use htmf::prelude_inline::*;
 use time::{OffsetDateTime, format_description};
 
 pub static BULLET: &str = "∙";

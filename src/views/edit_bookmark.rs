@@ -258,7 +258,8 @@ pub fn view(
                                 [
                                     class("text-sm text-neutral-400 mt-2"),
                                     title_attr(
-                                        "Bookmarks are private until they get added to a public list.",
+                                        "Bookmarks are private until they get added to a public \
+                                         list.",
                                     ),
                                 ],
                                 [span(class("mr-0.5"), "Visibility"), help_icon()],
