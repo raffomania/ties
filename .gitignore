@@ -11,5 +11,6 @@ development_cert
 # cargo-run-bin
 .bin/
 
-# JetBrains IDE
+# Various editors & IDEs
 .idea/
+.gram/
