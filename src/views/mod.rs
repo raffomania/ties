@@ -1,5 +1,6 @@
 #![allow(clippy::wildcard_imports)]
 #![allow(clippy::too_many_lines)]
+pub mod accept_invite;
 pub mod base_document;
 pub mod content;
 pub mod create_bookmark;

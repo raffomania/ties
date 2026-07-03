@@ -89,11 +89,7 @@ fn login_form(template: &Template) -> Element {
 
 fn username_field(errors: &FormErrors, val: &str) -> Element {
     fragment().with([
-        label([
-            class("mt-10 dark:text-neutral-400 text-neutral-500"),
-            for_("credentials[username]"),
-        ])
-        .with("Username"),
+        label([class("mt-10"), for_("credentials[username]")]).with("Username"),
         errors.view("credentials.username"),
         input([
             type_("text"),
@@ -110,11 +106,7 @@ fn username_field(errors: &FormErrors, val: &str) -> Element {
 
 fn password_field(errors: &FormErrors) -> Element {
     fragment().with([
-        label([
-            class("mt-4 dark:text-neutral-400 text-neutral-500"),
-            for_("credentials[password]"),
-        ])
-        .with("Password"),
+        label([class("mt-4"), for_("credentials[password]")]).with("Password"),
         errors.view("credentials.password"),
         input([
             type_("password"),

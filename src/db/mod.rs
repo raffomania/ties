@@ -9,6 +9,8 @@ pub mod archives;
 pub use archives::Archive;
 pub mod follows;
 pub mod invites;
+
+pub use invites::Invite;
 pub mod run_migrations;
 pub use ap_users::ApUser;
 pub mod items;
