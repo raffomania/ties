@@ -46,7 +46,21 @@ pub async fn by_oidc_id(tx: &mut AppTx, oidc_id: &str) -> ResponseResult<User> {
     Ok(user)
 }
 
-// TODO this needs to create an AP user?
+pub async fn by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<User> {
+    let user = query_as!(
+        User,
+        r#"
+        select * from users
+        where id = $1
+        "#,
+        id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Ok(user)
+}
+
 pub async fn insert_oidc(
     tx: &mut AppTx,
     create_user: CreateOidcUser,
@@ -92,7 +106,7 @@ pub async fn insert(
         "#,
         create_user.username,
         hashed_password,
-        ap_user.id
+        ap_user.id,
     )
     .fetch_one(&mut **tx)
     .await?;

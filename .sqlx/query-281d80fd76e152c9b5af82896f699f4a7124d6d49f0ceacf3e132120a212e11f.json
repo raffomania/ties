@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select * from users\n        where id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "password_hash",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "oidc_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "ap_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "invited_by",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "281d80fd76e152c9b5af82896f699f4a7124d6d49f0ceacf3e132120a212e11f"
+}

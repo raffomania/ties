@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use rand::distr::{Alphanumeric, SampleString};
 use sqlx::{prelude::FromRow, query_as};
 use time::OffsetDateTime;
@@ -13,6 +14,7 @@ pub struct Invite {
 
     pub created_at: OffsetDateTime,
 
+    // user_id, not ap_user_id
     pub invited_by: Uuid,
 
     pub token: String,
@@ -38,6 +40,24 @@ pub async fn insert(tx: &mut AppTx, invited_by: Uuid) -> ResponseResult<Invite> 
     .await?;
 
     Ok(invite)
+}
+
+pub async fn delete(tx: &mut AppTx, token: &str) -> ResponseResult<()> {
+    let res = sqlx::query!(
+        r#"
+        delete from invites
+        where token = $1
+        "#,
+        token
+    )
+    .execute(&mut **tx)
+    .await?;
+
+    if res.rows_affected() != 1 {
+        return Err(anyhow!("Deleting invite affected less or more than 1 row").into());
+    }
+
+    Ok(())
 }
 
 pub async fn delete_expired(tx: &mut AppTx) -> ResponseResult<()> {

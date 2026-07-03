@@ -111,20 +111,14 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                                 href(format!("/user/{}", data.authed_info.username)),
                                 "View my profile",
                             ),
-                            form(
+
+                            form([action("/invites/create"), method("post")], button(
                                 [
-                                    action("/invites/create"),
-                                    method("post"),
-                                    class("basis-sm grow"),
+                                    class(
+                                        "block px-8 py-2 basis-sm grow border rounded dark:border-neutral-700 border-neutral-300 dark:hover:bg-neutral-700 hover:bg-neutral-100",
+                                    ),
                                 ],
-                                button(
-                                    [class(
-                                        "block w-full px-4 py-2 border rounded border-neutral-700 \
-                                         hover:bg-neutral-700",
-                                    )],
-                                    "Invite a user",
-                                ),
-                            ),
+                                "Invite a user")),
                             form(
                                 [action("/logout"), method("post"), class("basis-sm grow")],
                                 button(

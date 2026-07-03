@@ -12,6 +12,8 @@ use crate::{
     views::content::help_icon,
 };
 
+/// Base data that is always needed, without form inputs, errors, search results
+/// etc.
 pub struct Loaded {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
@@ -46,6 +48,7 @@ pub enum ActionOutcome {
     NoAction,
 }
 
+/// All data required to render the view.
 pub struct ViewData {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
