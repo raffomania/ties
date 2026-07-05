@@ -34,8 +34,9 @@ pub fn view() -> Element {
                         class("inline-block w-0 h-4"),
                         [span(
                             class(
-                                "block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-900 \
-                                 animate-spin border-t-transparent htmx-indicator",
+                                "block w-4 h-4 -ml-6 border-2 rounded-full \
+                                 dark:border-neutral-900 border-neutral-200 animate-spin \
+                                 border-t-transparent htmx-indicator",
                             ),
                             (),
                         )],

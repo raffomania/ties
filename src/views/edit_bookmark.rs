@@ -211,11 +211,14 @@ pub fn view(
 
     layout::layout(
         [
-            div(class("border-t border-black"), ()),
-            div(class("border-t border-neutral-700"), ()),
+            div(class("border-t dark:border-black border-neutral-200"), ()),
+            div(
+                class("border-t dark:border-neutral-700 border-neutral-300"),
+                (),
+            ),
             div(
                 [
-                    class("flex flex-col max-w-xl px-4 pb-4 rounded grow bg-neutral-800 mx-auto"),
+                    class("flex flex-col max-w-xl px-4 pb-4 rounded grow mx-auto"),
                     attr("hx-indicator", "#global-spinner"),
                 ],
                 [
@@ -223,8 +226,9 @@ pub fn view(
                         [
                             href(format!("/bookmarks/{}", bookmark.id)),
                             class(
-                                "hover:bg-neutral-700 rounded text-neutral-400 self-start mt-4 \
-                                 py-0.5 px-2 -ml-2",
+                                "dark:hover:bg-neutral-700 hover:bg-neutral-200 rounded \
+                                 dark:text-neutral-400 text-neutral-500 self-start mt-4 py-0.5 \
+                                 px-2 -ml-2",
                             ),
                         ],
                         "← back",
@@ -237,9 +241,11 @@ pub fn view(
                                 [class("inline-block h-4"), id("global-spinner")],
                                 span(
                                     class(
-                                        "block w-4 h-4 border-2 rounded-full border-l-neutral-200 \
-                                         border-b-neutral-200 border-r-neutral-200 animate-spin \
-                                         border-t-transparent htmx-indicator",
+                                        "block w-4 h-4 border-2 rounded-full \
+                                         dark:border-l-neutral-200 border-l-neutral-700 \
+                                         dark:border-b-neutral-200 border-b-neutral-700 \
+                                         dark:border-r-neutral-200 border-r-neutral-700 \
+                                         animate-spin border-t-transparent htmx-indicator",
                                     ),
                                     (),
                                 ),
@@ -249,14 +255,17 @@ pub fn view(
                     dl(
                         (),
                         [
-                            dt(class("text-sm text-neutral-400"), "URL"),
+                            dt(
+                                class("text-sm dark:text-neutral-400 text-neutral-500"),
+                                "URL",
+                            ),
                             dd(
                                 class("overflow-hidden whitespace-nowrap text-ellipsis"),
                                 &bookmark.url,
                             ),
                             dt(
                                 [
-                                    class("text-sm text-neutral-400 mt-2"),
+                                    class("text-sm dark:text-neutral-400 text-neutral-500 mt-2"),
                                     title_attr(
                                         "Bookmarks are private until they get added to a public \
                                          list.",
@@ -318,7 +327,10 @@ fn rename(
                 [
                     label([for_("rename-title"), class("font-bold")], "Title"),
                     if outcome == &ActionOutcome::Renamed {
-                        span([class("text-neutral-300")], "✓ renamed!")
+                        span(
+                            [class("dark:text-neutral-300 text-neutral-600")],
+                            "✓ renamed!",
+                        )
                     } else {
                         nothing()
                     },
@@ -330,7 +342,10 @@ fn rename(
                 [
                     input([
                         value(&rename_input.title),
-                        class("rounded py-1.5 px-3 bg-neutral-900 grow"),
+                        class(
+                            "rounded py-1.5 px-3 bg-white border border-neutral-300 \
+                             dark:bg-neutral-900 dark:border-neutral-700 grow",
+                        ),
                         name("title"),
                         id("rename-title"),
                         required(""),
@@ -390,14 +405,21 @@ fn disconnect(
                 button(
                     [
                         class(
-                            "max-w-full border border-neutral-600 rounded px-3 gap-2 flex \
-                             items-center hover:bg-neutral-700",
+                            "max-w-full border dark:border-neutral-600 border-neutral-400 rounded \
+                             px-3 gap-2 flex items-center dark:hover:bg-neutral-700 \
+                             hover:bg-neutral-200",
                         ),
                         name("delete_link_id"),
                         value(link.link_id),
                     ],
                     [
-                        span([class("text-neutral-400"), title_attr("disconnect")], "✖"),
+                        span(
+                            [
+                                class("dark:text-neutral-400 text-neutral-500"),
+                                title_attr("disconnect"),
+                            ],
+                            "✖",
+                        ),
                         span(
                             class("text-ellipsis whitespace-nowrap overflow-hidden"),
                             &link.list_title,
@@ -447,14 +469,17 @@ fn connect(
                                 placeholder("Search lists to connect..."),
                                 // Adding an id will make htmx keep the keyboard focus
                                 id("connect-search-term"),
-                                class("py-1.5 px-3 bg-neutral-900 grow rounded"),
+                                class(
+                                    "py-1.5 px-3 bg-white border border-neutral-300 \
+                                     dark:bg-neutral-900 dark:border-neutral-700 grow rounded",
+                                ),
                             ]),
                             button(
                                 [
                                     type_("submit"),
                                     class(
-                                        "px-2 text-neutral-400 shrink border rounded \
-                                         border-neutral-700",
+                                        "px-2 dark:text-neutral-400 text-neutral-500 shrink \
+                                         border rounded dark:border-neutral-700 border-neutral-300",
                                     ),
                                 ],
                                 "Search lists",
@@ -482,7 +507,9 @@ fn connect(
                                     p((), "Include public lists in search"),
                                     if bookmark_private && search_input.search_public_lists {
                                         p(
-                                            [class("text-neutral-400 text-sm")],
+                                            [class(
+                                                "dark:text-neutral-400 text-neutral-500 text-sm",
+                                            )],
                                             "Connecting this bookmark to a public list will allow \
                                              anyone to see it.",
                                         )
@@ -496,7 +523,7 @@ fn connect(
                 ],
             ),
             p(
-                class("italic mt-2 text-sm text-neutral-400"),
+                class("italic mt-2 text-sm dark:text-neutral-400 text-neutral-500"),
                 if search_results.is_empty() && !search_input.search_term.is_empty() {
                     "Found no lists with a matching title."
                 } else if !search_results.is_empty() && search_input.search_term.is_empty() {
@@ -524,15 +551,18 @@ fn connect(
                                     name("connect_list_id"),
                                     value(list.id),
                                     class(
-                                        "max-w-full border border-neutral-600 rounded px-3 gap-2 \
-                                         flex items-center hover:bg-neutral-700",
+                                        "max-w-full border dark:border-neutral-600 \
+                                         border-neutral-400 rounded px-3 gap-2 flex items-center \
+                                         dark:hover:bg-neutral-700 hover:bg-neutral-200",
                                     ),
                                 ],
                                 [
                                     span(
                                         [
                                             title_attr("connect"),
-                                            class("font-black text-neutral-400"),
+                                            class(
+                                                "font-black dark:text-neutral-400 text-neutral-500",
+                                            ),
                                         ],
                                         "+",
                                     ),

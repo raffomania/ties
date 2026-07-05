@@ -22,11 +22,14 @@ pub fn view(
     }: &Data,
 ) -> Element {
     layout::layout(
-        div(class("border-t border-black")).with([
-            div(class("border-t border-neutral-700")),
+        div(class("border-t dark:border-black border-neutral-200")).with([
+            div(class("border-t dark:border-neutral-700 border-neutral-300")),
             form([
                 action("/bookmarks/create"),
-                class("flex flex-col max-w-xl px-4 pb-4 rounded grow bg-neutral-800"),
+                class(
+                    "flex flex-col max-w-xl px-4 pb-4 rounded grow dark:bg-neutral-800 \
+                     bg-neutral-100",
+                ),
                 attr("hx-post", "/bookmarks/create"),
                 attr("hx-push-url", "true"),
                 attr("hx-select", "main"),
@@ -41,7 +44,10 @@ pub fn view(
                 errors.view("url"),
                 input([
                     value(&input_data.url),
-                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    class(
+                        "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                         dark:bg-neutral-900 dark:border-neutral-700",
+                    ),
                     name("url"),
                     placeholder("https://..."),
                     required(""),
@@ -51,7 +57,10 @@ pub fn view(
                 errors.view("title"),
                 input([
                     value(&input_data.title),
-                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    class(
+                        "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                         dark:bg-neutral-900 dark:border-neutral-700",
+                    ),
                     name("title"),
                     required(""),
                     type_("text"),
@@ -63,8 +72,8 @@ pub fn view(
                         selected_parents
                             .iter()
                             .map(|parent| {
-                                label(class("block leading-8 text-fuchsia-100")).with([
-                                    span(class("text-fuchsia-100"))
+                                label(class("block leading-8")).with([
+                                    span(class("dark:text-fuchsia-100 text-fuchsia-800"))
                                         .with(format!("🧵 {}", parent.title)),
                                     input([name("parents[]"), type_("hidden"), value(parent.id)]),
                                 ])
@@ -79,7 +88,7 @@ pub fn view(
                             .map(|parent_name| {
                                 label(class("block leading-8")).with([
                                     text("New public list "),
-                                    span(class("text-fuchsia-100"))
+                                    span(class("dark:text-fuchsia-100 text-fuchsia-800"))
                                         .with(format!("🧵 {parent_name}")),
                                     input([
                                         name("create_parents[]"),
@@ -120,7 +129,10 @@ fn search(
         errors.view("list_search_term"),
         div(class("relative")).with([
             input([
-                class("rounded py-1.5 px-3 my-2 bg-neutral-900 w-full"),
+                class(
+                    "rounded py-1.5 px-3 my-2 bg-white border border-neutral-300 \
+                     dark:bg-neutral-900 dark:border-neutral-700 w-full",
+                ),
                 attr("hx-indicator", "#list_search_term_indicator"),
                 attr("hx-post", "/bookmarks/create"),
                 attr("hx-select", "#search_results"),
@@ -134,8 +146,9 @@ fn search(
             ]),
             span(class("absolute flex items-center right-0 top-0 w-0 h-full")).with(span([
                 class(
-                    "block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-400 animate-spin \
-                     border-t-neutral-900 htmx-indicator",
+                    "block w-4 h-4 -ml-6 border-2 rounded-full dark:border-neutral-400 \
+                     border-neutral-500 animate-spin dark:border-t-neutral-900 \
+                     border-t-neutral-100 htmx-indicator",
                 ),
                 id("list_search_term_indicator"),
             ])),
@@ -145,8 +158,9 @@ fn search(
                 if let Some(term) = &input_data.list_search_term {
                     button([
                         class(
-                            "block w-full px-4 pt-1 pb-2 text-left rounded hover:bg-neutral-700 \
-                             text-fuchsia-100",
+                            "block w-full px-4 pt-1 pb-2 text-left rounded \
+                             dark:hover:bg-neutral-700 hover:bg-neutral-200 dark:text-fuchsia-100 \
+                             text-fuchsia-800",
                         ),
                         attr("hx-params", "not list_search_term"),
                         attr("hx-post", "/bookmarks/create"),
@@ -167,7 +181,8 @@ fn search(
                             button([
                                 class(
                                     "block w-full px-4 pt-1 pb-2 text-left rounded \
-                                     hover:bg-neutral-700 text-fuchsia-100",
+                                     dark:hover:bg-neutral-700 hover:bg-neutral-200 \
+                                     dark:text-fuchsia-100 text-fuchsia-800",
                                 ),
                                 attr("hx-params", "not list_search_term"),
                                 attr("hx-post", "/bookmarks/create"),

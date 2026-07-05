@@ -26,13 +26,19 @@ pub fn base_document(children: impl IntoElements) -> Element {
                         }"#,
                     ),
                 ]),
-                meta([name("color-scheme"), content("dark")]),
+                meta([name("color-scheme"), content("dark light")]),
                 meta([
                     name("viewport"),
                     content("width=device-width,initial-scale=1"),
                 ]),
                 title_tag([]).with("ties"),
             ]))
-            .with(body(class("w-full h-full text-gray-200 bg-neutral-800")).with(children)),
+            .with(
+                body(class(
+                    "w-full h-full dark:text-gray-200 text-gray-700 dark:bg-neutral-800
+                     bg-neutral-50",
+                ))
+                .with(children),
+            ),
     )
 }

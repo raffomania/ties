@@ -44,7 +44,7 @@ pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> 
 }
 
 fn search(previous_input: Option<&str>) -> Element {
-    div(class("px-4 py-4 bg-neutral-900")).with(
+    div(class("px-4 py-4 dark:bg-neutral-900 bg-stone-100")).with(
         form([
             action("/search"),
             method("get"),
@@ -60,12 +60,13 @@ fn search(previous_input: Option<&str>) -> Element {
                 placeholder("Search all bookmarks"),
                 value(previous_input.unwrap_or("")),
                 class(
-                    "leading-8 px-3 bg-neutral-900 grow border rounded-l border-neutral-700 \
-                     max-w-2xl",
+                    "leading-8 px-3 dark:bg-neutral-900 bg-white grow border rounded-l \
+                     dark:border-neutral-700 border-neutral-300 max-w-2xl",
                 ),
             ]),
             button(class(
-                "px-2 text-neutral-400 shrink border-y border-r rounded-r border-neutral-700",
+                "px-2 dark:text-neutral-400 text-neutral-500 shrink border-y border-r rounded-r \
+                 dark:border-neutral-700 border-neutral-300",
             ))
             .with("Search"),
         ]),
@@ -76,18 +77,23 @@ fn sidebar(authed_info: &AuthedInfo) -> Element {
     aside([
         id("nav"),
         class(
-            "bg-neutral-900 sm:max-w-[18rem] sm:w-1/3 sm:max-h-full flex flex-col \
-             sm:flex-col-reverse sm:border-r border-neutral-700 border-t sm:border-t-0",
+            "dark:bg-neutral-900 bg-stone-100 sm:max-w-[18rem] sm:w-1/3 sm:max-h-full flex \
+             flex-col sm:flex-col-reverse sm:border-r dark:border-neutral-700 border-neutral-300 \
+             border-t sm:border-t-0",
         ),
     ])
     .with([
         div(class("sm:overflow-y-auto sm:flex-1")).with([lists_header(), lists(authed_info)]),
         header(class(
-            "sticky bottom-0 flex justify-between items-center p-2 leading-8 bg-neutral-900",
+            "sticky bottom-0 flex justify-between items-center p-2 leading-8 bg-stone-100 \
+             dark:bg-neutral-900",
         ))
         .with([a([
             href("/"),
-            class("px-2 font-bold rounded hover:bg-neutral-800 border border-neutral-900"),
+            class(
+                "px-2 font-bold rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 border \
+                 dark:border-neutral-900 border-stone-100",
+            ),
         ])
         .with([span([]).with(&authed_info.username)])]),
     ])
@@ -95,16 +101,20 @@ fn sidebar(authed_info: &AuthedInfo) -> Element {
 
 fn lists_header() -> Element {
     div(class(
-        "sticky top-0 flex items-center justify-between px-2 pt-2 sm:top-0 bg-neutral-900",
+        "sticky top-0 flex items-center justify-between px-2 pt-2 sm:top-0 dark:bg-neutral-900 \
+         bg-stone-100",
     ))
     .with([
         h3(class(
-            "px-2 py-1 text-sm font-bold tracking-tight text-neutral-400",
+            "px-2 py-1 text-sm font-bold tracking-tight dark:text-neutral-400 text-neutral-500",
         ))
         .with("Lists"),
         a([
             href("/lists/create"),
-            class("block px-3 text-xl rounded hover:bg-neutral-800 text-neutral-400"),
+            class(
+                "block px-3 text-xl rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
+                 dark:text-neutral-400 text-neutral-500",
+            ),
         ])
         .with("+"),
     ])
@@ -117,7 +127,7 @@ fn lists(authed_info: &AuthedInfo) -> Element {
             a([
                 class(
                     "block px-4 py-1 overflow-hidden text-ellipsis whitespace-nowrap \
-                     hover:bg-neutral-800",
+                     dark:hover:bg-neutral-800 hover:bg-neutral-200",
                 ),
                 href("/bookmarks/unsorted"),
             ])
@@ -128,7 +138,8 @@ fn lists(authed_info: &AuthedInfo) -> Element {
             a([
                 class(
                     "block px-4 py-1 overflow-hidden text-ellipsis whitespace-nowrap \
-                     hover:bg-neutral-800 text-neutral-400",
+                     dark:hover:bg-neutral-800 hover:bg-neutral-200 dark:text-neutral-400 \
+                     text-neutral-500",
                 ),
                 href("/lists/unpinned"),
             ])
@@ -142,7 +153,7 @@ fn list_item(list: &List) -> Element {
         a([
             class(
                 "block px-4 py-1 overflow-hidden text-ellipsis whitespace-nowrap \
-                 hover:bg-neutral-800",
+                 dark:hover:bg-neutral-800 hover:bg-neutral-200",
             ),
             href(format!("/lists/{}", list.id)),
         ])

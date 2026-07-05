@@ -29,9 +29,12 @@ pub fn view(
 ) -> Element {
     super::layout::layout(
         div(
-            class("border-t border-black"),
+            class("border-t dark:border-black border-neutral-200"),
             [
-                div(class("border-t border-neutral-700"), ()),
+                div(
+                    class("border-t dark:border-neutral-700 border-neutral-300"),
+                    (),
+                ),
                 form(
                     [
                         action("/links/create"),
@@ -80,7 +83,11 @@ pub fn view(
                                     errors.view("search_term_src"),
                                     errors.view("search_term_dest"),
                                     input([
-                                        class("rounded py-1.5 px-3 bg-neutral-900 w-full"),
+                                        class(
+                                            "rounded py-1.5 px-3 bg-white border \
+                                             border-neutral-300 dark:bg-neutral-900 \
+                                             dark:border-neutral-700 w-full",
+                                        ),
                                         attr("hx-post", "/links/create"),
                                         attr("hx-select", "#search_results"),
                                         attr("hx-target", "#search_results"),
@@ -105,7 +112,8 @@ pub fn view(
                                             [
                                                 class(
                                                     "block w-full px-4 pt-1 pb-2 text-left \
-                                                     rounded hover:bg-neutral-700",
+                                                     rounded dark:hover:bg-neutral-700 \
+                                                     hover:bg-neutral-200",
                                                 ),
                                                 attr("hx-post", "/links/create"),
                                                 value(list.id),
@@ -116,7 +124,7 @@ pub fn view(
                                                 }),
                                             ],
                                             p(
-                                                class("text-fuchsia-100"),
+                                                class("dark:text-fuchsia-100 text-fuchsia-800"),
                                                 format!("️🧵 {}", list.title),
                                             ),
                                         )
@@ -159,11 +167,15 @@ pub fn view(
 fn link_dest(link_dest: &db::LinkDestination) -> Element {
     match link_dest {
         db::LinkDestination::Bookmark(bookmark) => fragment([
-            p(class("text-orange-100"), format!("📄 {}", bookmark.title)),
+            p(
+                class("dark:text-orange-100 text-orange-900"),
+                format!("📄 {}", bookmark.title),
+            ),
             content::link_url(&bookmark.url),
         ]),
-        db::LinkDestination::List(list) => {
-            p(class("text-fuchsia-100"), format!("️🧵 {}", list.title))
-        }
+        db::LinkDestination::List(list) => p(
+            class("dark:text-fuchsia-100 text-fuchsia-800"),
+            format!("️🧵 {}", list.title),
+        ),
     }
 }

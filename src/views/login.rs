@@ -90,7 +90,7 @@ fn login_form(template: &Template) -> Element {
 fn username_field(errors: &FormErrors, val: &str) -> Element {
     fragment().with([
         label([
-            class("mt-10 text-neutral-400"),
+            class("mt-10 dark:text-neutral-400 text-neutral-500"),
             for_("credentials[username]"),
         ])
         .with("Username"),
@@ -98,7 +98,10 @@ fn username_field(errors: &FormErrors, val: &str) -> Element {
         input([
             type_("text"),
             name("credentials[username]"),
-            class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+            class(
+                "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 dark:bg-neutral-900 \
+                 dark:border-neutral-700",
+            ),
             value(val),
             required("true"),
         ]),
@@ -108,7 +111,7 @@ fn username_field(errors: &FormErrors, val: &str) -> Element {
 fn password_field(errors: &FormErrors) -> Element {
     fragment().with([
         label([
-            class("mt-4 text-neutral-400"),
+            class("mt-4 dark:text-neutral-400 text-neutral-500"),
             for_("credentials[password]"),
         ])
         .with("Password"),
@@ -116,7 +119,10 @@ fn password_field(errors: &FormErrors) -> Element {
         input([
             type_("password"),
             name("credentials[password]"),
-            class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+            class(
+                "rounded py-1.5 px-3 mt-2 dark:bg-neutral-900 dark:border-neutral-700 bg-white \
+                 border border-neutral-300",
+            ),
             required("true"),
         ]),
     ])
@@ -126,14 +132,15 @@ fn submit_button() -> Element {
     button([
         type_("submit"),
         class(
-            "leading-6 bg-neutral-300 mt-5 font-semibold rounded py-1.5 flex items-center \
-             justify-center disabled:bg-neutral-500 text-neutral-900",
+            "leading-6 bg-neutral-800 dark:bg-neutral-300 mt-5 font-semibold rounded py-1.5 flex \
+             items-center justify-center disabled:bg-neutral-500 dark:text-neutral-900 \
+             text-neutral-200",
         ),
     ])
     .with([
         span(class("inline-block w-0 h-4")).with(span(class(
-            "block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-900 animate-spin \
-             border-t-transparent htmx-indicator",
+            "block w-4 h-4 -ml-6 border-2 rounded-full dark:border-neutral-900 border-neutral-200 \
+             animate-spin border-t-transparent htmx-indicator",
         ))),
         text("Sign in"),
     ])
@@ -142,11 +149,11 @@ fn submit_button() -> Element {
 fn oidc_button(oidc_info: &OidcInfo) -> Element {
     if let OidcInfo::Configured { name } = oidc_info {
         fragment().with([
-            hr(class("my-5 border-neutral-700")),
+            hr(class("my-5 dark:border-neutral-700 border-neutral-300")),
             a([
                 class(
-                    "leading-6 border border-neutral-500 font-semibold rounded py-1.5 flex \
-                     items-center justify-center",
+                    "leading-6 border dark:border-neutral-500 border-neutral-400 font-semibold \
+                     rounded py-1.5 flex items-center justify-center",
                 ),
                 href("/login_oidc"),
             ])

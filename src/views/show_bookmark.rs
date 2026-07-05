@@ -34,18 +34,19 @@ pub fn view(
     layout::layout(
         fragment([
             header(
-                class("bg-neutral-900 px-4 pt-3 pb-4"),
+                class("dark:bg-neutral-900 bg-stone-100 px-4 pt-3 pb-4"),
                 [
                     h1(class("text-3xl tracking-tight font-bold"), &bookmark.title),
                     p(
                         class(
-                            "w-full overflow-hidden hover:text-fuchsia-300 whitespace-nowrap \
-                             text-ellipsis text-neutral-300",
+                            "w-full overflow-hidden dark:hover:text-orange-300 \
+                             hover:text-orange-900 whitespace-nowrap text-ellipsis \
+                             dark:text-neutral-300 text-neutral-600",
                         ),
                         a(
                             href(&bookmark.url),
                             [
-                                span(class("text-neutral-400 text-sm"), "↪"),
+                                span(class("dark:text-neutral-400 text-neutral-500 text-sm"), "↪"),
                                 text(" "),
                                 span((), &bookmark.url),
                             ],
@@ -71,8 +72,11 @@ pub fn view(
                     backlink_section(&backlinks),
                 ],
             ),
-            div(class("border-b border-black"), ()),
-            div(class("border-b border-neutral-700"), ()),
+            div(class("border-b dark:border-black border-neutral-200"), ()),
+            div(
+                class("border-b dark:border-neutral-700 border-neutral-300"),
+                (),
+            ),
             div(
                 id("archive-contents"),
                 archive_contents(archive.as_ref(), bookmark.id, is_owner),
@@ -90,7 +94,9 @@ fn edit_button(bookmark: &db::Bookmark, is_owner: bool) -> Element {
     a(
         [
             class(
-                "text-neutral-300 hover:bg-neutral-700 border rounded border-neutral-700 py-1 px-4",
+                "dark:text-neutral-300 text-neutral-600 dark:hover:bg-neutral-700 \
+                 hover:bg-neutral-200 border rounded dark:border-neutral-700 border-neutral-300 \
+                 py-1 px-4",
             ),
             href(format!("/bookmarks/{}/edit", bookmark.id)),
         ],
@@ -115,7 +121,7 @@ fn status(bookmark: &db::Bookmark, archive: Option<&db::Archive>, username: &str
     let created_at = content::format_date(bookmark.created_at);
 
     div(
-        class("flex flex-wrap text-sm gap-x-1 text-neutral-400 mb-4"),
+        class("flex flex-wrap text-sm gap-x-1 dark:text-neutral-400 text-neutral-500 mb-4"),
         [
             p((), format!("bookmarked by {username} on {created_at}")),
             archive_status.map_or(nothing(), |status| {
@@ -142,7 +148,9 @@ fn archive_button(
         ],
         button(
             class(
-                "text-neutral-300 hover:bg-neutral-700 border rounded border-neutral-700 py-1 px-4",
+                "dark:text-neutral-300 text-neutral-600 dark:hover:bg-neutral-700 \
+                 hover:bg-neutral-200 border rounded dark:border-neutral-700 border-neutral-300 \
+                 py-1 px-4",
             ),
             label,
         ),
@@ -155,7 +163,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
             class("p-4 flex flex-col gap-2"),
             [
                 p(
-                    class("text-neutral-500 italic text-sm"),
+                    class("dark:text-neutral-500 text-neutral-400 italic text-sm"),
                     "Not archived yet.",
                 ),
                 archive_button(bookmark_id, "Archive now", archive, is_owner),
@@ -177,8 +185,9 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
                 [
                     span(
                         class(
-                            "inline-block w-4 h-4 border-2 rounded-full border-b-neutral-300 \
-                             border-r-neutral-300 border-l-neutral-300 border-t-transparent  \
+                            "inline-block w-4 h-4 border-2 rounded-full dark:border-b-neutral-300 \
+                             border-b-neutral-600 dark:border-r-neutral-300 border-r-neutral-600 \
+                             dark:border-l-neutral-300 border-l-neutral-600 border-t-transparent \
                              animate-spin",
                         ),
                         (),
@@ -200,7 +209,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
             class("p-4 flex flex-col gap-2"),
             [
                 p(
-                    class("text-orange-300 text-sm italic"),
+                    class("dark:text-orange-300 text-orange-700 text-sm italic"),
                     format!("Could not archive this page: {error}"),
                 ),
                 archive_button(bookmark_id, "Retry archiving", Some(archive), is_owner),
@@ -210,7 +219,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
 
     div(
         [
-            class("prose prose-invert px-4"),
+            class("prose dark:prose-invert px-4"),
             // Ammonia strips hx- and data-hx- attributes, but it can't hurt to be extra safe
             attr("hx-disable", ""),
         ],
@@ -228,7 +237,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
             fragment(a(
                 [
                     href(format!("/lists/{}", list.id)),
-                    class("hover:text-fuchsia-300"),
+                    class("dark:hover:text-fuchsia-300 hover:text-pink-700"),
                 ],
                 &list.title,
             ))

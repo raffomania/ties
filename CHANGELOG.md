@@ -2,11 +2,7 @@
 
 *Note: This file does not contain any LLM-generated text.*
 
-## 0.2.1
-
-_Released on 2026-05-07_
-
-[You can now support ties development via GitHub Sponsors!](https://github.com/sponsors/raffomania)
+## Unreleased
 
 ### Breaking Changes
 
@@ -16,6 +12,20 @@ _Released on 2026-05-07_
 
 - New page for editing bookmark titles (including the option to use the fetched title from the remote site), as well as quickly adding/removing them to lists.
 - Updated bookmark titles are sent to federating servers.
+
+### Light Mode
+
+Depending on your browser/system setting, ties will now display in light mode. This is to prevent jarring changes when switching from other, light-mode sites to ties, and to increase legibility.
+
+### Bugfixes
+
+- Session lifetimes are now renewed on activity. Previously, you would get logged out two weeks after logging in, no matter what. Now, you'll only be logged out after two weeks of inactivity.
+
+## 0.2.1
+
+_Released on 2026-05-07_
+
+[You can now support ties development via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
 ### Docs
 

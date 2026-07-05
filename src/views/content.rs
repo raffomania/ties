@@ -7,8 +7,8 @@ pub static BULLET: &str = "∙";
 pub fn link_url(url: &str) -> Element {
     p(
         class(
-            "w-full overflow-hidden text-sm text-neutral-400 hover:text-neutral-300 \
-             whitespace-nowrap text-ellipsis",
+            "w-full overflow-hidden text-sm dark:text-neutral-400 text-neutral-500 \
+             dark:hover:text-neutral-300 hover:text-neutral-800 whitespace-nowrap text-ellipsis",
         ),
         a(href(url), url),
     )
@@ -17,7 +17,8 @@ pub fn link_url(url: &str) -> Element {
 pub fn help_icon() -> Element {
     span(
         [class(
-            "text-neutral-400 hover:text-neutral-200 cursor-default text-sm",
+            "dark:text-neutral-400 text-neutral-500 dark:hover:text-neutral-200 \
+             hover:text-neutral-600 cursor-default text-sm",
         )],
         "🛈",
     )
