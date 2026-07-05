@@ -17,8 +17,8 @@ pub fn view(
     }: &Data,
 ) -> Element {
     layout::layout(
-        div(class("border-t border-black")).with([
-            div(class("border-t border-neutral-700")),
+        div(class("border-t dark:border-black border-neutral-200")).with([
+            div(class("border-t dark:border-neutral-700 border-neutral-300")),
             form([
                 action("/lists/create"),
                 method("POST"),
@@ -34,7 +34,10 @@ pub fn view(
                     name("title"),
                     type_("text"),
                     value(&input_data.title),
-                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    class(
+                        "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                         dark:bg-neutral-900 dark:border-neutral-700",
+                    ),
                 ]),
                 label(class("mt-4")).with([
                     text("Note"),
@@ -43,7 +46,10 @@ pub fn view(
                         name("content"),
                         placeholder(""),
                         value(input_data.content.as_deref().unwrap_or("")),
-                        class("rounded py-1.5 px-3 mt-2 bg-neutral-900 block w-full"),
+                        class(
+                            "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                             dark:bg-neutral-900 dark:border-neutral-700 block w-full",
+                        ),
                     ]),
                 ]),
                 div(class("mt-3 mb-5")).with([label(()).with([

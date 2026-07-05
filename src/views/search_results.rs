@@ -20,8 +20,8 @@ fn results(data: &Data) -> Element {
     fragment([
         p(
             class(
-                "bg-neutral-900 px-4 pt-3 pb-3 font-bold tracking-tight border-b border-black \
-                 text-xl",
+                "dark:bg-neutral-900 bg-stone-100 px-4 pt-3 pb-3 font-bold tracking-tight \
+                 border-b dark:border-black border-neutral-200 text-xl",
             ),
             format!("{} bookmarks found", data.results.total_count),
         ),
@@ -39,7 +39,10 @@ fn results(data: &Data) -> Element {
 fn pagination(data: &Data) -> Element {
     let previous_input = data.layout.previous_search_input.as_deref().unwrap_or("");
     section(
-        class("flex flex-row gap-4 justify-center w-full p-4 border-t border-neutral-700"),
+        class(
+            "flex flex-row gap-4 justify-center w-full p-4 border-t dark:border-neutral-700 \
+             border-neutral-300",
+        ),
         [
             match data.results.previous_page {
                 Some(page) => {
@@ -61,18 +64,21 @@ fn pagination(data: &Data) -> Element {
 
 fn list_item(result: &db::search::Result, Data { layout, .. }: &Data) -> Element {
     section(
-        class("flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t border-neutral-700"),
+        class(
+            "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t dark:border-neutral-700 \
+             border-neutral-300",
+        ),
         [
             div(class("overflow-hidden"), list_item_bookmark(result)),
             if let Some(_authed_info) = &layout.authed_info {
                 div(
                     class(
                         "flex flex-wrap justify-end flex-1 pt-2 text-sm basis-32 gap-x-2 \
-                         text-neutral-400",
+                         dark:text-neutral-400 text-neutral-500",
                     ),
                     [a(
                         [
-                            class("hover:text-neutral-100"),
+                            class("dark:hover:text-neutral-100 hover:text-neutral-800"),
                             href(format!("/links/create?dest_id={}", result.bookmark_id)),
                         ],
                         "Connect",
@@ -90,8 +96,9 @@ fn list_item_bookmark(result: &db::search::Result) -> Element {
         a(
             [
                 class(
-                    "block overflow-hidden leading-8 text-orange-100 hover:text-orange-300 \
-                     text-ellipsis whitespace-nowrap",
+                    "block overflow-hidden leading-8 dark:text-orange-100 text-orange-900 \
+                     dark:hover:text-orange-300 hover:text-orange-700 text-ellipsis \
+                     whitespace-nowrap",
                 ),
                 href(format!("/bookmarks/{}", result.bookmark_id)),
             ],

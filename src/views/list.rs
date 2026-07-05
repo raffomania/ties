@@ -26,12 +26,15 @@ pub fn view(
     layout::layout(
         fragment()
             .with(
-                div(class("bg-neutral-900 border-b border-black px-4"))
-                    .with(title_and_description(list, metadata))
-                    .with(layout.authed_info.as_ref().and_then(|authed_info| {
-                        (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
-                    }))
-                    .with(backlink_section(backlinks)),
+                div(class(
+                    "dark:bg-neutral-900 bg-stone-100 border-b dark:border-black \
+                     border-neutral-200 px-4",
+                ))
+                .with(title_and_description(list, metadata))
+                .with(layout.authed_info.as_ref().and_then(|authed_info| {
+                    (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
+                }))
+                .with(backlink_section(backlinks)),
             )
             .with(
                 links
@@ -42,7 +45,8 @@ pub fn view(
             .with(
                 links.is_empty().then_some(
                     p(class(
-                        "border-t border-neutral-700 text-neutral-400 italic p-4",
+                        "border-t dark:border-neutral-700 border-neutral-300 \
+                         dark:text-neutral-400 text-neutral-500 italic p-4",
                     ))
                     .with("No bookmarks here yet."),
                 ),
@@ -55,10 +59,13 @@ fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Ele
     header(class("pt-3 mb-4"))
         .with([
             h1(class("text-2xl font-bold tracking-tight")).with(&list.title),
-            div(class("flex flex-wrap text-sm gap-x-1 text-neutral-400")).with([
+            div(class(
+                "flex flex-wrap text-sm gap-x-1 dark:text-neutral-400 text-neutral-500",
+            ))
+            .with([
                 a([
                     href(format!("/user/{}", metadata.username)),
-                    class("hover:text-neutral-200"),
+                    class("dark:hover:text-neutral-200 hover:text-neutral-600"),
                 ])
                 .with(format!("by {}", metadata.username)),
                 text("∙"),
@@ -86,7 +93,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
             fragment(a(
                 [
                     href(format!("/lists/{}", list.id)),
-                    class("hover:text-fuchsia-300"),
+                    class("dark:hover:text-fuchsia-300 hover:text-pink-700"),
                 ],
                 &list.title,
             ))
@@ -107,7 +114,11 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
                             title_attr(
                                 "These are lists that point to the list you are currently viewing.",
                             ),
-                            class("text-neutral-400 hover:text-neutral-200 cursor-default text-sm"),
+                            class(
+                                "dark:text-neutral-400 text-neutral-500 \
+                                 dark:hover:text-neutral-200 hover:text-neutral-600 \
+                                 cursor-default text-sm",
+                            ),
                         ],
                         "🛈",
                     ),
@@ -121,7 +132,10 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
 fn edit_buttons(Data { list, .. }: &Data) -> Element {
     section(class("flex flex-wrap my-4 mx-1 gap-x-4 gap-y-2")).with([
         a([
-            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
+            class(
+                "block px-4 py-1 border rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
+                 dark:border-neutral-700 border-neutral-300 w-max",
+            ),
             href(format!("/links/create?dest_id={}", list.id)),
         ])
         .with("Add to other list"),
@@ -135,7 +149,10 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             method("post"),
         ])
         .with([button([
-            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
+            class(
+                "block px-4 py-1 border rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
+                 dark:border-neutral-700 border-neutral-300 w-max",
+            ),
             name("private"),
             type_("submit"),
             value(if list.private { "false" } else { "true" }),
@@ -151,7 +168,10 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             method("post"),
         ])
         .with([button([
-            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
+            class(
+                "block px-4 py-1 border rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
+                 dark:border-neutral-700 border-neutral-300 w-max",
+            ),
             name("pinned"),
             type_("submit"),
             value(if list.pinned { "false" } else { "true" }),
@@ -162,14 +182,18 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             "Pin to sidebar"
         })]),
         a([
-            class("block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max"),
+            class(
+                "block px-4 py-1 border rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
+                 dark:border-neutral-700 border-neutral-300 w-max",
+            ),
             href(format!("/lists/{}/edit_title", list.id)),
         ])
         .with([
             text("Rename"),
             a([
                 class(
-                    "block px-4 py-1 border rounded hover:bg-neutral-800 border-neutral-700 w-max",
+                    "block px-4 py-1 border rounded dark:hover:bg-neutral-800 \
+                     hover:bg-neutral-200 dark:border-neutral-700 border-neutral-300 w-max",
                 ),
                 href(format!("/bookmarks/create?parent_id={}", list.id)),
                 attr("hx-get", format!("/bookmarks/create?parent_id={}", list.id)),
@@ -183,7 +207,8 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
 
 fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Element {
     section(class(
-        "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t border-neutral-700",
+        "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t dark:border-neutral-700 \
+         border-neutral-300",
     ))
     .with([
         div(class("overflow-hidden")).with(match &link.dest {
@@ -192,11 +217,12 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
         }),
         if let Some(authed_info) = &layout.authed_info {
             div(class(
-                "flex flex-wrap justify-end flex-1 pt-2 text-sm basis-32 gap-x-2 text-neutral-400",
+                "flex flex-wrap justify-end flex-1 pt-2 text-sm basis-32 gap-x-2 \
+                 dark:text-neutral-400 text-neutral-500",
             ))
             .with([
                 a([
-                    class("hover:text-neutral-100"),
+                    class("dark:hover:text-neutral-100 hover:text-neutral-800"),
                     href(format!("/links/create?dest_id={}", link.dest.id())),
                 ])
                 .with("Connect"),
@@ -204,7 +230,7 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
                     fragment().with([
                         span(()).with("∙"),
                         button([
-                            class("hover:text-neutral-100"),
+                            class("dark:hover:text-neutral-100 hover:text-neutral-800"),
                             attr("hx-delete", format!("/links/{}", link.id)),
                             attr("title", "Remove from list"),
                         ])
@@ -224,8 +250,8 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
     fragment().with([
         a([
             class(
-                "block overflow-hidden leading-8 text-orange-100 hover:text-orange-300 \
-                 text-ellipsis whitespace-nowrap",
+                "block overflow-hidden leading-8 dark:text-orange-100 text-orange-900 \
+                 dark:hover:text-orange-300 hover:text-orange-700 text-ellipsis whitespace-nowrap",
             ),
             href(format!("/bookmarks/{}", bookmark.id)),
         ])
@@ -240,8 +266,8 @@ fn list_item_list(inner_list: &db::ListWithLinks) -> Element {
     fragment().with([
         a([
             class(
-                "block overflow-hidden font-semibold leading-8 hover:text-fuchsia-300 \
-                 text-ellipsis whitespace-nowrap",
+                "block overflow-hidden font-medium tracking-tight leading-8 \
+                 dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis whitespace-nowrap",
             ),
             href(format!("/lists/{}", inner_list.list.id)),
         ])
@@ -256,7 +282,10 @@ fn list_item_list(inner_list: &db::ListWithLinks) -> Element {
                 .filter(|l| matches!(l, db::LinkDestination::Bookmark(_)))
                 .count();
             let list_count = inner_list.links.len() - bookmark_count;
-            div(class("text-sm text-neutral-400 flex flex-wrap gap-x-1")).with([
+            div(class(
+                "text-sm dark:text-neutral-400 text-neutral-500 flex flex-wrap gap-x-1",
+            ))
+            .with([
                 p([]).with(pluralize(
                     bookmark_count.try_into().unwrap_or(-1),
                     "bookmark",

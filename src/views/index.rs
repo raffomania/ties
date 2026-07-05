@@ -56,8 +56,11 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
     let user_stats = user_stats(tx, data.authed_info.ap_user_id).await?;
     let element = super::layout::layout(
         [
-            div(class("border-t border-black"), ()),
-            div(class("border-t border-neutral-700"), ()),
+            div(class("border-t dark:border-black border-neutral-200"), ()),
+            div(
+                class("border-t dark:border-neutral-700 border-neutral-300"),
+                (),
+            ),
             div(
                 class("px-4 flex flex-col w-full items-center text-center"),
                 [
@@ -75,16 +78,16 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                                 ],
                             ),
                             p(
-                                class("mt-2 text-neutral-400"),
+                                class("mt-2 dark:text-neutral-400 text-neutral-500"),
                                 [
                                     span((), "You have "),
                                     span(
-                                        class("text-neutral-300"),
+                                        class("dark:text-neutral-300 text-neutral-600"),
                                         user_stats.bookmark_count.to_string(),
                                     ),
                                     span((), " bookmarks  in "),
                                     span(
-                                        class("text-neutral-300"),
+                                        class("dark:text-neutral-300 text-neutral-600"),
                                         user_stats.list_count.to_string(),
                                     ),
                                     span((), " lists."),
@@ -119,7 +122,8 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
                                         button(
                                             class(
                                                 "w-full block p-4 border rounded \
-                                                 border-neutral-700 hover:bg-neutral-700",
+                                                 dark:border-neutral-700 border-neutral-300 \
+                                                 dark:hover:bg-neutral-700 hover:bg-neutral-100",
                                             ),
                                             "Logout",
                                         ),
@@ -142,7 +146,10 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
 fn dash_button<C: Into<Element>>(attrs: Attrs, children: C) -> Element {
     a(
         [
-            class("block px-8 py-4 w-full border rounded border-neutral-700 hover:bg-neutral-700"),
+            class(
+                "block px-8 py-4 w-full border rounded dark:border-neutral-700 border-neutral-300 \
+                 dark:hover:bg-neutral-700 hover:bg-neutral-100",
+            ),
             attrs,
         ],
         children,
@@ -186,8 +193,8 @@ fn bookmarklet(base_url: &Url) -> Element {
     a(
         [
             class(
-                "text-center block my-2 font-bold text-orange-200 border rounded py-2 px-16 \
-                 cursor-grab",
+                "text-center block my-2 font-bold dark:text-orange-200 text-orange-800 border \
+                 rounded py-2 px-16 cursor-grab",
             ),
             href(format!(
                 "javascript:(function()%7Bwindow.open(%0A%20%20%22{base_url}bookmarks%2Fcreate%\
@@ -201,7 +208,7 @@ fn bookmarklet(base_url: &Url) -> Element {
 
 fn bottom_info() -> Element {
     p(
-        class("text-sm flex gap-x-1 p-4 text-neutral-400 mt-8"),
+        class("text-sm flex gap-x-1 p-4 dark:text-neutral-400 text-neutral-500 mt-8"),
         [
             span((), format!("ties {}", built_version::describe_version())),
             span((), BULLET),

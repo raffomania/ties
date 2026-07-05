@@ -30,12 +30,18 @@ pub fn view(Data { errors, form_input }: Data) -> Element {
                      long. It will be your handle on the fediverse.",
                 ),
                 label(
-                    [class("mt-10 text-neutral-400"), name("username")],
+                    [
+                        class("mt-10 dark:text-neutral-400 text-neutral-500"),
+                        name("username"),
+                    ],
                     "Username",
                 ),
                 errors.view("username"),
                 input([
-                    class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                    class(
+                        "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                         dark:bg-neutral-900 dark:border-neutral-700",
+                    ),
                     name("username"),
                     required(""),
                     type_("text"),
@@ -55,8 +61,9 @@ pub fn view(Data { errors, form_input }: Data) -> Element {
                             class("inline-block w-0 h-4"),
                             span(
                                 class(
-                                    "block w-4 h-4 -ml-6 border-2 rounded-full border-neutral-900 \
-                                     animate-spin border-t-transparent htmx-indicator",
+                                    "block w-4 h-4 -ml-6 border-2 rounded-full \
+                                     dark:border-neutral-900 border-neutral-200 animate-spin \
+                                     border-t-transparent htmx-indicator",
                                 ),
                                 (),
                             ),

@@ -49,7 +49,7 @@ pub async fn view(
     // https://github.com/raffomania/ties/issues/154
     let children = fragment([
         header(
-            [class("p-4 bg-neutral-900")],
+            [class("p-4 dark:bg-neutral-900 bg-stone-100")],
             [
                 h1(
                     [class("text-xl font-bold tracking-tight")],
@@ -71,7 +71,10 @@ fn view_lists(lists: &[db::ListWithMetadata], metadata: &Metadata) -> Element {
     section(
         [],
         [p(
-            class("px-4 text-neutral-400 pb-3 bg-neutral-900 border-b border-black"),
+            class(
+                "px-4 dark:text-neutral-400 text-neutral-500 pb-3 dark:bg-neutral-900 \
+                 bg-stone-100 border-b dark:border-black border-neutral-200",
+            ),
             [
                 span(
                     class("font-bold tracking-tight"),
@@ -94,20 +97,21 @@ fn view_lists(lists: &[db::ListWithMetadata], metadata: &Metadata) -> Element {
 
 fn list_item(list: &db::ListWithMetadata) -> Element {
     section(
-        class("px-4 pt-4 pb-4 border-t border-neutral-700"),
+        class("px-4 pt-4 pb-4 border-t dark:border-neutral-700 border-neutral-300"),
         [
             a(
                 [
                     class(
-                        "block overflow-hidden font-semibold leading-8 hover:text-fuchsia-300 \
-                         text-ellipsis whitespace-nowrap",
+                        "block overflow-hidden font-semibold leading-8 \
+                         dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis \
+                         whitespace-nowrap",
                     ),
                     href(list.list.path()),
                 ],
                 &list.list.title,
             ),
             div(
-                class("text-sm text-neutral-400 flex flex-wrap gap-x-1"),
+                class("text-sm dark:text-neutral-400 text-neutral-500 flex flex-wrap gap-x-1"),
                 [
                     p(
                         [],

@@ -13,7 +13,10 @@ pub fn view(Data { layout, lists }: Data) -> Element {
     super::layout::layout(
         [
             header(
-                class("px-4 pt-3 pb-4 bg-neutral-900 border-b border-black"),
+                class(
+                    "px-4 pt-3 pb-4 dark:bg-neutral-900 bg-stone-100 border-b dark:border-black \
+                     border-neutral-200",
+                ),
                 [h1(class("text-xl font-bold"), "Unpinned Lists")],
             ),
             fragment(lists.into_iter().map(list_item).collect::<Vec<_>>()),
@@ -26,7 +29,7 @@ fn list_item(list: db::lists::UnpinnedList) -> Element {
     section(
         class(
             "flex flex-wrap items-end justify-between gap-2 px-4 pt-4 pb-4 border-t \
-             border-neutral-700",
+             dark:border-neutral-700 border-neutral-300",
         ),
         [div(
             class("overflow-hidden"),
@@ -34,8 +37,9 @@ fn list_item(list: db::lists::UnpinnedList) -> Element {
                 a(
                     [
                         class(
-                            "block overflow-hidden font-semibold leading-8 hover:text-fuchsia-300 \
-                             text-ellipsis whitespace-nowrap",
+                            "block overflow-hidden font-semibold leading-8 \
+                             dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis \
+                             whitespace-nowrap",
                         ),
                         href(format!("/lists/{}", list.id)),
                     ],
@@ -46,11 +50,11 @@ fn list_item(list: db::lists::UnpinnedList) -> Element {
                         content
                             .is_empty()
                             .not()
-                            .then_some(p(class("mt-2"), content))
+                            .then_some(p(class("mb-2"), content))
                     })
                     .unwrap_or(nothing()),
                 div(
-                    class("flex flex-wrap text-sm gap-x-2 text-neutral-400"),
+                    class("flex flex-wrap text-sm gap-x-2 dark:text-neutral-400 text-neutral-500"),
                     [
                         p((), format!("{} bookmarks", list.bookmark_count)),
                         text("∙"),

@@ -20,8 +20,11 @@ pub fn view(
 ) -> Element {
     super::layout::layout(
         [
-            div(class("border-t border-black"), ()),
-            div(class("border-t border-neutral-700"), ()),
+            div(class("border-t dark:border-black border-neutral-200"), ()),
+            div(
+                class("border-t dark:border-neutral-700 border-neutral-300"),
+                (),
+            ),
             form(
                 [
                     action(format!("/lists/{list_id}/edit_title")),
@@ -37,7 +40,10 @@ pub fn view(
                     errors.view("title"),
                     input([
                         value(form_input.title),
-                        class("rounded py-1.5 px-3 mt-2 bg-neutral-900"),
+                        class(
+                            "rounded py-1.5 px-3 mt-2 bg-white border border-neutral-300 \
+                             dark:bg-neutral-900 dark:border-neutral-700",
+                        ),
                         name("title"),
                         required(""),
                         type_("text"),
