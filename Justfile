@@ -183,6 +183,10 @@ test-flaky *args: start-test-database generate-database-info
     # which is always empty and only migrated inside the tests themselves.
     DATABASE_URL=${DATABASE_URL_TEST} SQLX_OFFLINE=true cargo bin cargo-nextest run --run-ignored=only {{ args }}
 
+[group('Testing')]
+update-test-snapshots:
+    INSTA_UPDATE=always just test
+
 [group('Development')]
 development-cert: (ensure-command "mkcert")
     mkdir -p development_cert
