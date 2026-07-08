@@ -4,11 +4,15 @@
 )]
 
 use anyhow::Result;
-use sqlx::Row;
+use sqlx::{Postgres, Row, Transaction, query};
 use url::Url;
 use uuid::Uuid;
 
-use crate::{db, forms::users::CreateUser};
+use crate::{
+    authentication::hash_password,
+    db::{self},
+    forms::ap_users::CreateApUser,
+};
 
 #[test_log::test(tokio::test)]
 async fn generate_missing_ap_users_migration() -> Result<()> {
@@ -105,12 +109,9 @@ async fn generate_missing_bookmark_ap_ids_migration() -> Result<()> {
     // Create bookmark without an ap id
     let mut tx = pool.begin().await?;
 
-    let create_user = CreateUser {
-        username: "testuser".to_string(),
-        password: "testpassword".to_string(),
-    };
+    // Create user
+    let user_id = create_user(&mut tx, &base_url).await?;
 
-    let user = db::users::insert(&mut tx, create_user, &base_url).await?;
     let id = Uuid::new_v4();
     let title = "test title";
     let url = "https://ties.rafa.ee";
@@ -124,7 +125,7 @@ async fn generate_missing_bookmark_ap_ids_migration() -> Result<()> {
         ",
     )
     .bind(id)
-    .bind(user.id)
+    .bind(user_id)
     .bind(url)
     .bind(title)
     .fetch_one(&mut *tx)
@@ -150,4 +151,58 @@ async fn generate_missing_bookmark_ap_ids_migration() -> Result<()> {
     tx.commit().await?;
 
     Ok(())
+}
+
+/// Create a user using the old table layout before the migration we are
+/// testing.
+async fn create_user(tx: &mut Transaction<'_, Postgres>, base_url: &Url) -> Result<Uuid> {
+    let username = "testuser".to_string();
+
+    let hashed_password = hash_password("testpassword")?;
+    let create_ap_user = CreateApUser::new_local(base_url, username.clone())?;
+    let ap_user = query(
+        r#"
+            insert into ap_users
+            (
+                id,
+                ap_id,
+                username,
+                inbox_url,
+                public_key,
+                private_key,
+                last_refreshed_at,
+                display_name,
+                bio
+            )
+            values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            returning *
+            "#,
+    )
+    .bind(create_ap_user.id)
+    .bind(create_ap_user.ap_id.to_string())
+    .bind(create_ap_user.username)
+    .bind(create_ap_user.inbox_url.to_string())
+    .bind(create_ap_user.public_key)
+    .bind(create_ap_user.private_key)
+    .bind(create_ap_user.last_refreshed_at)
+    .bind(create_ap_user.display_name)
+    .bind(create_ap_user.bio)
+    .fetch_one(&mut **tx)
+    .await?;
+
+    let user = query(
+        r#"
+        insert into users
+        (username, password_hash, ap_user_id)
+        values ($1, $2, $3)
+        returning *
+        "#,
+    )
+    .bind("testuser")
+    .bind(hashed_password)
+    .bind(ap_user.get::<Uuid, _>("id"))
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Ok(user.get("id"))
 }
