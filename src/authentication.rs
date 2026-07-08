@@ -19,7 +19,7 @@ use crate::{
     server::AppState,
 };
 
-pub fn hash_password(password: &String) -> ResponseResult<String> {
+pub fn hash_password(password: &str) -> ResponseResult<String> {
     let salt =
         argon2::password_hash::SaltString::generate(&mut argon2::password_hash::rand_core::OsRng);
 
