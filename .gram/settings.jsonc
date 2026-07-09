@@ -1,0 +1,14 @@
+{
+  "file_scan_exclusions": [".sqlx/**/*.json"],
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "cargo": {
+          "extraEnv": {
+            "SQLX_OFFLINE": "false",
+          },
+        },
+      },
+    },
+  },
+}
