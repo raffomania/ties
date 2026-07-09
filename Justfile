@@ -147,15 +147,15 @@ start-test-database:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    if podman ps --format "{{{{.Names}}" | grep -wq "${DATABASE_NAME}_postgres_test"; then
+    if podman ps --format "{{{{.Names}}" | grep -wq "${DATABASE_NAME_TEST}_postgres"; then
         echo "Test database is running."
         exit
     fi
 
-    if ! podman inspect "${DATABASE_NAME}_postgres_test" &> /dev/null; then
+    if ! podman inspect "${DATABASE_NAME_TEST}_postgres" &> /dev/null; then
         set -x
         podman create \
-            --replace --name "${DATABASE_NAME}_postgres_test" --image-volume tmpfs \
+            --replace --name "${DATABASE_NAME_TEST}_postgres" --image-volume tmpfs \
             --health-cmd pg_isready --health-interval 10s \
             --health-startup-cmd="pg_isready" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME_TEST} \
@@ -167,12 +167,14 @@ start-test-database:
             -c autovacuum=off
     fi
 
-    podman start "${DATABASE_NAME}_postgres_test"
+    podman start "${DATABASE_NAME_TEST}_postgres"
 
-    podman wait --condition=healthy "${DATABASE_NAME}_postgres_test"
+    podman wait --condition=healthy "${DATABASE_NAME_TEST}_postgres"
 
 [group('Testing')]
 test *args: start-database start-test-database
+    DATABASE_NAME=${DATABASE_NAME_TEST} just wipe-database
+
     # Migrate the test database so we can compile the tests using SQLX_OFFLINE=false,
     # which avoids needless recompilations
     RUST_LOG="sqlx=warn" cargo -q run -- db --database-url=${DATABASE_URL_TEST} migrate
