@@ -15,7 +15,7 @@ use crate::{
 
 pub const COOKIE_NAME: &str = "ties-session";
 const COOKIE_ATTRIBUTES: &str = "Path=/; HttpOnly; SameSite=Lax; Secure";
-const SESSION_EXPIRY_DURATION: Duration = Duration::weeks(2);
+pub const SESSION_EXPIRY_DURATION: Duration = Duration::weeks(2);
 
 impl Session {
     pub(crate) fn new() -> Session {
@@ -51,6 +51,10 @@ impl Session {
             ap_user_id: user.ap_user_id,
         });
         session.persist(tx).await
+    }
+
+    pub fn expires_in(&self) -> Duration {
+        self.expires_at - OffsetDateTime::now_utc()
     }
 }
 
@@ -96,6 +100,15 @@ impl FromRequestParts<AppState> for Session {
         } else {
             Session::new()
         };
+
+        // If a session has less time to live than this, extend its expiry on activity.
+        // This way, we don't write to the DB on every request.
+        let minimum_expiry_duration = SESSION_EXPIRY_DURATION - Duration::days(1);
+        if state_inner.expires_in() < minimum_expiry_duration {
+            let mut tx = state.pool.begin().await?;
+            db::sessions::extend_expiry(&mut tx, &state_inner.key).await?;
+            tx.commit().await?;
+        }
 
         Ok(state_inner)
     }
