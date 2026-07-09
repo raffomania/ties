@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, query, query_as, types::Json};
 use time::OffsetDateTime;
 
-use crate::db::AppTx;
+use crate::{db::AppTx, session::SESSION_EXPIRY_DURATION};
 
 /// Actual contents of the session without the metadata.
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -84,6 +84,24 @@ pub async fn upsert(
     .execute(&mut **tx)
     .await
     .context("Failed to upsert session")?;
+
+    Ok(())
+}
+
+pub async fn extend_expiry(tx: &mut AppTx, key: &str) -> anyhow::Result<()> {
+    let expires_at = OffsetDateTime::now_utc() + SESSION_EXPIRY_DURATION;
+    query!(
+        "
+        update sessions
+        set expires_at = $2
+        where session_key = $1
+        ",
+        key,
+        expires_at as OffsetDateTime,
+    )
+    .execute(&mut **tx)
+    .await
+    .context("Failed to extend session expiry")?;
 
     Ok(())
 }
