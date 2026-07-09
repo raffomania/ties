@@ -20,6 +20,7 @@ path = [
     "zizmor.yml",
     ".editorconfig",
     ".vscode/settings.json",
+    ".gram/settings.jsonc",
     "tailwind.config.js",
     ".config/*.toml",
     ".cargo/*.toml",
