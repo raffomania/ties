@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "cargo"
+    labels: []
     directory: "/"
     schedule:
       interval: "monthly"
@@ -13,6 +14,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    labels: []
     directory: "/"
     schedule:
       interval: "monthly"
