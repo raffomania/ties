@@ -21,7 +21,8 @@ pub fn base_document(children: impl IntoElements) -> Element {
                     name("htmx-config"),
                     content(
                         r#"{
-                            "scrollIntoViewOnBoost": false
+                            "scrollIntoViewOnBoost": false,
+                            "historyCacheSize": 0
                         }"#,
                     ),
                 ]),
