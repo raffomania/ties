@@ -83,13 +83,14 @@ impl FromRequestParts<AppState> for Session {
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let cookie_header = parts
+        let cookie_headers: Vec<&str> = parts
             .headers
-            .get(axum::http::header::COOKIE)
-            .and_then(|h| h.to_str().ok())
-            .map(ToOwned::to_owned);
+            .get_all(axum::http::header::COOKIE)
+            .iter()
+            .filter_map(|h| h.to_str().ok())
+            .collect();
 
-        let session_key = cookie_header.as_deref().and_then(extract_session_key);
+        let session_key = extract_session_key(cookie_headers);
 
         let state_inner = if let Some(key) = session_key {
             match crate::db::sessions::load(&state.pool, &key.to_string()).await {
@@ -114,10 +115,9 @@ impl FromRequestParts<AppState> for Session {
     }
 }
 
-fn extract_session_key(cookie_header: &str) -> Option<Uuid> {
-    for cookie in cookie_header.split(';') {
-        let cookie = cookie.trim();
-        if let Some((name, value)) = cookie.split_once('=')
+fn extract_session_key(cookie_headers: Vec<&str>) -> Option<Uuid> {
+    for cookie_header in cookie_headers {
+        if let Some((name, value)) = cookie_header.split_once('=')
             && name.trim() == COOKIE_NAME
             && let Ok(uuid) = value.trim().parse::<Uuid>()
         {
