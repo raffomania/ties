@@ -1,4 +1,4 @@
-use std::{env, path::Path, process::Command};
+use std::{env, fs, path::Path, process::Command};
 
 use railwind::{Source, SourceOptions};
 use regex::Regex;
@@ -10,6 +10,67 @@ fn git_cmd(args: &[&str]) -> Option<String> {
         .ok()
         .filter(|o| o.status.success())
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+}
+
+/// Reorders CSS so that all `@media (prefers-color-scheme: dark)` blocks appear
+/// at the end.
+///
+/// This ensures dark mode styles have higher specificity than light mode
+/// styles, since CSS rules with equal specificity are resolved by source order.
+/// Once we switch to encre, check if they fix this for us or if we should
+/// contribute a fix upstream.
+fn reorder_dark_mode_css(css: &str) -> String {
+    let mut normal_rules = String::new();
+    let mut dark_blocks = String::new();
+
+    let mut in_dark_block = false;
+    let mut brace_depth: u32 = 0;
+    let mut current_block = String::new();
+
+    for line in css.lines() {
+        if in_dark_block {
+            current_block.push_str(line);
+            current_block.push('\n');
+
+            // Track brace depth to find end of block
+            for ch in line.chars() {
+                match ch {
+                    '{' => brace_depth += 1,
+                    '}' => {
+                        brace_depth -= 1;
+                    }
+                    _ => {}
+                }
+
+                if brace_depth == 0 {
+                    // End of dark mode block
+                    dark_blocks.push_str(&current_block);
+                    current_block.clear();
+                    in_dark_block = false;
+                    break;
+                }
+            }
+        } else if line.starts_with("@media (prefers-color-scheme: dark)") {
+            // Start of dark mode block
+            in_dark_block = true;
+            brace_depth = 0;
+            current_block.push_str(line);
+            current_block.push('\n');
+
+            // Count opening brace on the same line
+            for ch in line.chars() {
+                if ch == '{' {
+                    brace_depth += 1;
+                }
+            }
+        } else {
+            normal_rules.push_str(line);
+            normal_rules.push('\n');
+        }
+    }
+
+    normal_rules.push_str(&dark_blocks);
+    normal_rules
 }
 
 #[expect(clippy::unwrap_used, reason = "Panicking at compile time is fine")]
@@ -53,5 +114,7 @@ fn main() {
         .collect();
 
     let source = Source::Files(sources);
-    railwind::parse_to_file(source, dest_path.to_str().unwrap(), false, &mut Vec::new());
+    let css = railwind::parse_to_string(source, false, &mut Vec::new());
+    let reordered = reorder_dark_mode_css(&css);
+    fs::write(dest_path, reordered).unwrap();
 }
