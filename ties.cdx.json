@@ -1182,6 +1182,32 @@
       "version": "8.0.2"
     },
     {
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#bs58@0.5.1",
+      "description": "Another Base58 codec implementation.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/Nullus157/bs58-rs"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "bf88ba1141d185c399bee5288d850d63b8369520c1eafc32a0430b5b6c287bf4"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "bs58",
+      "purl": "pkg:cargo/bs58@0.5.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.5.1"
+    },
+    {
       "author": "Andrew Gallant <jamslam@gmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#byteorder@1.5.0",
       "description": "Library for reading/writing numbers in big-endian and little-endian.",
@@ -9340,7 +9366,7 @@
     },
     {
       "author": "Jonas Bushart, Marcin Kaźmierczak",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.18.0",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.21.0",
       "description": "Custom de/serialization functions for Rust's serde",
       "externalReferences": [
         {
@@ -9355,7 +9381,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "dd5414fad8e6907dbdd5bc441a50ae8d6e26151a03b1de04d89a5576de61d01f"
+          "content": "76a5c54c7310e7b8b9577c286d7e399ddd876c3e12b3ed917a8aabc4b96e9e8c"
         }
       ],
       "licenses": [
@@ -9364,14 +9390,14 @@
         }
       ],
       "name": "serde_with",
-      "purl": "pkg:cargo/serde_with@3.18.0",
+      "purl": "pkg:cargo/serde_with@3.21.0",
       "scope": "required",
       "type": "library",
-      "version": "3.18.0"
+      "version": "3.21.0"
     },
     {
       "author": "Jonas Bushart",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.18.0",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.21.0",
       "description": "proc-macro library for serde_with",
       "externalReferences": [
         {
@@ -9386,7 +9412,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "d3db8978e608f1fe7357e211969fd9abdcae80bac1ba7a3369bb7eb6b404eb65"
+          "content": "84d57bc0c8b9a17920c178daa6bb924850d54a9c97ab45194bb8c17ad66bb660"
         }
       ],
       "licenses": [
@@ -9395,10 +9421,10 @@
         }
       ],
       "name": "serde_with_macros",
-      "purl": "pkg:cargo/serde_with_macros@3.18.0",
+      "purl": "pkg:cargo/serde_with_macros@3.21.0",
       "scope": "required",
       "type": "library",
-      "version": "3.18.0"
+      "version": "3.21.0"
     },
     {
       "author": "The Servo Project Developers",
@@ -12884,6 +12910,12 @@
       "ref": "registry+https://github.com/rust-lang/crates.io-index#brotli@8.0.2"
     },
     {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#tinyvec@1.11.0"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#bs58@0.5.1"
+    },
+    {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#byteorder@1.5.0"
     },
     {
@@ -14104,7 +14136,7 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
+        "registry+https://github.com/rust-lang/crates.io-index#base64@0.21.7",
         "registry+https://github.com/rust-lang/crates.io-index#chrono@0.4.44",
         "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.6",
@@ -14141,7 +14173,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.149",
         "registry+https://github.com/rust-lang/crates.io-index#serde_path_to_error@0.1.20",
         "registry+https://github.com/rust-lang/crates.io-index#serde_plain@1.0.2",
-        "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.18.0",
+        "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.21.0",
         "registry+https://github.com/rust-lang/crates.io-index#sha2@0.10.9",
         "registry+https://github.com/rust-lang/crates.io-index#subtle@2.6.1",
         "registry+https://github.com/rust-lang/crates.io-index#thiserror@1.0.69",
@@ -14813,6 +14845,7 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
+        "registry+https://github.com/rust-lang/crates.io-index#bs58@0.5.1",
         "registry+https://github.com/rust-lang/crates.io-index#chrono@0.4.44",
         "registry+https://github.com/rust-lang/crates.io-index#hex@0.4.3",
         "registry+https://github.com/rust-lang/crates.io-index#indexmap@1.9.3",
@@ -14821,10 +14854,10 @@
         "registry+https://github.com/rust-lang/crates.io-index#schemars@1.2.1",
         "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.228",
         "registry+https://github.com/rust-lang/crates.io-index#serde_json@1.0.149",
-        "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.18.0",
+        "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.21.0",
         "registry+https://github.com/rust-lang/crates.io-index#time@0.3.47"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.18.0"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with@3.21.0"
     },
     {
       "dependsOn": [
@@ -14833,7 +14866,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
         "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.18.0"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_with_macros@3.21.0"
     },
     {
       "dependsOn": [
