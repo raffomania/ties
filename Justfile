@@ -95,7 +95,7 @@ start-rauthy:
             --replace --name ties_rauthy \
             --pull=missing \
             -e COOKIE_MODE=danger-insecure \
-            -e PUB_URL=localhost:${RAUTHY_PORT} \
+            -e PUB_URL=127.0.0.1:${RAUTHY_PORT} \
             -e LOG_LEVEL=info \
             -e LOCAL_TEST=true \
             -e BOOTSTRAP_ADMIN_EMAIL=admin@rauthy.localhost \
