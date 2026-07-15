@@ -150,13 +150,17 @@ async fn get_login_oidc_redirect(
         Err(ResponseError::NotFound) => {
             let mut session = session.rotate(&mut tx).await?;
             session.contents.oidc_user_info = Some(authed_oidc_info);
-            session.persist(&mut tx).await?;
+            let cookie = session.persist(&mut tx).await?;
             tx.commit().await?;
 
-            Ok(HtmfResponse(oidc_select_username::view(
+            let mut res = HtmfResponse(oidc_select_username::view(
                 views::oidc_select_username::Data::default(),
             ))
-            .into_response())
+            .into_response();
+
+            attach_cookie(&mut res, cookie);
+
+            Ok(res)
         }
         Err(e) => Err(e),
     }
