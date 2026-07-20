@@ -1,3 +1,6 @@
+use axum::http::StatusCode;
+use uuid::Uuid;
+
 use crate::{
     db::{self, bookmarks::InsertBookmark},
     forms::{links::CreateLink, lists::CreateList},
@@ -96,6 +99,36 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
     .await?;
 
     assert!(db::bookmarks::is_public(&mut tx, bookmark.id).await?);
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn only_owner_can_delete_bookmark() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let owner = app.create_user("owner", "longpassword").await;
+    let _other = app.create_user("other", "longpassword").await;
+
+    let bookmark = app
+        .create_bookmark(&owner, "https://example.com", "Test")
+        .await;
+
+    app.login_user("other", "longpassword").await;
+    app.req()
+        .expect_status(StatusCode::NOT_FOUND)
+        .delete(&format!("/bookmarks/{}", bookmark.id))
+        .await;
+
+    app.login_user("owner", "longpassword").await;
+    app.req()
+        .expect_status(StatusCode::OK)
+        .delete(&format!("/bookmarks/{}", bookmark.id))
+        .await;
+
+    app.req()
+        .expect_status(StatusCode::NOT_FOUND)
+        .delete(&format!("/bookmarks/{}", Uuid::new_v4()))
+        .await;
 
     Ok(())
 }

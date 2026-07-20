@@ -105,6 +105,35 @@ impl RequestBuilder {
         }
     }
 
+    pub async fn delete(mut self, url: &str) -> TestResponse {
+        if let Some(cookie) = &self.logged_in_cookie {
+            self.request = self.request.header(axum::http::header::COOKIE, cookie);
+        }
+
+        let request = self
+            .request
+            .method(http::Method::DELETE)
+            .uri(url)
+            .body(Body::empty())
+            .unwrap();
+
+        let response = ServiceExt::<Request<Body>>::ready(&mut self.router)
+            .await
+            .unwrap()
+            .call(request)
+            .await
+            .unwrap();
+
+        tracing::debug!("{:?}", response.headers());
+
+        Self::assert_expected_status(self.expected_status, &response, "DELETE", url);
+
+        TestResponse {
+            response,
+            new_request_builder: RequestBuilder::new(&self.router, self.logged_in_cookie),
+        }
+    }
+
     fn assert_expected_status(
         expected_status: StatusCode,
         response: &Response<Body>,
