@@ -397,9 +397,10 @@ async fn get_unsorted(
 
 async fn delete_by_id(
     extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
     Path(id): Path<Uuid>,
 ) -> ResponseResult<HeaderMap> {
-    db::bookmarks::delete_by_id(&mut tx, id).await?;
+    db::bookmarks::delete_by_id(&mut tx, id, auth_user.ap_user_id).await?;
 
     tx.commit().await?;
 

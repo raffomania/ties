@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+It's recommended to upgrade to this version as soon as possible since it contains a fix for a security vulnerability that might cause bookmark loss.
+
+### Security
+
+- Added a missing permission check when deleting bookmarks. Previously, unauthenticated users could delete any bookmark they knew the ID of. Now, only a bookmark's owner can delete it.
+
 ### Breaking Changes
 
 - Ties now requires a minimum Rust version of 1.91.0 to compile.

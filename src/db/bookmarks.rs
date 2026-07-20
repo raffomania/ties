@@ -177,30 +177,31 @@ pub async fn list_unsorted(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<V
         .collect::<ResponseResult<Vec<_>>>()
 }
 
-pub async fn delete_by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Bookmark> {
+pub async fn delete_by_id(tx: &mut AppTx, id: Uuid, ap_user_id: Uuid) -> ResponseResult<Bookmark> {
+    let deleted_bookmark = query_as!(
+        BookmarkRow,
+        r#"
+        delete from bookmarks
+        where id = $1 and ap_user_id = $2
+        returning id, created_at, ap_user_id, url, title, ap_id;
+        "#,
+        id,
+        ap_user_id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
     query!(
         r#"
         delete from archives
         where bookmark_id = $1;
         "#,
-        id
+        deleted_bookmark.id
     )
     .execute(&mut **tx)
     .await?;
 
-    let bookmark = query_as!(
-        BookmarkRow,
-        r#"
-        delete from bookmarks
-        where id = $1
-        returning id, created_at, ap_user_id, url, title, ap_id;
-        "#,
-        id
-    )
-    .fetch_one(&mut **tx)
-    .await?;
-
-    bookmark.try_into()
+    deleted_bookmark.try_into()
 }
 
 /// Create a new UUID as primary key.
