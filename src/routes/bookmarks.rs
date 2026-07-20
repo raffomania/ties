@@ -259,6 +259,9 @@ async fn post_disconnect(
 ) -> ResponseResult<HtmfResponse> {
     let mut loaded = views::edit_bookmark::load(&mut tx, &auth_user, id, search_query).await?;
 
+    // Since this is intended to be used in the bookmark edit form only,
+    // and that form is only intended to work on your own bookmarks, we can be
+    // more restrictive here than technically necessary.
     if loaded.bookmark.ap_user_id != auth_user.ap_user_id {
         return Err(ResponseError::NotFound);
     }
@@ -299,6 +302,9 @@ async fn post_connect(
     let mut loaded =
         views::edit_bookmark::load(&mut tx, &auth_user, bookmark_id, search_query).await?;
 
+    // Since this is intended to be used in the bookmark edit form only,
+    // and that form is only intended to work on your own bookmarks, we can be
+    // more restrictive here than technically necessary.
     if loaded.bookmark.ap_user_id != auth_user.ap_user_id {
         return Err(ResponseError::NotFound);
     }
