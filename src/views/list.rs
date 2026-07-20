@@ -212,8 +212,8 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
     ))
     .with([
         div(class("overflow-hidden")).with(match &link.dest {
-            db::LinkDestinationWithChildren::List(inner_list) => list_item_list(inner_list),
-            db::LinkDestinationWithChildren::Bookmark(bookmark) => list_item_bookmark(bookmark),
+            db::LinkDestinationWithMetadata::List(inner_list) => list_item_list(inner_list),
+            db::LinkDestinationWithMetadata::Bookmark(bookmark) => list_item_bookmark(bookmark),
         }),
         if let Some(authed_info) = &layout.authed_info {
             div(class(
@@ -260,7 +260,7 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
     ])
 }
 
-fn list_item_list(inner_list: &db::ListWithLinks) -> Element {
+fn list_item_list(inner_list: &db::ListWithMetadata) -> Element {
     // TODO show owning user if it's different than this list's owner
     // https://github.com/raffomania/ties/issues/152
     fragment().with([
@@ -276,12 +276,8 @@ fn list_item_list(inner_list: &db::ListWithLinks) -> Element {
             (!content.is_empty()).then_some(p(class("max-w-2xl mb-2")).with(content))
         })),
         {
-            let bookmark_count = inner_list
-                .links
-                .iter()
-                .filter(|l| matches!(l, db::LinkDestination::Bookmark(_)))
-                .count();
-            let list_count = inner_list.links.len() - bookmark_count;
+            let bookmark_count = inner_list.metadata.linked_bookmark_count;
+            let list_count = inner_list.metadata.linked_list_count;
             div(class(
                 "text-sm dark:text-neutral-400 text-neutral-500 flex flex-wrap gap-x-1",
             ))
