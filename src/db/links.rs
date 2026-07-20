@@ -22,16 +22,16 @@ pub struct Link {
 
 #[derive(Deserialize)]
 #[serde(untagged)]
-pub enum LinkDestinationWithChildren {
+pub enum LinkDestinationWithMetadata {
     Bookmark(db::Bookmark),
-    List(db::ListWithLinks),
+    List(db::ListWithMetadata),
 }
 
-impl LinkDestinationWithChildren {
+impl LinkDestinationWithMetadata {
     pub fn id(&self) -> Uuid {
         match self {
-            LinkDestinationWithChildren::Bookmark(b) => b.id,
-            LinkDestinationWithChildren::List(l) => l.list.id,
+            LinkDestinationWithMetadata::Bookmark(b) => b.id,
+            LinkDestinationWithMetadata::List(l) => l.list.id,
         }
     }
 }
@@ -62,7 +62,7 @@ impl LinkDestination {
 pub struct LinkWithContent {
     pub id: Uuid,
 
-    pub dest: LinkDestinationWithChildren,
+    pub dest: LinkDestinationWithMetadata,
 }
 
 // TODO: when showing backlinks in the browser, this needs to be re-evaluated
@@ -170,15 +170,13 @@ pub async fn list_by_list(
             case when lists.id is not null then
                 jsonb_build_object(
                     'list', to_jsonb(lists.*),
-                    'links',
-                    coalesce(
-                        jsonb_agg(lists_bookmarks.*)
-                        filter (where lists_bookmarks.id is not null),
-                    jsonb_build_array())
-                    || coalesce(
-                        jsonb_agg(lists_lists.*)
-                        filter (where lists_lists.id is not null),
-                    jsonb_build_array())
+                    'metadata', jsonb_build_object(
+                        'linked_bookmark_count', count(lists_bookmarks.*)
+                            filter (where lists_bookmarks.id is not null),
+                        'linked_list_count', count(lists_lists.*)
+                            filter (where lists_lists.id is not null),
+                        'username', (select username from users where users.ap_user_id = lists.ap_user_id)
+                    )
                 )
             when bookmarks.id is not null then
                 to_jsonb(bookmarks.*)
@@ -207,7 +205,7 @@ pub async fn list_by_list(
     let results = rows
         .into_iter()
         .map(|row| {
-            let dest: LinkDestinationWithChildren = serde_json::from_value(row.dest.into())?;
+            let dest: LinkDestinationWithMetadata = serde_json::from_value(row.dest.into())?;
             Ok(LinkWithContent {
                 id: row.link_id,
                 dest,

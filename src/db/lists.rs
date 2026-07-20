@@ -3,7 +3,7 @@ use sqlx::{FromRow, query, query_as};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use super::{AppTx, LinkDestination};
+use super::AppTx;
 use crate::{forms::lists::CreateList, response_error::ResponseResult};
 
 #[derive(FromRow, Debug, Deserialize, Clone)]
@@ -35,13 +35,6 @@ impl List {
 }
 
 #[derive(Deserialize)]
-pub struct ListWithLinks {
-    pub list: List,
-
-    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_default_from_null")]
-    pub links: Vec<LinkDestination>,
-}
-
 pub struct ListWithMetadata {
     pub list: List,
     pub metadata: Metadata,
