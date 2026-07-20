@@ -69,6 +69,7 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
     db::links::insert(
         &mut tx,
         user.id,
+        user.ap_user_id,
         CreateLink {
             src: private_list.id,
             dest: bookmark.id,
@@ -91,6 +92,7 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
     db::links::insert(
         &mut tx,
         user.id,
+        user.ap_user_id,
         CreateLink {
             src: public_list.id,
             dest: bookmark.id,
