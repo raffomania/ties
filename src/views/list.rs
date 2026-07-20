@@ -2,7 +2,7 @@ use htmf::prelude::*;
 
 use super::{content, layout};
 use crate::{
-    db::{self, LinkWithContent},
+    db::{self, LinkWithContent, layout::AuthedInfo},
     views::content::pluralize,
 };
 
@@ -212,7 +212,9 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
     ))
     .with([
         div(class("overflow-hidden")).with(match &link.dest {
-            db::LinkDestinationWithMetadata::List(inner_list) => list_item_list(inner_list),
+            db::LinkDestinationWithMetadata::List(inner_list) => {
+                list_item_list(inner_list, layout.authed_info.as_ref())
+            }
             db::LinkDestinationWithMetadata::Bookmark(bookmark) => list_item_bookmark(bookmark),
         }),
         if let Some(authed_info) = &layout.authed_info {
@@ -260,7 +262,7 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
     ])
 }
 
-fn list_item_list(inner_list: &db::ListWithMetadata) -> Element {
+fn list_item_list(inner_list: &db::ListWithMetadata, authed_info: Option<&AuthedInfo>) -> Element {
     // TODO show owning user if it's different than this list's owner
     // https://github.com/raffomania/ties/issues/152
     fragment().with([
@@ -282,17 +284,21 @@ fn list_item_list(inner_list: &db::ListWithMetadata) -> Element {
                 "text-sm dark:text-neutral-400 text-neutral-500 flex flex-wrap gap-x-1",
             ))
             .with([
-                p([]).with(pluralize(
-                    bookmark_count.try_into().unwrap_or(-1),
-                    "bookmark",
-                    "bookmarks",
-                )),
+                if Some(inner_list.list.ap_user_id) == authed_info.as_ref().map(|i| i.ap_user_id) {
+                    nothing()
+                } else {
+                    fragment().with([
+                        a([
+                            href(format!("/user/{}", inner_list.metadata.username)),
+                            class("dark:hover:text-neutral-200 hover:text-neutral-600"),
+                        ])
+                        .with(format!("by {}", inner_list.metadata.username)),
+                        text("∙"),
+                    ])
+                },
+                p([]).with(pluralize(bookmark_count, "bookmark", "bookmarks")),
                 text("∙"),
-                p([]).with(pluralize(
-                    list_count.try_into().unwrap_or(-1),
-                    "list",
-                    "lists",
-                )),
+                p([]).with(pluralize(list_count, "list", "lists")),
             ])
         },
     ])
