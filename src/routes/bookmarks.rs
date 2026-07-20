@@ -95,6 +95,7 @@ async fn post_create(
         db::links::insert(
             &mut tx,
             auth_user.user_id,
+            auth_user.ap_user_id,
             CreateLink {
                 src: parent.id,
                 dest: bookmark.id,
@@ -111,6 +112,7 @@ async fn post_create(
         db::links::insert(
             &mut tx,
             auth_user.user_id,
+            auth_user.ap_user_id,
             CreateLink {
                 src: parent,
                 dest: bookmark.id,
@@ -321,6 +323,7 @@ async fn post_connect(
         let link = db::links::insert(
             &mut tx,
             auth_user.user_id,
+            auth_user.ap_user_id,
             forms::links::CreateLink {
                 src,
                 dest: bookmark_id,

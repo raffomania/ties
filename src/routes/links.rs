@@ -81,6 +81,7 @@ async fn post_create(
         db::links::insert(
             &mut tx,
             auth_user.user_id,
+            auth_user.ap_user_id,
             CreateLink {
                 src: src.id(),
                 dest: dest.id(),

@@ -123,12 +123,39 @@ async fn validate_private_lists_belong_to_same_owner(
     Err(anyhow!("Private lists need to belong to the same owner to be linked").into())
 }
 
+/// Validate that the link source belongs to the user creating the new link.
+async fn validate_src_belongs_to_creator(
+    tx: &mut AppTx,
+    create_link: &CreateLink,
+    ap_user_id: Uuid,
+) -> ResponseResult<()> {
+    let src = query!(
+        r#"
+        select src.ap_user_id as ap_user_id
+        from lists src
+        where src.id = $1
+        "#,
+        create_link.src
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    if src.ap_user_id != ap_user_id {
+        return Err(anyhow!("Cannot link from another users list").into());
+    }
+
+    Ok(())
+}
+
 pub async fn insert(
     tx: &mut AppTx,
     user_id: Uuid,
+    ap_user_id: Uuid,
     create_link: CreateLink,
 ) -> ResponseResult<Link> {
     validate_private_lists_belong_to_same_owner(tx, &create_link).await?;
+    validate_src_belongs_to_creator(tx, &create_link, ap_user_id).await?;
+    // TODO linking to private bookmarks should only be allowed to the owning user
 
     let list = query_as!(
         Link,

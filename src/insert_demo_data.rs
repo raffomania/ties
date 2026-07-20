@@ -11,6 +11,12 @@ use sqlx::PgPool;
 use url::Url;
 use uuid::Uuid;
 
+#[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
+struct UserRef {
+    user_id: Uuid,
+    ap_user_id: Uuid,
+}
+
 use crate::{
     archive,
     db::{self, AppTx, bookmarks::InsertBookmark},
@@ -22,6 +28,10 @@ use crate::{
     },
 };
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "It's annoying to disentangle and not that big of a problem at the moment."
+)]
 pub async fn insert_demo_data(
     pool: &PgPool,
     dev_user_credentials: Option<CreateUser>,
@@ -36,10 +46,10 @@ pub async fn insert_demo_data(
         users.push(db::users::create_if_not_exists(&mut tx, create_dev_user, base_url).await?);
     }
 
-    let mut public_lists = Vec::new();
+    let mut all_public_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
     let mut all_bookmarks = Vec::new();
-    let mut public_bookmarks = Vec::new();
-    let mut private_lists: HashMap<Uuid, Vec<_>> = HashMap::new();
+    let mut all_public_bookmarks = Vec::new();
+    let mut all_private_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
 
     tracing::debug!("Creating bookmarks and lists...");
     for user in &users {
@@ -64,7 +74,13 @@ pub async fn insert_demo_data(
             if list.private {
                 lists.push(list);
             } else {
-                public_lists.push(list);
+                all_public_lists
+                    .entry(UserRef {
+                        user_id: user.id,
+                        ap_user_id: user.ap_user_id,
+                    })
+                    .or_default()
+                    .push(list);
             }
         }
 
@@ -77,33 +93,40 @@ pub async fn insert_demo_data(
             let dest = random_link_reference(&bookmarks, &lists)?;
 
             let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user.id, create_link).await?;
+            db::links::insert(&mut tx, user.id, user.ap_user_id, create_link).await?;
         }
 
-        private_lists.entry(user.id).or_default().append(&mut lists);
+        all_private_lists
+            .entry(UserRef {
+                user_id: user.id,
+                ap_user_id: user.ap_user_id,
+            })
+            .or_default()
+            .append(&mut lists);
 
         tx.commit().await?;
         tx = pool.begin().await?;
     }
 
     tracing::debug!("Creating links...");
-    for user in users {
+    for (user_ref, lists) in &all_public_lists {
         // Public-to-public links
         // Here, we make bookmarks public by linking to them from public lists.
         for _ in 0..1000 {
-            let src = public_lists
+            let src = lists
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to put into a link"))?
                 .id;
-            let dest = random_link_reference(&all_bookmarks, &public_lists)?;
+            let dest = random_link_reference(&all_bookmarks, lists)?;
 
             let create_link = CreateLink { src, dest };
-            let link = db::links::insert(&mut tx, user.id, create_link)
-                .await
-                .context("Failed to insert link")?;
+            let link =
+                db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link)
+                    .await
+                    .context("Failed to insert link")?;
 
             if let Some(id) = link.dest_bookmark_id {
-                public_bookmarks.push(id);
+                all_public_bookmarks.push(id);
             }
         }
 
@@ -114,19 +137,19 @@ pub async fn insert_demo_data(
     // Private-to-public links
     // Here, we can only link to public bookmarks, and private bookmarks from the
     // same user.
-    for (user_id, lists) in private_lists {
+    for (user_ref, lists) in all_private_lists {
         // list to public bookmark
         for _ in 0..100 {
             let src = lists
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to link from"))?
                 .id;
-            let dest = *public_bookmarks
+            let dest = *all_public_bookmarks
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random bookmark"))?;
 
             let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user_id, create_link).await?;
+            db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
         }
 
         // list to public list
@@ -135,13 +158,16 @@ pub async fn insert_demo_data(
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to link from"))?
                 .id;
-            let dest = public_lists
+            let dest = all_public_lists
+                .values()
+                .choose(&mut rand::rng())
+                .ok_or(anyhow!("Found no public list"))?
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no public list"))?
                 .id;
 
             let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user_id, create_link).await?;
+            db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
         }
 
         tx.commit().await?;
