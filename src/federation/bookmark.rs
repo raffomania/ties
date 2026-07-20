@@ -134,7 +134,7 @@ impl Object for db::Bookmark {
         );
         let web_url = data.base_url.join(&self.path())?;
 
-        // None for public lists
+        // Pass None as user id to only fetch public lists for hashtags
         let lists = db::lists::pointing_to_bookmark(&mut tx, self.id, None).await?;
         let mut tags = Vec::with_capacity(lists.len());
         for list in lists {
