@@ -4,6 +4,12 @@
 
 [If you like ties, speed up development by supporting us via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
+## Unreleased
+
+### Security
+
+- Update quinn-proto dependency, fixing [a vulnerability](https://github.com/advisories/GHSA-4w2j-m93h-cj5j)
+
 ## 0.3.0
 
 _Released on 2026-07-24_
