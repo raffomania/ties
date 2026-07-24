@@ -23,6 +23,10 @@ Bookmarks are not published until they are added to a public list.
 - Fix an error preventing bookmarks from being deleted.
 - Only add the `Secure` flag to session cookies when the `BASE_URL` uses `https://`.
 
+### Security
+
+- Update quinn-proto dependency, fixing [a vulnerability](https://github.com/advisories/GHSA-4w2j-m93h-cj5j)
+
 ## 0.3.0
 
 _Released on 2026-07-24_

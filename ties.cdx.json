@@ -4166,37 +4166,6 @@
     },
     {
       "author": "The Rand Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#getrandom@0.3.4",
-      "description": "A small cross-platform library for retrieving random data from system source",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/getrandom"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-random/getrandom"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "getrandom",
-      "purl": "pkg:cargo/getrandom@0.3.4",
-      "scope": "required",
-      "type": "library",
-      "version": "0.3.4"
-    },
-    {
-      "author": "The Rand Project Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#getrandom@0.4.2",
       "description": "A small cross-platform library for retrieving random data from system source",
       "externalReferences": [
@@ -7503,7 +7472,7 @@
       "version": "1.0.106"
     },
     {
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.14",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.16",
       "description": "State machine for the QUIC transport protocol",
       "externalReferences": [
         {
@@ -7514,7 +7483,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "434b42fec591c96ef50e21e886936e66d3cc3f737104fdb9b737c40ffb94c098"
+          "content": "2f4bfc015262b9df63c8845072ce59068853ff5872180c2ce2f13038b970e560"
         }
       ],
       "licenses": [
@@ -7523,10 +7492,10 @@
         }
       ],
       "name": "quinn-proto",
-      "purl": "pkg:cargo/quinn-proto@0.11.14",
+      "purl": "pkg:cargo/quinn-proto@0.11.16",
       "scope": "required",
       "type": "library",
-      "version": "0.11.14"
+      "version": "0.11.16"
     },
     {
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-udp@0.5.14",
@@ -7713,41 +7682,6 @@
       "version": "0.8.6"
     },
     {
-      "author": "The Rand Project Developers, The Rust Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rand@0.9.4",
-      "description": "Random number generators and other randomness functionality. ",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/rand"
-        },
-        {
-          "type": "website",
-          "url": "https://rust-random.github.io/book"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-random/rand"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "44c5af06bb1b7d3216d91932aed5265164bf384dc89cd6ba05cf59a35f5f76ea"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "rand",
-      "purl": "pkg:cargo/rand@0.9.4",
-      "scope": "required",
-      "type": "library",
-      "version": "0.9.4"
-    },
-    {
       "author": "The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rand_chacha@0.3.1",
       "description": "ChaCha random number generator ",
@@ -7781,41 +7715,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.3.1"
-    },
-    {
-      "author": "The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rand_chacha@0.9.0",
-      "description": "ChaCha random number generator ",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/rand_chacha"
-        },
-        {
-          "type": "website",
-          "url": "https://rust-random.github.io/book"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-random/rand"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "rand_chacha",
-      "purl": "pkg:cargo/rand_chacha@0.9.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.9.0"
     },
     {
       "author": "The Rand Project Developers",
@@ -7888,13 +7787,13 @@
       "version": "0.6.4"
     },
     {
-      "author": "The Rand Project Developers, The Rust Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.9.5",
-      "description": "Core random number generator traits and tools for implementation. ",
+      "author": "The Rand Project Developers",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#rand_pcg@0.10.2",
+      "description": "Selected PCG random number generators",
       "externalReferences": [
         {
           "type": "documentation",
-          "url": "https://docs.rs/rand_core"
+          "url": "https://docs.rs/rand_pcg"
         },
         {
           "type": "website",
@@ -7902,13 +7801,13 @@
         },
         {
           "type": "vcs",
-          "url": "https://github.com/rust-random/rand"
+          "url": "https://github.com/rust-random/rngs"
         }
       ],
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c"
+          "content": "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
         }
       ],
       "licenses": [
@@ -7916,11 +7815,11 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "name": "rand_core",
-      "purl": "pkg:cargo/rand_core@0.9.5",
+      "name": "rand_pcg",
+      "purl": "pkg:cargo/rand_pcg@0.10.2",
       "scope": "required",
       "type": "library",
-      "version": "0.9.5"
+      "version": "0.10.2"
     },
     {
       "author": "Ethan Brierley <ethanboxx@gmail.com>",
@@ -13340,13 +13239,6 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.4",
-        "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.185"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#getrandom@0.3.4"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.4",
         "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.185",
         "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.10.1"
       ],
@@ -14096,7 +13988,8 @@
         "registry+https://github.com/rust-lang/crates.io-index#aws-lc-rs@1.16.3",
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#lru-slab@0.1.2",
-        "registry+https://github.com/rust-lang/crates.io-index#rand@0.9.4",
+        "registry+https://github.com/rust-lang/crates.io-index#rand@0.10.1",
+        "registry+https://github.com/rust-lang/crates.io-index#rand_pcg@0.10.2",
         "registry+https://github.com/rust-lang/crates.io-index#ring@0.17.14",
         "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@2.1.2",
         "registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.38",
@@ -14105,7 +13998,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#tinyvec@1.11.0",
         "registry+https://github.com/rust-lang/crates.io-index#tracing@0.1.44"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.14"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.16"
     },
     {
       "dependsOn": [
@@ -14121,7 +14014,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#bytes@1.11.1",
         "registry+https://github.com/rust-lang/crates.io-index#cfg_aliases@0.2.1",
         "registry+https://github.com/rust-lang/crates.io-index#pin-project-lite@0.2.17",
-        "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.14",
+        "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.16",
         "registry+https://github.com/rust-lang/crates.io-index#quinn-udp@0.5.14",
         "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@2.1.2",
         "registry+https://github.com/rust-lang/crates.io-index#rustls@0.23.38",
@@ -14169,24 +14062,10 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#rand_chacha@0.9.0",
-        "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.9.5"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rand@0.9.4"
-    },
-    {
-      "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#ppv-lite86@0.2.21",
         "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.6.4"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#rand_chacha@0.3.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#ppv-lite86@0.2.21",
-        "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.9.5"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rand_chacha@0.9.0"
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.10.1"
@@ -14199,9 +14078,9 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#getrandom@0.3.4"
+        "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.10.1"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#rand_core@0.9.5"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#rand_pcg@0.10.2"
     },
     {
       "ref": "registry+https://github.com/rust-lang/crates.io-index#redact@0.1.11"
