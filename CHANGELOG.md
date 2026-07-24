@@ -2,7 +2,11 @@
 
 *Note: This file does not contain any LLM-generated text.*
 
-## Unreleased
+[If you like ties, speed up development by supporting us via GitHub Sponsors!](https://github.com/sponsors/raffomania)
+
+## 0.3.0
+
+_Released on 2026-07-24_
 
 It's recommended to upgrade to this version as soon as possible since it contains a fix for a security vulnerability that might cause bookmark loss.
 
