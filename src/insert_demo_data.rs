@@ -47,14 +47,20 @@ pub async fn insert_demo_data(
     }
 
     let mut all_public_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
-    let mut all_bookmarks = Vec::new();
+    let mut all_private_bookmarks: HashMap<UserRef, Vec<_>> = HashMap::new();
     let mut all_public_bookmarks = Vec::new();
     let mut all_private_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
 
     tracing::debug!("Creating bookmarks and lists...");
     for user in &users {
         let bookmarks = create_bookmarks(&mut tx, user, base_url).await?;
-        all_bookmarks.append(&mut bookmarks.clone());
+        all_private_bookmarks
+            .entry(UserRef {
+                user_id: user.id,
+                ap_user_id: user.ap_user_id,
+            })
+            .or_default()
+            .append(&mut bookmarks.clone());
         let mut lists = Vec::new();
 
         for _ in 0..100 {
@@ -117,7 +123,12 @@ pub async fn insert_demo_data(
                 .choose(&mut rand::rng())
                 .ok_or(anyhow!("Found no random list to put into a link"))?
                 .id;
-            let dest = random_link_reference(&all_bookmarks, lists)?;
+            let dest = random_link_reference(
+                all_private_bookmarks
+                    .get(user_ref)
+                    .ok_or(anyhow!("Missing private bookmarks for user"))?,
+                lists,
+            )?;
 
             let create_link = CreateLink { src, dest };
             let link =
