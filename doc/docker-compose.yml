@@ -3,13 +3,23 @@ services:
     image: ghcr.io/raffomania/ties
     depends_on:
       - db
+    # For more information on the environment configuration, refer to the command line help:
+    # `docker run ghcr.io/raffomania/ties --help`
     environment:
+      # Interface and port to bind to.
       - LISTEN=0.0.0.0:3000
+      # Where to reach the postgresql database at.
       - DATABASE_URL=postgres://ties:ties@db/ties
+      # Set this to "debug" if you want more detailed logs.
       - RUST_LOG=info
+      # URL for reaching the server publicly.
       # Careful: This will form the domain part of user handles, such as "rafael@ties.pub",
       # and cannot be changed once set!
+      # Include the protocol when setting this.
+      # Example: https://ties.pub
       - BASE_URL=
+      # Optional: Create an admin user if it does not exist yet.
+      # This is currently the only way to set the admin password.
       - ADMIN_USERNAME=
       - ADMIN_PASSWORD=
     ports:
