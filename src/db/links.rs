@@ -1,11 +1,15 @@
-use anyhow::{Context, anyhow};
+use anyhow::Context;
 use serde::Deserialize;
 use sqlx::{FromRow, query, query_as};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::AppTx;
-use crate::{db, forms::links::CreateLink, response_error::ResponseResult};
+use crate::{
+    db,
+    forms::links::CreateLink,
+    response_error::{ResponseError, ResponseResult},
+};
 
 #[derive(FromRow, Debug)]
 #[expect(dead_code, reason = "Kept for reference on the DB schema")]
@@ -65,83 +69,40 @@ pub struct LinkWithContent {
     pub dest: LinkDestinationWithMetadata,
 }
 
-// TODO: when showing backlinks in the browser, this needs to be re-evaluated
-// https://github.com/raffomania/ties/issues/147
-async fn validate_private_lists_belong_to_same_owner(
-    tx: &mut AppTx,
-    create_link: &CreateLink,
-) -> ResponseResult<()> {
-    let dest_is_bookmark = query!(
-        r#"
-        select exists (
-            select 1
-            from bookmarks
-            where id = $1
-        )
-        "#,
-        create_link.dest
-    )
-    .fetch_one(&mut **tx)
-    .await?;
-    if let Some(true) = dest_is_bookmark.exists {
-        return Ok(());
+/// Validate that the link source belongs to the user creating the new link.
+fn validate_src_belongs_to_creator(src: &db::List, ap_user_id: Uuid) -> ResponseResult<()> {
+    if src.ap_user_id != ap_user_id {
+        return Err(ResponseError::NotFound);
     }
 
-    let lists = query!(
-        r#"
-        select src.ap_user_id as src_ap_user_id,
-            src.private as src_private,
-            dest.ap_user_id as dest_ap_user_id,
-            dest.private as dest_private
-        from lists src
-        inner join lists dest on dest.id = $2
-        where src.id = $1
-        "#,
-        create_link.src,
-        create_link.dest
-    )
-    .fetch_one(&mut **tx)
-    .await
-    .context("Failed getting data for authorization check")?;
-
-    // If destination list is public, everything's fine
-    if !lists.dest_private {
-        return Ok(());
-    }
-
-    // If source is public, but destination is private, that's not ok
-    if !lists.src_private && lists.dest_private {
-        return Err(anyhow!("Can't link from a public list to a private list").into());
-    }
-
-    // If source and destination are private, and they belong to the same user, it's
-    // ok
-    if lists.src_private && lists.dest_private && lists.src_ap_user_id == lists.dest_ap_user_id {
-        return Ok(());
-    }
-
-    Err(anyhow!("Private lists need to belong to the same owner to be linked").into())
+    Ok(())
 }
 
-/// Validate that the link source belongs to the user creating the new link.
-async fn validate_src_belongs_to_creator(
+/// Validate that private link sources or targets can only be involved in links
+/// by their owner.
+async fn validate_private_items_belong_to_creator(
     tx: &mut AppTx,
-    create_link: &CreateLink,
+    src: &db::List,
+    dest: &LinkDestination,
     ap_user_id: Uuid,
 ) -> ResponseResult<()> {
-    let src = query!(
-        r#"
-        select src.ap_user_id as ap_user_id
-        from lists src
-        where src.id = $1
-        "#,
-        create_link.src
-    )
-    .fetch_one(&mut **tx)
-    .await?;
+    if src.private && src.ap_user_id != ap_user_id {
+        return Err(ResponseError::NotFound);
+    }
 
-    if src.ap_user_id != ap_user_id {
-        return Err(anyhow!("Cannot link from another users list").into());
+    match dest {
+        LinkDestination::Bookmark(bookmark) => {
+            if !db::bookmarks::is_public(tx, bookmark.id).await?
+                && bookmark.ap_user_id != ap_user_id
+            {
+                return Err(ResponseError::NotFound);
+            }
+        }
+        LinkDestination::List(list) => {
+            if list.private && list.ap_user_id != ap_user_id {
+                return Err(ResponseError::NotFound);
+            }
+        }
     }
 
     Ok(())
@@ -153,9 +114,10 @@ pub async fn insert(
     ap_user_id: Uuid,
     create_link: CreateLink,
 ) -> ResponseResult<Link> {
-    validate_private_lists_belong_to_same_owner(tx, &create_link).await?;
-    validate_src_belongs_to_creator(tx, &create_link, ap_user_id).await?;
-    // TODO linking to private bookmarks should only be allowed to the owning user
+    let src_list = db::lists::by_id(tx, create_link.src).await?;
+    let dest_item = db::items::by_id(tx, create_link.dest).await?;
+    validate_src_belongs_to_creator(&src_list, ap_user_id)?;
+    validate_private_items_belong_to_creator(tx, &src_list, &dest_item, ap_user_id).await?;
 
     let list = query_as!(
         Link,
