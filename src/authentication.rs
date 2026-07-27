@@ -84,7 +84,7 @@ pub async fn create_and_login_temp_user(
     let password = Uuid::new_v4().to_string();
     let create = CreateUser { username, password };
     create.validate().context("Invalid demo user generated")?;
-    let user = db::users::insert(tx, create, base_url).await?;
+    let user = db::users::insert(tx, create, None, base_url).await?;
 
     session.persist_logged_in_user(tx, &user).await
 }

@@ -43,7 +43,9 @@ pub async fn insert_demo_data(
 
     tracing::debug!("Creating dev user...");
     if let Some(create_dev_user) = dev_user_credentials {
-        users.push(db::users::create_if_not_exists(&mut tx, create_dev_user, base_url).await?);
+        users.push(
+            db::users::create_root_admin_if_not_exists(&mut tx, create_dev_user, base_url).await?,
+        );
     }
 
     let mut all_public_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
@@ -266,7 +268,7 @@ fn random_article(title: String, url: String) -> Result<legible::Article> {
 
 async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {
     tracing::debug!("Creating users...");
-    let mut users = Vec::new();
+    let mut users: Vec<db::User> = Vec::new();
     for _ in 0..5 {
         let email: Option<String> = fake::faker::internet::en::SafeEmail().fake();
         let display_name: String = fake::faker::name::en::Name().fake();
@@ -280,13 +282,14 @@ async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {
 
             db::users::insert_oidc(tx, create_oidc_user, base_url).await?
         } else {
+            let invited_by = users.choose(&mut rand::rng()).map(|u| u.id);
             let create_user = CreateUser {
                 username,
                 // random string with 20 chars
                 password: 20.fake(),
             };
 
-            db::users::insert(tx, create_user, base_url).await?
+            db::users::insert(tx, create_user, invited_by, base_url).await?
         };
         let ap_user = db::ap_users::read_by_id(tx, user.ap_user_id).await?;
         users.push(user);

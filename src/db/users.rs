@@ -73,13 +73,13 @@ pub async fn insert_oidc(
         User,
         r#"
         insert into users
-        (email, oidc_id, username, ap_user_id)
-        values ($1, $2, $3, $4)
+        (email, oidc_id, username, ap_user_id, invited_by)
+        values ($1, $2, $3, $4, null)
         returning *"#,
         create_user.email,
         create_user.oidc_id,
         create_user.username,
-        ap_user.id
+        ap_user.id,
     )
     .fetch_one(&mut **tx)
     .await?;
@@ -90,6 +90,7 @@ pub async fn insert_oidc(
 pub async fn insert(
     tx: &mut AppTx,
     create_user: CreateUser,
+    invited_by_user_id: Option<Uuid>,
     base_url: &Url,
 ) -> ResponseResult<User> {
     let hashed_password = hash_password(&create_user.password)?;
@@ -100,13 +101,14 @@ pub async fn insert(
         User,
         r#"
         insert into users
-        (username, password_hash, ap_user_id)
-        values ($1, $2, $3)
+        (username, password_hash, ap_user_id, invited_by)
+        values ($1, $2, $3, $4)
         returning *
         "#,
         create_user.username,
         hashed_password,
         ap_user.id,
+        invited_by_user_id
     )
     .fetch_one(&mut **tx)
     .await?;
@@ -144,7 +146,7 @@ pub async fn by_ap_user_id(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<O
     Ok(user)
 }
 
-pub async fn create_if_not_exists(
+pub async fn create_root_admin_if_not_exists(
     tx: &mut AppTx,
     create: CreateUser,
     base_url: &Url,
@@ -153,8 +155,8 @@ pub async fn create_if_not_exists(
     let user = by_username(tx, &username).await;
     let actual_user = match user {
         Err(ResponseError::NotFound) => {
-            tracing::info!("Creating admin user '{username}'");
-            insert(tx, create, base_url).await?
+            tracing::info!("Creating user '{username}'");
+            insert(tx, create, None, base_url).await?
         }
         Ok(actual_user) => {
             tracing::debug!("Admin user '{username}' exists, not creating");
