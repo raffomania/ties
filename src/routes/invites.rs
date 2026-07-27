@@ -20,7 +20,7 @@ use crate::{
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/invites/create", post(post_create))
+        .route("/invites/create", post(post_create).get(get_create))
         .route("/invites/{token}", get(get_accept).post(post_accept))
 }
 
@@ -44,6 +44,13 @@ async fn post_create(
         })?
         .into(),
     )
+}
+
+/// Redirect GET requests to the index page since that's where the button for
+/// creating a new invite is.
+/// This should only happen if users reload the posted invite creation page.
+async fn get_create(_auth_user: AuthUser) -> Response {
+    Redirect::to("/").into_response()
 }
 
 async fn get_accept(
