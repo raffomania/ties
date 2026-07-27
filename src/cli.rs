@@ -199,7 +199,7 @@ pub async fn run() -> Result<()> {
                     return Err(anyhow!("Invalid credentials for admin user provided:\n{e}"));
                 }
                 let mut tx = pool.begin().await?;
-                db::users::create_if_not_exists(&mut tx, create, &base_url).await?;
+                db::users::create_root_admin_if_not_exists(&mut tx, create, &base_url).await?;
                 tx.commit().await?;
             }
 
