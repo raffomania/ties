@@ -4,6 +4,14 @@
 
 [If you like ties, speed up development by supporting us via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
+## Unreleased
+
+### 💌 Invites
+
+You can now invite other people to your ties server! To get started, head to your ties start page and click "Invite a user". You can then send them a link which they'll use to set up their account.
+
+We hope that an invite-only system will result in less spam than open signups.
+
 ## 0.3.0
 
 _Released on 2026-07-24_
