@@ -274,11 +274,19 @@ async fn get_profile(
         crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
     )
     .await?;
-    let maybe_user = db::users::by_ap_user_id(&mut tx, ap_user.id).await?;
-    let public_lists = if let Some(user) = maybe_user {
+    let maybe_local_user = db::users::by_ap_user_id(&mut tx, ap_user.id).await?;
+    let public_lists = if let Some(user) = &maybe_local_user {
         db::lists::list_public_by_user(&mut tx, user.ap_user_id).await?
     } else {
         Vec::new()
+    };
+
+    let invited_by_user = if let Some(user) = &maybe_local_user
+        && let Some(invited_by_id) = user.invited_by
+    {
+        Some(db::ap_users::read_by_user_id(&mut tx, invited_by_id).await?)
+    } else {
+        None
     };
 
     let elem = views::profile::view(
@@ -287,6 +295,7 @@ async fn get_profile(
             layout,
             ap_user,
             public_lists,
+            invited_by_user,
         },
     )
     .await?;

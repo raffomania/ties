@@ -25,7 +25,6 @@ pub struct ApUser {
     pub public_key: String,
 
     /// For local users, this is always present.
-    // TODO wrap this in redact::Secret
     pub private_key: Option<redact::Secret<String>>,
     pub last_refreshed_at: OffsetDateTime,
     pub display_name: Option<String>,
@@ -203,8 +202,25 @@ pub async fn read_by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<ApUser> {
     Ok(user)
 }
 
+pub async fn read_by_user_id(tx: &mut AppTx, invited_by_id: Uuid) -> ResponseResult<ApUser> {
+    let user = query_as!(
+        ApUserRow,
+        r#"
+        select ap_users.* from ap_users
+        join users on ap_users.id = users.ap_user_id
+        where users.id = $1
+        "#,
+        invited_by_id
+    )
+    .fetch_one(&mut **tx)
+    .await?
+    .try_into()?;
+
+    Ok(user)
+}
+
 /// Since usernames are not unique, always pass in a domain as well.
-/// for local users, just use the configured `base_url`.
+/// for local users, pass in the configured `base_url`.
 pub async fn read_by_username(
     tx: &mut AppTx,
     resource: webfinger::Resource,

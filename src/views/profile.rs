@@ -15,6 +15,7 @@ pub struct Data {
     pub layout: layout::Template,
     pub ap_user: db::ApUser,
     pub public_lists: Vec<db::ListWithMetadata>,
+    pub invited_by_user: Option<db::ApUser>,
 }
 
 async fn get_metadata(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Metadata> {
@@ -42,6 +43,7 @@ pub async fn view(
         layout,
         ap_user,
         public_lists: lists,
+        invited_by_user,
     }: &Data,
 ) -> ResponseResult<Element> {
     let metadata = get_metadata(&mut tx, ap_user.id).await?;
@@ -55,10 +57,27 @@ pub async fn view(
                     [class("text-xl font-bold tracking-tight")],
                     [&ap_user.username],
                 ),
+                invited_by_user.as_ref().map_or(nothing(), |inviter| {
+                    p(
+                        class("dark:text-neutral-400 text-neutral-500"),
+                        [
+                            span((), "Invited by "),
+                            a(
+                                [
+                                    href(format!("/user/{}", inviter.username)),
+                                    class(
+                                        "underline dark:hover:text-fuchsia-300 hover:text-pink-700",
+                                    ),
+                                ],
+                                &inviter.username,
+                            ),
+                        ],
+                    )
+                }),
                 ap_user
                     .bio
                     .as_ref()
-                    .map_or(nothing(), |bio| p(class("m-4"), bio)),
+                    .map_or(nothing(), |bio| p(class("mt-4"), bio)),
             ],
         ),
         view_lists(lists, &metadata),
