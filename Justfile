@@ -242,6 +242,9 @@ verify-podman-container:
     podman run --rm --entrypoint "" localhost/ties ls /etc/ssl/certs/ca-certificates.crt
 
 [group('Code Quality')]
+lint: clippy-lint format-lint reuse-lint
+
+[group('Code Quality')]
 clippy-lint *args:
     cargo clippy {{ args }} -- -D warnings
 
