@@ -154,7 +154,6 @@ pub struct TestResponse {
 }
 
 impl TestResponse {
-    #[expect(dead_code)]
     pub async fn dom(self) -> visdom::types::Elements<'static> {
         let body = self
             .response
@@ -169,6 +168,16 @@ impl TestResponse {
 
     pub fn headers(&self) -> &HeaderMap {
         self.response.headers()
+    }
+
+    pub fn cookie(&self, name: &str) -> Option<String> {
+        self.response
+            .headers()
+            .get_all(axum::http::header::SET_COOKIE)
+            .iter()
+            .filter_map(|v| v.to_str().ok())
+            .find(|c| c.starts_with(&format!("{name}=")))
+            .map(|c| c.split(';').next().unwrap().to_string())
     }
 
     pub async fn test_page(self) -> TestPage {

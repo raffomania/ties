@@ -3,7 +3,7 @@ use openidconnect::{AuthorizationCode, CsrfToken};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Validate, Deserialize, Clone)]
+#[derive(Validate, Serialize, Deserialize, Clone)]
 pub struct CreateUser {
     #[garde(pattern("^[a-zA-Z0-9_]+$"), length(min = 3, max = 50))]
     pub username: String,
