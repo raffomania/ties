@@ -12,6 +12,7 @@ use visdom::Vis;
 use super::dom::assert_form_matches;
 use crate::tests::util::html_decode::html_decode;
 
+/// Used for sending requests and evaluating responses in tests.
 pub struct RequestBuilder {
     router: axum::Router,
     /// This is the HTTP status that we expect the backend to return.
@@ -45,6 +46,7 @@ impl RequestBuilder {
         self
     }
 
+    /// This requires [Serialize] - all of our form structs should derive that.
     pub async fn post<Input>(mut self, url: &str, input: &Input) -> TestResponse
     where
         Input: Serialize,

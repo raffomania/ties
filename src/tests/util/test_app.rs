@@ -15,6 +15,12 @@ use crate::{
 const TEST_USER_USERNAME: &str = "testuser";
 const TEST_USER_PASSWORD: &str = "testpassword";
 
+/// Entry point for normal tests.
+/// Usually, tests begin like this:
+/// 1. TestApp::new()
+/// 2. app.create_test_user()
+/// 3. app.login_test_user()
+/// 4. app.req() for sending the request to test.
 pub struct TestApp {
     pub logged_in_cookie: Option<String>,
     pub router: Router,
