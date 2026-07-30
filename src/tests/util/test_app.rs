@@ -159,11 +159,12 @@ impl TestApp {
             .fill_form("form", &input)
             .await;
 
-        let cookie = login_response.headers().get("Set-Cookie").unwrap();
-        let cookie = cookie.to_str().unwrap().split_once(';').unwrap().0;
+        let cookie = login_response
+            .cookie(crate::session::COOKIE_NAME)
+            .expect("login should set a session cookie");
         assert!(!cookie.is_empty());
 
-        self.logged_in_cookie = Some(cookie.to_string());
+        self.logged_in_cookie = Some(cookie);
     }
 
     /// Will panic if run twice.

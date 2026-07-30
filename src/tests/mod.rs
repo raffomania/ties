@@ -4,6 +4,7 @@ mod archive;
 mod bookmarks;
 mod federation;
 mod index;
+mod invites;
 mod lists;
 mod migrations;
 mod response_error;
