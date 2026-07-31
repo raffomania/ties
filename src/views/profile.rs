@@ -89,34 +89,37 @@ pub async fn view(
 fn view_lists(lists: &[db::ListWithMetadata], metadata: &Metadata) -> Element {
     section(
         [],
-        [p(
-            class(
-                "px-4 dark:text-neutral-400 text-neutral-500 pb-3 dark:bg-neutral-900 \
-                 bg-stone-100 border-b dark:border-black border-neutral-200",
-            ),
-            [
-                span(
-                    class("font-bold tracking-tight"),
-                    pluralize(
-                        lists.len().try_into().unwrap_or(-1),
-                        "public list",
-                        "public lists",
+        [
+            p(
+                class(
+                    "px-4 dark:text-neutral-400 text-neutral-500 pb-3 dark:bg-neutral-900 \
+                     bg-stone-100",
+                ),
+                [
+                    span(
+                        class("font-bold tracking-tight"),
+                        pluralize(
+                            lists.len().try_into().unwrap_or(-1),
+                            "public list",
+                            "public lists",
+                        ),
                     ),
-                ),
-                span((), " containing "),
-                span(
-                    (),
-                    pluralize(metadata.public_bookmark_count, "bookmark", "bookmarks"),
-                ),
-            ],
-        )],
+                    span((), " containing "),
+                    span(
+                        (),
+                        pluralize(metadata.public_bookmark_count, "bookmark", "bookmarks"),
+                    ),
+                ],
+            ),
+            layout::upper_border(),
+        ],
     )
     .with(lists.iter().map(list_item).collect::<Vec<_>>())
 }
 
 fn list_item(list: &db::ListWithMetadata) -> Element {
     section(
-        class("px-4 pt-4 pb-4 border-t dark:border-neutral-700 border-neutral-300"),
+        class("px-4 pt-4 pb-4 border-b last:border-b-0 dark:border-neutral-700 border-neutral-300"),
         [
             a(
                 [

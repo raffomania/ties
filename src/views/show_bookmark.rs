@@ -72,11 +72,7 @@ pub fn view(
                     backlink_section(&backlinks),
                 ],
             ),
-            div(class("border-b dark:border-black border-neutral-200"), ()),
-            div(
-                class("border-b dark:border-neutral-700 border-neutral-300"),
-                (),
-            ),
+            layout::upper_border(),
             div(
                 id("archive-contents"),
                 archive_contents(archive.as_ref(), bookmark.id, is_owner),
@@ -219,7 +215,7 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
 
     div(
         [
-            class("prose dark:prose-invert px-4"),
+            class("prose dark:prose-invert mx-4 my-2"),
             // Ammonia strips hx- and data-hx- attributes, but it can't hurt to be extra safe
             attr("hx-disable", ""),
         ],

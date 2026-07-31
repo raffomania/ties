@@ -20,8 +20,7 @@ pub fn created(
 
     Ok(layout::layout(
         [
-            div(class("border-t border-stone-300 dark:border-black"), ()),
-            div(class("border-t border-white dark:border-neutral-700"), ()),
+            layout::upper_border(),
             section(
                 [class(
                     "flex flex-col items-stretch mx-auto my-8 p-2 gap-2 max-w-xl",

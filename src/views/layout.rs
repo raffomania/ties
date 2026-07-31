@@ -43,6 +43,13 @@ pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> 
     )
 }
 
+pub fn upper_border() -> Element {
+    fragment().with([
+        div(class("border-t border-stone-300 dark:border-black")),
+        div(class("border-t border-white dark:border-neutral-700")),
+    ])
+}
+
 fn search(previous_input: Option<&str>) -> Element {
     div(class("px-4 py-4 dark:bg-neutral-900 bg-stone-100")).with(
         form([
