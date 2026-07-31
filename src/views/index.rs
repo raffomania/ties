@@ -56,11 +56,7 @@ pub async fn view(data: &Data<'_>, tx: &mut AppTx) -> ResponseResult<Element> {
     let user_stats = user_stats(tx, data.authed_info.ap_user_id).await?;
     let element = super::layout::layout(
         [
-            div(class("border-t dark:border-black border-neutral-200"), ()),
-            div(
-                class("border-t dark:border-neutral-700 border-neutral-300"),
-                (),
-            ),
+            layout::upper_border(),
             div(
                 class("px-4 flex flex-col w-full items-center text-center"),
                 [

@@ -2,7 +2,7 @@ use std::ops::Not;
 
 use htmf::prelude_inline::*;
 
-use crate::db;
+use crate::{db, views::layout};
 
 pub struct Data {
     pub layout: super::layout::Template,
@@ -13,12 +13,10 @@ pub fn view(Data { layout, lists }: Data) -> Element {
     super::layout::layout(
         [
             header(
-                class(
-                    "px-4 pt-3 pb-4 dark:bg-neutral-900 bg-stone-100 border-b dark:border-black \
-                     border-neutral-200",
-                ),
+                class("px-4 pt-3 pb-4 dark:bg-neutral-900 bg-stone-100"),
                 [h1(class("text-xl font-bold"), "Unpinned Lists")],
             ),
+            layout::upper_border(),
             fragment(lists.into_iter().map(list_item).collect::<Vec<_>>()),
         ],
         &layout,
@@ -28,8 +26,8 @@ pub fn view(Data { layout, lists }: Data) -> Element {
 fn list_item(list: db::lists::UnpinnedList) -> Element {
     section(
         class(
-            "flex flex-wrap items-end justify-between gap-2 px-4 pt-4 pb-4 border-t \
-             dark:border-neutral-700 border-neutral-300",
+            "flex flex-wrap items-end justify-between gap-2 px-4 pt-4 pb-4 border-b \
+             last:border-b-0 dark:border-neutral-700 border-neutral-300",
         ),
         [div(
             class("overflow-hidden"),

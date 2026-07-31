@@ -1,7 +1,7 @@
 use htmf::prelude_inline::*;
 use uuid::Uuid;
 
-use crate::{form_errors::FormErrors, forms};
+use crate::{form_errors::FormErrors, forms, views::layout};
 
 pub struct Data {
     pub layout: super::layout::Template,
@@ -20,15 +20,11 @@ pub fn view(
 ) -> Element {
     super::layout::layout(
         [
-            div(class("border-t dark:border-black border-neutral-200"), ()),
-            div(
-                class("border-t dark:border-neutral-700 border-neutral-300"),
-                (),
-            ),
+            layout::upper_border(),
             form(
                 [
                     action(format!("/lists/{list_id}/edit_title")),
-                    class("flex flex-col max-w-xl mx-4 mb-4 grow"),
+                    class("flex flex-col max-w-xl px-4 mb-4 mx-auto mt-4 md:mt-8 grow"),
                     method("POST"),
                 ],
                 [

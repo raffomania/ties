@@ -17,16 +17,15 @@ pub fn view(
     }: &Data,
 ) -> Element {
     layout::layout(
-        div(class("border-t dark:border-black border-neutral-200")).with([
-            div(class("border-t dark:border-neutral-700 border-neutral-300")),
+        fragment().with([
+            layout::upper_border(),
             form([
                 action("/lists/create"),
                 method("POST"),
-                class("flex flex-col max-w-xl mx-4 mb-4 grow"),
+                class("flex flex-col max-w-xl mx-auto mb-4 mt-4 md:mt-8 px-4 grow"),
             ])
             .with([
-                header(class("mt-3 mb-4"))
-                    .with([h1(class("text-xl font-bold")).with("Create a list")]),
+                header(class("mb-4")).with([h1(class("text-xl font-bold")).with("Create a list")]),
                 label(for_("title")).with("Title"),
                 errors.view("title"),
                 input([

@@ -20,11 +20,11 @@ fn results(data: &Data) -> Element {
     fragment([
         p(
             class(
-                "dark:bg-neutral-900 bg-stone-100 px-4 pt-3 pb-3 font-bold tracking-tight \
-                 border-b dark:border-black border-neutral-200 text-xl",
+                "dark:bg-neutral-900 bg-stone-100 px-4 pt-3 pb-3 font-bold tracking-tight text-xl",
             ),
             format!("{} bookmarks found", data.results.total_count),
         ),
+        layout::upper_border(),
         fragment(
             data.results
                 .bookmarks
@@ -39,22 +39,19 @@ fn results(data: &Data) -> Element {
 fn pagination(data: &Data) -> Element {
     let previous_input = data.layout.previous_search_input.as_deref().unwrap_or("");
     section(
-        class(
-            "flex flex-row gap-4 justify-center w-full p-4 border-t dark:border-neutral-700 \
-             border-neutral-300",
-        ),
+        class("flex flex-row gap-4 justify-center w-full p-4"),
         [
             match data.results.previous_page {
                 Some(page) => {
                     let url = format!("/search?q={previous_input}&page={page}");
-                    a([href(url)], "Previous page")
+                    a([href(url), class("underline")], "Previous page")
                 }
                 None => nothing(),
             },
             match data.results.next_page {
                 Some(page) => {
                     let url = format!("/search?q={previous_input}&page={page}");
-                    a([href(url)], "Next page")
+                    a([href(url), class("underline")], "Next page")
                 }
                 None => nothing(),
             },
@@ -65,7 +62,7 @@ fn pagination(data: &Data) -> Element {
 fn list_item(result: &db::search::Result, Data { layout, .. }: &Data) -> Element {
     section(
         class(
-            "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t dark:border-neutral-700 \
+            "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-b dark:border-neutral-700 \
              border-neutral-300",
         ),
         [

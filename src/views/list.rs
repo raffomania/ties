@@ -26,16 +26,14 @@ pub fn view(
     layout::layout(
         fragment()
             .with(
-                div(class(
-                    "dark:bg-neutral-900 bg-stone-100 border-b dark:border-black \
-                     border-neutral-200 px-4",
-                ))
-                .with(title_and_description(list, metadata))
-                .with(layout.authed_info.as_ref().and_then(|authed_info| {
-                    (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
-                }))
-                .with(backlink_section(backlinks)),
+                div(class("dark:bg-neutral-900 bg-stone-100 px-4 pb-4"))
+                    .with(title_and_description(list, metadata))
+                    .with(layout.authed_info.as_ref().and_then(|authed_info| {
+                        (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
+                    }))
+                    .with(backlink_section(backlinks)),
             )
+            .with(layout::upper_border())
             .with(
                 links
                     .iter()
@@ -44,11 +42,8 @@ pub fn view(
             )
             .with(
                 links.is_empty().then_some(
-                    p(class(
-                        "border-t dark:border-neutral-700 border-neutral-300 \
-                         dark:text-neutral-400 text-neutral-500 italic p-4",
-                    ))
-                    .with("No bookmarks here yet."),
+                    p(class("dark:text-neutral-400 text-neutral-500 italic p-4"))
+                        .with("No bookmarks here yet."),
                 ),
             ),
         layout,
@@ -103,7 +98,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
     .collect::<Vec<_>>();
 
     section(
-        class("pb-4 mt-4"),
+        class("mt-4"),
         [
             h2(
                 class("font-bold mb-0.5 text-sm tracking-tight flex gap-1"),
@@ -130,7 +125,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
 }
 
 fn edit_buttons(Data { list, .. }: &Data) -> Element {
-    section(class("flex flex-wrap my-4 mx-1 gap-x-4 gap-y-2")).with([
+    section(class("flex flex-wrap mt-4 gap-x-4 gap-y-2")).with([
         a([
             class(
                 "block px-4 py-1 border rounded dark:hover:bg-neutral-800 hover:bg-neutral-200 \
@@ -188,27 +183,14 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             ),
             href(format!("/lists/{}/edit_title", list.id)),
         ])
-        .with([
-            text("Rename"),
-            a([
-                class(
-                    "block px-4 py-1 border rounded dark:hover:bg-neutral-800 \
-                     hover:bg-neutral-200 dark:border-neutral-700 border-neutral-300 w-max",
-                ),
-                href(format!("/bookmarks/create?parent_id={}", list.id)),
-                attr("hx-get", format!("/bookmarks/create?parent_id={}", list.id)),
-                attr("hx-select", "#create_bookmark"),
-                attr("hx-target", "closest section"),
-            ])
-            .with("Add new bookmark"),
-        ]),
+        .with([text("Rename")]),
     ])
 }
 
 fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Element {
     section(class(
-        "flex flex-wrap items-end gap-2 px-4 pt-4 pb-4 border-t dark:border-neutral-700 \
-         border-neutral-300",
+        "flex flex-wrap items-end gap-2 px-4 pt-3 pb-4 border-b last:border-b-0 \
+         dark:border-neutral-700 border-neutral-300",
     ))
     .with([
         div(class("overflow-hidden")).with(match &link.dest {
