@@ -37,6 +37,7 @@ pub fn router() -> Router<AppState> {
         )
         .route("/bookmarks/{id}/connect", get(get_edit).post(post_connect))
         .route("/bookmarks/{id}/archive", post(post_archive))
+        .route("/bookmarks/{id}/archive-title", get(get_archive_title))
 }
 
 /// Create a private bookmark with an empty title and redirect the user to the
@@ -49,6 +50,7 @@ async fn post_create(
 ) -> ResponseResult<Response> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 
+    // TODO: refactor UI to work with empty titles
     let insert_bookmark = match InsertBookmark::try_from(input.clone()) {
         Err(errors) => {
             return Ok(HtmfResponse(views::create_bookmark::view(
@@ -378,4 +380,24 @@ async fn post_archive(
     state.archive_queue.archive_in_background(archive.id);
 
     Ok(Redirect::to(&format!("/bookmarks/{id}")))
+}
+
+async fn get_archive_title(
+    extract::Tx(mut tx): extract::Tx,
+    auth_user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> ResponseResult<HtmfResponse> {
+    let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
+
+    if bookmark.ap_user_id != auth_user.ap_user_id {
+        return Err(ResponseError::NotFound);
+    }
+
+    let title_from_archive = views::edit_bookmark::query_archive_title(&mut tx, id).await?;
+
+    Ok(HtmfResponse(views::edit_bookmark::archive_title_view(
+        &title_from_archive,
+        &bookmark.title,
+        bookmark.id,
+    )))
 }

@@ -145,13 +145,13 @@ async fn query_connected_lists(
     Ok(links)
 }
 
-enum TitleFromArchive {
+pub enum TitleFromArchive {
     Success(String),
     Error,
     Pending,
 }
 
-async fn query_archive_title(
+pub async fn query_archive_title(
     tx: &mut AppTx,
     bookmark_id: Uuid,
 ) -> ResponseResult<TitleFromArchive> {
@@ -376,36 +376,49 @@ fn rename(
                     ),
                 ],
             ),
-            match title_from_archive {
-                TitleFromArchive::Success(title) => {
-                    if &bookmark.title == title {
-                        nothing()
-                    } else {
-                        let shortened: String =
-                            title.chars().take(title.floor_char_boundary(500)).collect();
-
-                        button(
-                            [
-                                name("title"),
-                                value(&shortened),
-                                type_("submit"),
-                                class("underline text-sm max-w-full break-all text-left"),
-                            ],
-                            format!(r#"Use website title: "{shortened}""#),
-                        )
-                    }
-                }
-                TitleFromArchive::Error => span(
-                    class("text-sm italic"),
-                    "Could not load title from website.",
-                ),
-                TitleFromArchive::Pending => {
-                    // TODO: autoreload with htmx here
-                    span(class("text-sm italic"), "Loading title from website...")
-                }
-            },
+            archive_title_view(title_from_archive, &bookmark.title, bookmark.id),
         ],
     )
+}
+
+pub fn archive_title_view(
+    title_from_archive: &TitleFromArchive,
+    bookmark_title: &str,
+    bookmark_id: Uuid,
+) -> Element {
+    match title_from_archive {
+        TitleFromArchive::Success(title) => {
+            if bookmark_title == title {
+                nothing()
+            } else {
+                let shortened: String =
+                    title.chars().take(title.floor_char_boundary(500)).collect();
+
+                // TODO: this button is broken due to html5 validation
+                button(
+                    [
+                        name("title"),
+                        value(&shortened),
+                        type_("submit"),
+                        class("underline text-sm max-w-full break-all text-left"),
+                    ],
+                    format!(r#"Use website title: "{shortened}""#),
+                )
+            }
+        }
+        TitleFromArchive::Error => span(
+            class("text-sm italic"),
+            "Could not load title from website.",
+        ),
+        TitleFromArchive::Pending => span(
+            [
+                class("text-sm italic"),
+                attr("hx-get", format!("/bookmarks/{bookmark_id}/archive-title")),
+                attr("hx-trigger", "load delay:1s"),
+            ],
+            "Loading title from website...",
+        ),
+    }
 }
 
 fn disconnect(
