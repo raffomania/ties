@@ -3,8 +3,8 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, bookmarks::InsertBookmark},
-    forms::{links::CreateLink, lists::CreateList},
-    tests::util::test_app::TestApp,
+    forms::{self, links::CreateLink, lists::CreateList},
+    tests::util::{dom::assert_form_matches, test_app::TestApp},
 };
 
 #[test_log::test(tokio::test)]
@@ -29,10 +29,12 @@ async fn get_create_bookmark() -> anyhow::Result<()> {
 
     let form_page = app.req().get("/bookmarks/create").await.test_page().await;
 
-    let recent_list_button = form_page.dom.find("button[name='parents[]']");
-
-    assert_eq!(recent_list_button.length(), 1);
-    assert!(recent_list_button.text().contains("recent test list"));
+    assert_form_matches(
+        &form_page.dom,
+        &forms::bookmarks::CreateBookmark {
+            url: "https://ties.pub".to_string(),
+        },
+    );
 
     Ok(())
 }

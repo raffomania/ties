@@ -165,21 +165,6 @@ pub async fn metadata_by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<Met
     Ok(list)
 }
 
-pub async fn list_by_id(tx: &mut AppTx, list_ids: &[Uuid]) -> ResponseResult<Vec<List>> {
-    let list = query_as!(
-        List,
-        r#"
-        select * from lists
-        where id = any($1)
-        "#,
-        list_ids,
-    )
-    .fetch_all(&mut **tx)
-    .await?;
-
-    Ok(list)
-}
-
 pub async fn list_pinned_by_user(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Vec<List>> {
     let lists = query_as!(
         List,

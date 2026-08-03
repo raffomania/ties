@@ -57,7 +57,7 @@ impl LinkDestination {
 
     pub fn path(&self) -> String {
         match self {
-            LinkDestination::Bookmark(b) => b.path(),
+            LinkDestination::Bookmark(b) => b.show_path(),
             LinkDestination::List(n) => n.path(),
         }
     }

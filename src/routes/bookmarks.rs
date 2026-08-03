@@ -39,22 +39,15 @@ pub fn router() -> Router<AppState> {
         .route("/bookmarks/{id}/archive", post(post_archive))
 }
 
+/// Create a private bookmark with an empty title and redirect the user to the
+/// edit screen.
 async fn post_create(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     State(state): State<AppState>,
-    federation_data: federation::Data,
     QsForm(input): QsForm<CreateBookmark>,
 ) -> ResponseResult<Response> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
-
-    let selected_parents = db::lists::list_by_id(&mut tx, &input.parents).await?;
-
-    // TODO exclude items that are already linked
-    let search_results = match input.list_search_term.as_ref() {
-        None => db::lists::list_recent(&mut tx, auth_user.ap_user_id).await?,
-        Some(term) => db::lists::search(&mut tx, term, auth_user.ap_user_id).await?,
-    };
 
     let insert_bookmark = match InsertBookmark::try_from(input.clone()) {
         Err(errors) => {
@@ -63,8 +56,6 @@ async fn post_create(
                     layout,
                     errors,
                     input,
-                    selected_parents,
-                    search_results,
                 },
             ))
             .into_response());
@@ -80,71 +71,17 @@ async fn post_create(
     )
     .await?;
 
-    let mut first_created_parent = Option::None;
-    for parent_title in input.create_parents {
-        let parent = db::lists::insert(
-            &mut tx,
-            auth_user.ap_user_id,
-            CreateList {
-                title: parent_title,
-                content: None,
-                private: false,
-            },
-        )
-        .await?;
-        db::links::insert(
-            &mut tx,
-            auth_user.user_id,
-            auth_user.ap_user_id,
-            CreateLink {
-                src: parent.id,
-                dest: bookmark.id,
-            },
-        )
-        .await?;
-
-        if first_created_parent.is_none() {
-            first_created_parent.replace(parent);
-        }
-    }
-
-    for parent in input.parents {
-        db::links::insert(
-            &mut tx,
-            auth_user.user_id,
-            auth_user.ap_user_id,
-            CreateLink {
-                src: parent,
-                dest: bookmark.id,
-            },
-        )
-        .await?;
-    }
-
     let archive = db::archives::insert_pending(&mut tx, bookmark.id).await?;
-    let is_public = db::bookmarks::is_public(&mut tx, bookmark.id).await?;
-    let ap_user = db::ap_users::read_by_id(&mut tx, auth_user.ap_user_id).await?;
     tx.commit().await?;
-
-    if is_public {
-        federation::CreateBookmark::send_to_followers(&ap_user, bookmark.clone(), &federation_data)
-            .await?;
-    }
 
     state.archive_queue.archive_in_background(archive.id);
 
-    let redirect_dest = match selected_parents.first().or(first_created_parent.as_ref()) {
-        Some(parent) => parent.path(),
-        None => "/bookmarks/unsorted".to_string(),
-    };
-    Ok(Redirect::to(&redirect_dest).into_response())
+    Ok(Redirect::to(&bookmark.edit_path()).into_response())
 }
 
 #[derive(Deserialize)]
 struct CreateBookmarkQuery {
-    parent_id: Option<Uuid>,
     url: Option<String>,
-    title: Option<String>,
 }
 
 async fn get_create(
@@ -154,24 +91,13 @@ async fn get_create(
 ) -> ResponseResult<HtmfResponse> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 
-    let selected_parent = match query.parent_id {
-        Some(id) => Some(db::lists::by_id(&mut tx, id).await?),
-        _ => None,
-    };
-
     Ok(HtmfResponse(views::create_bookmark::view(
         &views::create_bookmark::Data {
             layout,
             errors: FormErrors::default(),
             input: CreateBookmark {
-                parents: Vec::new(),
                 url: query.url.unwrap_or_default(),
-                title: query.title.unwrap_or_default(),
-                ..Default::default()
             },
-            selected_parents: selected_parent.into_iter().collect(),
-            // TODO exclude items that are already linked
-            search_results: db::lists::list_recent(&mut tx, auth_user.ap_user_id).await?,
         },
     )))
 }
@@ -331,6 +257,8 @@ async fn post_connect(
             },
         )
         .await?;
+
+        // TODO: if bookmark is now public, publish it to fediverse
 
         loaded
             .connected_lists
