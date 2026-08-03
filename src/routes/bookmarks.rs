@@ -221,6 +221,8 @@ async fn post_disconnect(
 async fn post_connect(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
+    federation_data: federation::Data,
+
     Path(bookmark_id): Path<Uuid>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
     QsForm(input): QsForm<forms::bookmarks::ConnectToList>,
@@ -244,6 +246,8 @@ async fn post_connect(
         return Err(ResponseError::InvalidForm(view_data.view().into()));
     }
 
+    let bookmark_public_before = db::bookmarks::is_public(&mut tx, bookmark_id).await?;
+
     if let Some(src) = input.connect_list_id {
         let target_list = db::lists::by_id(&mut tx, src).await?;
 
@@ -258,7 +262,17 @@ async fn post_connect(
         )
         .await?;
 
-        // TODO: if bookmark is now public, publish it to fediverse
+        let bookmark_public_after = !target_list.private;
+
+        if !bookmark_public_before && bookmark_public_after {
+            let ap_user = db::ap_users::read_by_id(&mut tx, loaded.bookmark.ap_user_id).await?;
+            federation::CreateBookmark::send_to_followers(
+                &ap_user,
+                loaded.bookmark.clone(),
+                &federation_data,
+            )
+            .await?;
+        }
 
         loaded
             .connected_lists
