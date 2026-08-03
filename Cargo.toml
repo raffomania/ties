@@ -28,7 +28,7 @@ shadow_reuse = { level = "allow" }
 pattern_type_mismatch = { level = "allow" }
 doc_paragraphs_missing_punctuation = { level = "allow" }
 min_ident_chars = { level = "allow" }
-mod_module_files = { level = "allow" }
+mod_module_files = { level = "deny" }
 self_named_module_files = { level = "allow" }
 pub_use = { level = "allow" }
 cfg_not_test = { level = "allow" }
