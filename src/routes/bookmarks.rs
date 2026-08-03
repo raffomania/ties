@@ -321,11 +321,6 @@ async fn post_connect(
     if let Some(src) = input.connect_list_id {
         let target_list = db::lists::by_id(&mut tx, src).await?;
 
-        // Only allow linking to own lists
-        if target_list.ap_user_id != auth_user.ap_user_id {
-            return Err(ResponseError::NotFound);
-        }
-
         let link = db::links::insert(
             &mut tx,
             auth_user.user_id,
