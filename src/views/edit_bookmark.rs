@@ -18,7 +18,7 @@ pub struct Loaded {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
     pub connected_lists: Vec<LinkWithList>,
-    pub title_from_archive: Option<String>,
+    pub title_from_archive: TitleFromArchive,
     pub query: forms::bookmarks::EditQuery,
 }
 
@@ -58,7 +58,7 @@ pub struct ViewData {
     pub rename_input: forms::bookmarks::Rename,
     pub search_query: forms::bookmarks::EditQuery,
     pub outcome: ActionOutcome,
-    pub title_from_archive: Option<String>,
+    pub title_from_archive: TitleFromArchive,
 }
 
 impl From<Loaded> for ViewData {
@@ -145,10 +145,19 @@ async fn query_connected_lists(
     Ok(links)
 }
 
-async fn query_archive_title(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<Option<String>> {
+enum TitleFromArchive {
+    Success(String),
+    Error,
+    Pending,
+}
+
+async fn query_archive_title(
+    tx: &mut AppTx,
+    bookmark_id: Uuid,
+) -> ResponseResult<TitleFromArchive> {
     let row = sqlx::query!(
         r#"
-        select extracted_title
+        select extracted_title, status as "status: db::archives::Status"
         from archives
         where archives.bookmark_id = $1
         "#,
@@ -157,7 +166,15 @@ async fn query_archive_title(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResul
     .fetch_optional(&mut **tx)
     .await?;
 
-    Ok(row.and_then(|r| r.extracted_title))
+    let Some(row) = row else {
+        return Ok(TitleFromArchive::Error);
+    };
+
+    Ok(match (row.status, row.extracted_title) {
+        (db::archives::Status::Success, Some(title)) => TitleFromArchive::Success(title),
+        (db::archives::Status::Pending, _) => TitleFromArchive::Pending,
+        _ => TitleFromArchive::Error,
+    })
 }
 
 pub async fn search_unconnected_lists(
@@ -359,27 +376,34 @@ fn rename(
                     ),
                 ],
             ),
-            title_from_archive
-                .as_ref()
-                .and_then(|title| {
+            match title_from_archive {
+                TitleFromArchive::Success(title) => {
                     if &bookmark.title == title {
-                        return None;
+                        nothing()
+                    } else {
+                        let shortened: String =
+                            title.chars().take(title.floor_char_boundary(500)).collect();
+
+                        button(
+                            [
+                                name("title"),
+                                value(&shortened),
+                                type_("submit"),
+                                class("underline text-sm max-w-full break-all text-left"),
+                            ],
+                            format!(r#"Use website title: "{shortened}""#),
+                        )
                     }
-
-                    let shortened: String =
-                        title.chars().take(title.floor_char_boundary(500)).collect();
-
-                    Some(button(
-                        [
-                            name("title"),
-                            value(&shortened),
-                            type_("submit"),
-                            class("underline text-sm max-w-full break-all text-left"),
-                        ],
-                        format!(r#"Use website title: "{shortened}""#),
-                    ))
-                })
-                .into(),
+                }
+                TitleFromArchive::Error => span(
+                    class("text-sm italic"),
+                    "Could not load title from website.",
+                ),
+                TitleFromArchive::Pending => {
+                    // TODO: autoreload with htmx here
+                    span(class("text-sm italic"), "Loading title from website...")
+                }
+            },
         ],
     )
 }
