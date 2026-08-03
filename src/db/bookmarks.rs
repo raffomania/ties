@@ -50,9 +50,14 @@ impl TryFrom<BookmarkRow> for Bookmark {
 }
 
 impl Bookmark {
-    pub fn path(&self) -> String {
+    pub fn show_path(&self) -> String {
         let id = self.id;
         format!("/bookmarks/{id}")
+    }
+
+    pub fn edit_path(&self) -> String {
+        let id = self.id;
+        format!("/bookmarks/{id}/edit")
     }
 }
 

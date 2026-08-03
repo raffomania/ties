@@ -132,7 +132,7 @@ impl Object for db::Bookmark {
             r#"<p>{}</p><a href="{}">{}</p>"#,
             self.title, self.url, self.url
         );
-        let web_url = data.base_url.join(&self.path())?;
+        let web_url = data.base_url.join(&self.show_path())?;
 
         // Pass None as user id to only fetch public lists for hashtags
         let lists = db::lists::pointing_to_bookmark(&mut tx, self.id, None).await?;
