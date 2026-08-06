@@ -331,78 +331,97 @@ fn rename(
     }: &ViewData,
 ) -> Element {
     let sq = search_input.query_string();
-    form(
-        [
-            method("POST"),
-            action(format!("/bookmarks/{}/rename{}", bookmark.id, sq)),
-            attr("hx-boost", "true"),
-        ],
-        [
-            div(
-                class("flex justify-between mt-6"),
-                [
-                    label([for_("rename-title"), class("font-bold")], "Title"),
-                    if outcome == &ActionOutcome::Renamed {
-                        span(
-                            [class("dark:text-neutral-300 text-neutral-600")],
-                            "✓ renamed!",
-                        )
-                    } else {
-                        nothing()
-                    },
-                ],
-            ),
-            errors.view("title"),
-            div(
-                class("flex flex-wrap gap-2 mt-1 items-center"),
-                [
-                    input([
-                        value(&rename_input.title),
-                        class(
-                            "rounded py-1.5 px-3 bg-white border border-neutral-300 \
-                             dark:bg-neutral-900 dark:border-neutral-700 grow",
+    fragment([
+        form(
+            [
+                method("POST"),
+                action(format!("/bookmarks/{}/rename{}", bookmark.id, sq)),
+                attr("hx-boost", "true"),
+            ],
+            [
+                div(
+                    class("flex justify-between mt-6"),
+                    [
+                        label([for_("rename-title"), class("font-bold")], "Title"),
+                        if outcome == &ActionOutcome::Renamed {
+                            span(
+                                [class("dark:text-neutral-300 text-neutral-600")],
+                                "✓ renamed!",
+                            )
+                        } else {
+                            nothing()
+                        },
+                    ],
+                ),
+                errors.view("title"),
+                div(
+                    class("flex flex-wrap gap-2 mt-1 items-center"),
+                    [
+                        input([
+                            value(&rename_input.title),
+                            class(
+                                "rounded py-1.5 px-3 bg-white border border-neutral-300 \
+                                 dark:bg-neutral-900 dark:border-neutral-700 grow",
+                            ),
+                            name("title"),
+                            required(""),
+                            id("rename-title"),
+                            type_("text"),
+                        ]),
+                        button(
+                            [
+                                class("bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded"),
+                                type_("submit"),
+                            ],
+                            "Rename",
                         ),
-                        name("title"),
-                        id("rename-title"),
-                        required(""),
-                        type_("text"),
-                    ]),
-                    button(
-                        [
-                            class("bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded"),
-                            type_("submit"),
-                        ],
-                        "Rename",
-                    ),
-                ],
-            ),
-            archive_title_view(title_from_archive, &bookmark.title, bookmark.id),
-        ],
-    )
+                    ],
+                ),
+            ],
+        ),
+        archive_title_view(
+            title_from_archive,
+            &bookmark.title,
+            bookmark.id,
+            search_input,
+        ),
+    ])
 }
 
 pub fn archive_title_view(
     title_from_archive: &TitleFromArchive,
     bookmark_title: &str,
     bookmark_id: Uuid,
+    search_query: &EditQuery,
 ) -> Element {
     match title_from_archive {
-        TitleFromArchive::Success(title) => {
-            if bookmark_title == title {
+        TitleFromArchive::Success(archived_title) => {
+            if bookmark_title == archived_title {
                 nothing()
             } else {
-                let shortened: String =
-                    title.chars().take(title.floor_char_boundary(500)).collect();
+                let shortened: String = archived_title
+                    .chars()
+                    .take(archived_title.floor_char_boundary(500))
+                    .collect();
 
-                // TODO: this button is broken due to html5 validation
-                button(
+                // Use separate form from the title input to not send two values for the title
+                // until this issue is fixed: https://github.com/samscott89/serde_qs/issues/171
+                let sq = search_query.query_string();
+                form(
                     [
-                        name("title"),
-                        value(&shortened),
-                        type_("submit"),
-                        class("underline text-sm max-w-full break-all text-left"),
+                        method("POST"),
+                        action(format!("/bookmarks/{bookmark_id}/rename{sq}")),
+                        attr("hx-boost", "true"),
                     ],
-                    format!(r#"Use website title: "{shortened}""#),
+                    button(
+                        [
+                            name("title"),
+                            value(&shortened),
+                            type_("submit"),
+                            class("underline text-sm max-w-full break-all text-left"),
+                        ],
+                        format!(r#"Use website title: "{shortened}""#),
+                    ),
                 )
             }
         }

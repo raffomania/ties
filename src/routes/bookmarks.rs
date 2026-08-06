@@ -17,7 +17,7 @@ use crate::{
     extract::{self},
     federation,
     form_errors::FormErrors,
-    forms::{self, bookmarks::CreateBookmark, links::CreateLink, lists::CreateList},
+    forms::{self, bookmarks::CreateBookmark},
     htmf_response::HtmfResponse,
     response_error::{ResponseError, ResponseResult},
     server::AppState,
@@ -386,6 +386,7 @@ async fn get_archive_title(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     Path(id): Path<Uuid>,
+    QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
 ) -> ResponseResult<HtmfResponse> {
     let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
 
@@ -399,5 +400,6 @@ async fn get_archive_title(
         &title_from_archive,
         &bookmark.title,
         bookmark.id,
+        &search_query,
     )))
 }
