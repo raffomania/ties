@@ -50,7 +50,6 @@ async fn post_create(
 ) -> ResponseResult<Response> {
     let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
 
-    // TODO: refactor UI to work with empty titles
     let insert_bookmark = match InsertBookmark::try_from(input.clone()) {
         Err(errors) => {
             return Ok(HtmfResponse(views::create_bookmark::view(
@@ -150,7 +149,7 @@ async fn post_rename(
         &mut tx,
         id,
         db::bookmarks::UpdateBookmark {
-            title: rename_input.title.clone(),
+            title: Some(rename_input.title.clone()),
         },
         auth_user.ap_user_id,
     )
@@ -398,7 +397,7 @@ async fn get_archive_title(
 
     Ok(HtmfResponse(views::edit_bookmark::archive_title_view(
         &title_from_archive,
-        &bookmark.title,
+        bookmark.title.as_deref(),
         bookmark.id,
         &search_query,
     )))

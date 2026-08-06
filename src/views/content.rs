@@ -24,6 +24,12 @@ pub fn help_icon() -> Element {
     )
 }
 
+/// Return the title, or if it's None, a generic "untitled" title description.
+#[expect(clippy::ref_option, reason = "It's easier to call this way.")]
+pub fn bookmark_title(title: &Option<String>) -> &str {
+    title.as_deref().unwrap_or("Untitled Bookmark")
+}
+
 pub fn format_date(date: OffsetDateTime) -> String {
     let maybe_formatted = format_description::parse("[year]-[month]-[day]")
         .context("Invalid date format description")

@@ -89,7 +89,7 @@ impl TryFrom<Json> for InsertBookmark {
 
         let create_bookmark = InsertBookmark {
             url,
-            title: value.name.ok_or_else(|| anyhow!("Missing title"))?,
+            title: value.name,
         };
 
         // TODO how to validate InsertBookmark?
@@ -128,10 +128,16 @@ impl Object for db::Bookmark {
             media_type: None,
             kind: LinkType::Link,
         }];
-        let content = format!(
-            r#"<p>{}</p><a href="{}">{}</p>"#,
-            self.title, self.url, self.url
-        );
+
+        let content = {
+            use htmf::prelude_inline::*;
+
+            let description = match &self.title {
+                Some(title) => p((), title),
+                None => nothing(),
+            };
+            fragment([description, a(href(&self.url), &self.url)]).to_html()
+        };
         let web_url = data.base_url.join(&self.show_path())?;
 
         // Pass None as user id to only fetch public lists for hashtags
@@ -152,7 +158,7 @@ impl Object for db::Bookmark {
             to: vec![public()],
             published: self.created_at,
             content: Some(content),
-            name: Some(self.title),
+            name: self.title,
             url: web_url,
             source: Source {
                 content: String::new(),

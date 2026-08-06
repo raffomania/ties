@@ -72,7 +72,7 @@ impl From<Loaded> for ViewData {
         }: Loaded,
     ) -> Self {
         let rename_input = forms::bookmarks::Rename {
-            title: bookmark.title.clone(),
+            title: bookmark.title.clone().unwrap_or_default(),
         };
 
         Self {
@@ -381,7 +381,7 @@ fn rename(
         ),
         archive_title_view(
             title_from_archive,
-            &bookmark.title,
+            bookmark.title.as_deref(),
             bookmark.id,
             search_input,
         ),
@@ -390,13 +390,13 @@ fn rename(
 
 pub fn archive_title_view(
     title_from_archive: &TitleFromArchive,
-    bookmark_title: &str,
+    bookmark_title: Option<&str>,
     bookmark_id: Uuid,
     search_query: &EditQuery,
 ) -> Element {
     match title_from_archive {
         TitleFromArchive::Success(archived_title) => {
-            if bookmark_title == archived_title {
+            if bookmark_title == Some(archived_title) {
                 nothing()
             } else {
                 let shortened: String = archived_title

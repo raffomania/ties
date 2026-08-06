@@ -19,7 +19,7 @@ pub struct Bookmark {
     pub ap_user_id: Uuid,
 
     pub url: String,
-    pub title: String,
+    pub title: Option<String>,
     pub ap_id: ObjectId<Bookmark>,
 }
 
@@ -30,7 +30,7 @@ struct BookmarkRow {
     ap_user_id: Uuid,
 
     url: String,
-    title: String,
+    title: Option<String>,
     ap_id: String,
 }
 
@@ -63,7 +63,7 @@ impl Bookmark {
 
 pub struct InsertBookmark {
     pub url: String,
-    pub title: String,
+    pub title: Option<String>,
 }
 
 pub async fn insert_local(
@@ -98,7 +98,7 @@ pub async fn insert_local(
 }
 
 pub struct UpdateBookmark {
-    pub title: String,
+    pub title: Option<String>,
 }
 
 pub async fn update_local(

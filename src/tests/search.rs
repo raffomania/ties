@@ -40,7 +40,7 @@ async fn search_finds_bookmarks_with_various_queries() -> anyhow::Result<()> {
                     "https://example.com/{}",
                     title.to_lowercase().replace(' ', "-")
                 ),
-                title: (*title).to_string(),
+                title: Some(title.to_string()),
             },
             &app.base_url,
         )
@@ -120,7 +120,7 @@ async fn search_only_returns_users_own_bookmarks() -> anyhow::Result<()> {
         user1.ap_user_id,
         InsertBookmark {
             url: "https://example.com/user1".to_string(),
-            title: "My Rust Tutorial".to_string(),
+            title: Some("My Rust Tutorial".to_string()),
         },
         &app.base_url,
     )
@@ -130,7 +130,7 @@ async fn search_only_returns_users_own_bookmarks() -> anyhow::Result<()> {
         user2.ap_user_id,
         InsertBookmark {
             url: "https://example.com/user2".to_string(),
-            title: "Other User's Rust Guide".to_string(),
+            title: Some("Other User's Rust Guide".to_string()),
         },
         &app.base_url,
     )
@@ -240,7 +240,7 @@ async fn update_bookmark_updates_search_index() -> anyhow::Result<()> {
         user.ap_user_id,
         InsertBookmark {
             url: "https://example.com/renamed-bookmark".to_string(),
-            title: "Original Title".to_string(),
+            title: Some("Original Title".to_string()),
         },
         &app.base_url,
     )
@@ -261,7 +261,7 @@ async fn update_bookmark_updates_search_index() -> anyhow::Result<()> {
         &mut tx,
         bookmark.id,
         UpdateBookmark {
-            title: "Updated Title".to_string(),
+            title: Some("Updated Title".to_string()),
         },
         bookmark.ap_user_id,
     )

@@ -239,7 +239,7 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
             ),
             href(format!("/bookmarks/{}", bookmark.id)),
         ])
-        .with(&bookmark.title),
+        .with(content::bookmark_title(&bookmark.title)),
         content::link_url(&bookmark.url),
     ])
 }
