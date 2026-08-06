@@ -36,7 +36,10 @@ pub fn view(
             header(
                 class("dark:bg-neutral-900 bg-stone-100 px-4 pt-3 pb-4"),
                 [
-                    h1(class("text-3xl tracking-tight font-bold"), &bookmark.title),
+                    h1(
+                        class("text-3xl tracking-tight font-bold"),
+                        content::bookmark_title(&bookmark.title),
+                    ),
                     p(
                         class(
                             "w-full overflow-hidden dark:hover:text-orange-300 \

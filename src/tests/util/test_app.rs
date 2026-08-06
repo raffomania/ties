@@ -107,7 +107,7 @@ impl TestApp {
             user.ap_user_id,
             db::bookmarks::InsertBookmark {
                 url: url.to_string(),
-                title: title.to_string(),
+                title: Some(title.to_string()),
             },
             &self.base_url,
         )

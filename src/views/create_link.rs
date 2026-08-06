@@ -162,7 +162,7 @@ fn link_dest(link_dest: &db::LinkDestination) -> Element {
         db::LinkDestination::Bookmark(bookmark) => fragment([
             p(
                 class("dark:text-orange-100 text-orange-900"),
-                format!("📄 {}", bookmark.title),
+                format!("📄 {}", content::bookmark_title(&bookmark.title)),
             ),
             content::link_url(&bookmark.url),
         ]),

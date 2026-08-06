@@ -14,7 +14,7 @@ pub struct Results {
 }
 
 pub struct Result {
-    pub title: String,
+    pub title: Option<String>,
     pub bookmark_id: Uuid,
     pub bookmark_url: String,
 }

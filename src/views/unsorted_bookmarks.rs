@@ -44,7 +44,7 @@ fn bookmark_entry(bookmark: &Bookmark) -> Element {
                      whitespace-nowrap",
                 ),
             ])
-            .with(&bookmark.title),
+            .with(content::bookmark_title(&bookmark.title)),
             content::link_url(&bookmark.url),
         ]),
         div(class(

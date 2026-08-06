@@ -20,7 +20,7 @@ impl TryFrom<CreateBookmark> for InsertBookmark {
 
         Ok(InsertBookmark {
             url: value.url,
-            title: String::new(),
+            title: None,
         })
     }
 }

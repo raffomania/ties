@@ -200,9 +200,11 @@ async fn create_bookmarks(
     let mut bookmarks = Vec::new();
 
     for _ in 0..500 {
-        let title: String = fake::faker::lorem::en::Words(1..5)
-            .fake::<Vec<_>>()
-            .join(" ");
+        let title = rand::random_bool(0.95).then(|| {
+            fake::faker::lorem::en::Words(1..5)
+                .fake::<Vec<_>>()
+                .join(" ")
+        });
         let insert_bookmark = InsertBookmark {
             url: random_url()?,
             title,
@@ -248,11 +250,11 @@ async fn create_archive(tx: &mut AppTx, bookmark: &db::Bookmark) -> Result<db::A
     Ok(archive)
 }
 
-fn random_article(title: String, url: String) -> Result<legible::Article> {
+fn random_article(title: Option<String>, url: String) -> Result<legible::Article> {
     let content: Vec<_> = fake::faker::lorem::en::Paragraphs(1..100).fake();
 
     Ok(legible::Article {
-        title,
+        title: title.unwrap_or_default(),
         byline: fake::faker::name::en::Name().fake(),
         dir: None,
         lang: Some("en".to_string()),

@@ -99,7 +99,7 @@ fn list_item_bookmark(result: &db::search::Result) -> Element {
                 ),
                 href(format!("/bookmarks/{}", result.bookmark_id)),
             ],
-            &result.title,
+            content::bookmark_title(&result.title),
         ),
         content::link_url(&result.bookmark_url),
     ])

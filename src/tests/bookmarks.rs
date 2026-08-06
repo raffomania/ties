@@ -50,7 +50,7 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
         user.ap_user_id,
         InsertBookmark {
             url: String::new(),
-            title: String::new(),
+            title: None,
         },
         &app.base_url,
     )
