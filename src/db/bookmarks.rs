@@ -262,6 +262,35 @@ pub async fn is_public(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<bool
     Ok(public_destination_count.count > 0)
 }
 
+/// Return true if the bookmark is public or the given AP user is its owner.
+pub async fn is_public_or_owner(
+    tx: &mut AppTx,
+    ap_user_id: Uuid,
+    bookmark_id: Uuid,
+) -> ResponseResult<bool> {
+    let result = query!(
+        r#"
+        select
+            (bookmarks.ap_user_id = $2) as "owner!",
+            exists(
+                select 1
+                from links
+                inner join lists on links.src_list_id = lists.id
+                where not lists.private
+                    and links.dest_bookmark_id = $1
+            ) as "is_public!"
+        from bookmarks
+        where bookmarks.id = $1
+        "#,
+        bookmark_id,
+        ap_user_id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+
+    Ok(result.is_some_and(|r| r.owner || r.is_public))
+}
+
 /// Weights used:
 /// A: title
 /// B: body

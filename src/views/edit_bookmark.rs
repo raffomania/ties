@@ -18,7 +18,7 @@ pub struct Loaded {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
     pub connected_lists: Vec<LinkWithList>,
-    pub title_from_archive: TitleFromArchive,
+    pub title_from_archive: db::archives::TitleFromArchive,
     pub query: forms::bookmarks::EditQuery,
 }
 
@@ -31,7 +31,7 @@ pub async fn load(
     let layout = layout::Template::from_db(tx, Some(auth_user)).await?;
     let bookmark = db::bookmarks::by_id(tx, bookmark_id).await?;
     let connected_lists = query_connected_lists(tx, bookmark_id, auth_user.user_id).await?;
-    let title_from_archive = query_archive_title(tx, bookmark_id).await?;
+    let title_from_archive = db::archives::title(tx, bookmark_id, auth_user.ap_user_id).await?;
 
     Ok(Loaded {
         layout,
@@ -58,7 +58,7 @@ pub struct ViewData {
     pub rename_input: forms::bookmarks::Rename,
     pub search_query: forms::bookmarks::EditQuery,
     pub outcome: ActionOutcome,
-    pub title_from_archive: TitleFromArchive,
+    pub title_from_archive: db::archives::TitleFromArchive,
 }
 
 impl From<Loaded> for ViewData {
@@ -143,38 +143,6 @@ async fn query_connected_lists(
     .await?;
 
     Ok(links)
-}
-
-pub enum TitleFromArchive {
-    Success(String),
-    Error,
-    Pending,
-}
-
-pub async fn query_archive_title(
-    tx: &mut AppTx,
-    bookmark_id: Uuid,
-) -> ResponseResult<TitleFromArchive> {
-    let row = sqlx::query!(
-        r#"
-        select extracted_title, status as "status: db::archives::Status"
-        from archives
-        where archives.bookmark_id = $1
-        "#,
-        bookmark_id,
-    )
-    .fetch_optional(&mut **tx)
-    .await?;
-
-    let Some(row) = row else {
-        return Ok(TitleFromArchive::Error);
-    };
-
-    Ok(match (row.status, row.extracted_title) {
-        (db::archives::Status::Success, Some(title)) => TitleFromArchive::Success(title),
-        (db::archives::Status::Pending, _) => TitleFromArchive::Pending,
-        _ => TitleFromArchive::Error,
-    })
 }
 
 pub async fn search_unconnected_lists(
@@ -389,13 +357,13 @@ fn rename(
 }
 
 pub fn archive_title_view(
-    title_from_archive: &TitleFromArchive,
+    title_from_archive: &db::archives::TitleFromArchive,
     bookmark_title: Option<&str>,
     bookmark_id: Uuid,
     search_query: &EditQuery,
 ) -> Element {
     match title_from_archive {
-        TitleFromArchive::Success(archived_title) => {
+        db::archives::TitleFromArchive::Success(archived_title) => {
             if bookmark_title == Some(archived_title) {
                 nothing()
             } else {
@@ -425,11 +393,11 @@ pub fn archive_title_view(
                 )
             }
         }
-        TitleFromArchive::Error => span(
+        db::archives::TitleFromArchive::Error => span(
             class("text-sm italic"),
             "Could not load title from website.",
         ),
-        TitleFromArchive::Pending => span(
+        db::archives::TitleFromArchive::Pending => span(
             [
                 class("text-sm italic"),
                 attr("hx-get", format!("/bookmarks/{bookmark_id}/archive-title")),

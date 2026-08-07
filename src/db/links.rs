@@ -92,9 +92,7 @@ async fn validate_private_items_belong_to_creator(
 
     match dest {
         LinkDestination::Bookmark(bookmark) => {
-            if !db::bookmarks::is_public(tx, bookmark.id).await?
-                && bookmark.ap_user_id != ap_user_id
-            {
+            if !db::bookmarks::is_public_or_owner(tx, ap_user_id, bookmark.id).await? {
                 return Err(ResponseError::NotFound);
             }
         }
