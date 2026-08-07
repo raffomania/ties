@@ -302,9 +302,7 @@ async fn get_by_id(
 
     let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
 
-    if !db::bookmarks::is_public(&mut tx, bookmark.id).await?
-        && bookmark.ap_user_id != auth_user.ap_user_id
-    {
+    if !db::bookmarks::is_public_or_owner(&mut tx, auth_user.ap_user_id, bookmark.id).await? {
         return Err(ResponseError::NotFound);
     }
 
@@ -393,7 +391,7 @@ async fn get_archive_title(
         return Err(ResponseError::NotFound);
     }
 
-    let title_from_archive = views::edit_bookmark::query_archive_title(&mut tx, id).await?;
+    let title_from_archive = db::archives::title(&mut tx, id, auth_user.ap_user_id).await?;
 
     Ok(HtmfResponse(views::edit_bookmark::archive_title_view(
         &title_from_archive,

@@ -211,3 +211,40 @@ pub async fn delete_by_bookmark_id(tx: &mut AppTx, bookmark_id: Uuid) -> Respons
 
     Ok(())
 }
+
+pub enum TitleFromArchive {
+    Success(String),
+    Error,
+    Pending,
+}
+
+pub async fn title(
+    tx: &mut AppTx,
+    bookmark_id: Uuid,
+    ap_user_id: Uuid,
+) -> ResponseResult<TitleFromArchive> {
+    if !db::bookmarks::is_public_or_owner(tx, ap_user_id, bookmark_id).await? {
+        return Err(crate::response_error::ResponseError::NotFound);
+    }
+
+    let row = sqlx::query!(
+        r#"
+        select extracted_title, status as "status: db::archives::Status"
+        from archives
+        where archives.bookmark_id = $1
+        "#,
+        bookmark_id,
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+
+    let Some(row) = row else {
+        return Ok(TitleFromArchive::Error);
+    };
+
+    Ok(match (row.status, row.extracted_title) {
+        (db::archives::Status::Success, Some(title)) => TitleFromArchive::Success(title),
+        (db::archives::Status::Pending, _) => TitleFromArchive::Pending,
+        _ => TitleFromArchive::Error,
+    })
+}
