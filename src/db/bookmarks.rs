@@ -1,4 +1,5 @@
 use activitypub_federation::fetch::object_id::ObjectId;
+use anyhow::{Context, anyhow};
 use serde::Deserialize;
 use sqlx::{FromRow, query, query_as, query_scalar};
 use time::OffsetDateTime;
@@ -8,6 +9,7 @@ use uuid::Uuid;
 use super::AppTx;
 use crate::{
     db,
+    federation::webfinger,
     response_error::{ResponseError, ResponseResult},
 };
 
@@ -46,6 +48,41 @@ impl TryFrom<BookmarkRow> for Bookmark {
             title: value.title,
             ap_id: value.ap_id.parse()?,
         })
+    }
+}
+
+impl Bookmark {
+    pub fn show_path(&self) -> String {
+        let id = self.id;
+        format!("/bookmarks/{id}")
+    }
+
+    pub fn edit_path(&self) -> String {
+        let id = self.id;
+        format!("/bookmarks/{id}/edit")
+    }
+
+    /// Return Ok if that URL is a followable user
+    pub async fn is_followable(
+        &self,
+        tx: &mut AppTx,
+        base_url: &Url,
+    ) -> ResponseResult<webfinger::Resource> {
+        let parsed_url = Url::parse(&self.url)?;
+        let username = parsed_url
+            .path_segments()
+            .context("No path segments in URL")?
+            .next_back()
+            .context("No final path segment")?;
+
+        let resource = webfinger::Resource::from_name_and_url(username.to_string(), &parsed_url)?;
+
+        let user = db::ap_users::read_by_webfinger(tx, &resource).await?;
+        if !user.is_local(base_url) {
+            return Err(anyhow!("Can only follow local users at the moment").into());
+        }
+
+        Ok(resource)
     }
 }
 

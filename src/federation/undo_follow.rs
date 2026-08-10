@@ -87,8 +87,8 @@ impl ActivityHandler for UndoFollow {
         db::follows::remove(
             &mut tx,
             db::follows::Insert {
-                follower_id: follower.id,
-                following_id: following.id,
+                follower_ap_user_id: follower.id,
+                following_ap_user_id: following.id,
             },
         )
         .await?;

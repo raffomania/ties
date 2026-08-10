@@ -8,15 +8,15 @@ use crate::{db::AppTx, response_error::ResponseResult};
 pub struct Follow {
     pub id: Uuid,
 
-    /// The user that is following
+    /// The AP user that is following
     pub follower_id: Uuid,
-    /// The user being followed
+    /// The AP user being followed
     pub following_id: Uuid,
 }
 
 pub struct Insert {
-    pub follower_id: Uuid,
-    pub following_id: Uuid,
+    pub follower_ap_user_id: Uuid,
+    pub following_ap_user_id: Uuid,
 }
 
 pub async fn upsert(tx: &mut AppTx, insert: Insert) -> ResponseResult<()> {
@@ -33,8 +33,8 @@ pub async fn upsert(tx: &mut AppTx, insert: Insert) -> ResponseResult<()> {
         on conflict (follower_id, following_id)
             do nothing
         ",
-        insert.follower_id,
-        insert.following_id,
+        insert.follower_ap_user_id,
+        insert.following_ap_user_id,
     )
     .execute(&mut **tx)
     .await?;
@@ -48,8 +48,8 @@ pub async fn remove(tx: &mut AppTx, insert: Insert) -> ResponseResult<()> {
         delete from follows
         where follower_id = $1 and following_id = $2
         ",
-        insert.follower_id,
-        insert.following_id
+        insert.follower_ap_user_id,
+        insert.following_ap_user_id
     )
     .execute(&mut **tx)
     .await?;

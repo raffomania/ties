@@ -1,6 +1,7 @@
 use htmf::prelude::*;
 use uuid::Uuid;
 
+// TODO: some kind of "follow" button if it's a local user
 use crate::{
     db::{self, AppTx},
     response_error::ResponseResult,
