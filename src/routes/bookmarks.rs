@@ -15,7 +15,7 @@ use crate::{
     authentication::AuthUser,
     db::{self, bookmarks::InsertBookmark},
     extract::{self},
-    federation,
+    federation::{self},
     form_errors::FormErrors,
     forms::{self, bookmarks::CreateBookmark},
     htmf_response::HtmfResponse,
@@ -107,9 +107,11 @@ async fn get_edit(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     Path(id): Path<Uuid>,
+    State(state): State<AppState>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
 ) -> ResponseResult<HtmfResponse> {
-    let loaded = views::edit_bookmark::load(&mut tx, &auth_user, id, search_query).await?;
+    let loaded =
+        views::edit_bookmark::load(&mut tx, &auth_user, id, search_query, &state.base_url).await?;
 
     if loaded.bookmark.ap_user_id != auth_user.ap_user_id {
         return Err(ResponseError::NotFound);
@@ -126,11 +128,13 @@ async fn post_rename(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     federation_data: federation::Data,
+    State(state): State<AppState>,
     Path(id): Path<Uuid>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
     QsForm(rename_input): QsForm<forms::bookmarks::Rename>,
 ) -> ResponseResult<HtmfResponse> {
-    let mut loaded = views::edit_bookmark::load(&mut tx, &auth_user, id, search_query).await?;
+    let mut loaded =
+        views::edit_bookmark::load(&mut tx, &auth_user, id, search_query, &state.base_url).await?;
 
     if loaded.bookmark.ap_user_id != auth_user.ap_user_id {
         return Err(ResponseError::NotFound);
@@ -180,11 +184,13 @@ async fn post_rename(
 async fn post_disconnect(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
+    State(state): State<AppState>,
     Path(id): Path<Uuid>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
     QsForm(input): QsForm<forms::bookmarks::Disconnect>,
 ) -> ResponseResult<HtmfResponse> {
-    let mut loaded = views::edit_bookmark::load(&mut tx, &auth_user, id, search_query).await?;
+    let mut loaded =
+        views::edit_bookmark::load(&mut tx, &auth_user, id, search_query, &state.base_url).await?;
 
     // Since this is intended to be used in the bookmark edit form only,
     // and that form is only intended to work on your own bookmarks, we can be
@@ -223,13 +229,19 @@ async fn post_connect(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     federation_data: federation::Data,
-
+    State(state): State<AppState>,
     Path(bookmark_id): Path<Uuid>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
     QsForm(input): QsForm<forms::bookmarks::ConnectToList>,
 ) -> ResponseResult<HtmfResponse> {
-    let mut loaded =
-        views::edit_bookmark::load(&mut tx, &auth_user, bookmark_id, search_query).await?;
+    let mut loaded = views::edit_bookmark::load(
+        &mut tx,
+        &auth_user,
+        bookmark_id,
+        search_query,
+        &state.base_url,
+    )
+    .await?;
 
     // Since this is intended to be used in the bookmark edit form only,
     // and that form is only intended to work on your own bookmarks, we can be
@@ -271,6 +283,24 @@ async fn post_connect(
                 &ap_user,
                 loaded.bookmark.clone(),
                 &federation_data,
+            )
+            .await?;
+        }
+
+        // If newly added to a public list, and it's a followable user,
+        // insert a follow
+        if let Ok(resource) = loaded.bookmark.is_followable(&state.base_url)
+            && !bookmark_public_before
+            && bookmark_public_after
+        {
+            let followed_ap_user = db::ap_users::read_by_username(&mut tx, resource).await?;
+
+            db::follows::upsert(
+                &mut tx,
+                db::follows::Insert {
+                    follower_ap_user_id: auth_user.ap_user_id,
+                    following_ap_user_id: followed_ap_user.id,
+                },
             )
             .await?;
         }

@@ -80,8 +80,8 @@ impl ActivityHandler for Follow {
         db::follows::upsert(
             &mut tx,
             db::follows::Insert {
-                follower_id: actor.id,
-                following_id: followed.id,
+                follower_ap_user_id: actor.id,
+                following_ap_user_id: followed.id,
             },
         )
         .await?;

@@ -1,5 +1,6 @@
 use htmf::{into_attrs::IntoAttrs, prelude_inline::*};
 use sqlx::query_as;
+use url::Url;
 use uuid::Uuid;
 
 use super::layout;
@@ -20,6 +21,7 @@ pub struct Loaded {
     pub connected_lists: Vec<LinkWithList>,
     pub title_from_archive: db::archives::TitleFromArchive,
     pub query: forms::bookmarks::EditQuery,
+    pub followable: bool,
 }
 
 pub async fn load(
@@ -27,11 +29,16 @@ pub async fn load(
     auth_user: &AuthUser,
     bookmark_id: Uuid,
     query: forms::bookmarks::EditQuery,
+    server_base_url: &Url,
 ) -> ResponseResult<Loaded> {
     let layout = layout::Template::from_db(tx, Some(auth_user)).await?;
     let bookmark = db::bookmarks::by_id(tx, bookmark_id).await?;
     let connected_lists = query_connected_lists(tx, bookmark_id, auth_user.user_id).await?;
     let title_from_archive = db::archives::title(tx, bookmark_id, auth_user.ap_user_id).await?;
+
+    // TODO: indicate if already following
+    // TODO: add unfollow
+    let followable = bookmark.is_followable(server_base_url).is_ok();
 
     Ok(Loaded {
         layout,
@@ -39,6 +46,7 @@ pub async fn load(
         connected_lists,
         title_from_archive,
         query,
+        followable,
     })
 }
 
@@ -59,6 +67,7 @@ pub struct ViewData {
     pub search_query: forms::bookmarks::EditQuery,
     pub outcome: ActionOutcome,
     pub title_from_archive: db::archives::TitleFromArchive,
+    pub followable: bool,
 }
 
 impl From<Loaded> for ViewData {
@@ -69,6 +78,7 @@ impl From<Loaded> for ViewData {
             connected_lists,
             title_from_archive,
             query,
+            followable,
         }: Loaded,
     ) -> Self {
         let rename_input = forms::bookmarks::Rename {
@@ -85,6 +95,7 @@ impl From<Loaded> for ViewData {
             search_list_results: Vec::new(),
             outcome: ActionOutcome::NoAction,
             title_from_archive,
+            followable,
         }
     }
 }
@@ -192,6 +203,7 @@ pub fn view(
         bookmark,
         search_list_results,
         search_query,
+        followable,
         ..
     }: &ViewData,
 ) -> Element {
@@ -265,6 +277,23 @@ pub fn view(
                                     "Public"
                                 },
                             ),
+                            if *followable {
+                                fragment([
+                                    dt(
+                                        [class(
+                                            "text-sm dark:text-orange-100 text-orange-900 mt-2",
+                                        )],
+                                        "Ties User",
+                                    ),
+                                    dd(
+                                        (),
+                                        "Add this bookmark to a public list to see lists and \
+                                         bookmarks they create.",
+                                    ),
+                                ])
+                            } else {
+                                nothing()
+                            },
                         ],
                     ),
                     rename(view_data),
