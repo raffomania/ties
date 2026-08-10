@@ -12,6 +12,12 @@ You can now invite other people to your ties server! To get started, head to you
 
 We hope that an invite-only system will result in less spam than open signups.
 
+### ⚡ One-click Bookmarking
+
+Adding a bookmark now requires only the URL.
+After submission, you'll be directed to the edit form where you can set the bookmark title and assign it to lists.
+Bookmarks are not published until they are added to a public list.
+
 ## 0.3.0
 
 _Released on 2026-07-24_
