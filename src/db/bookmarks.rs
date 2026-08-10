@@ -1,4 +1,5 @@
 use activitypub_federation::fetch::object_id::ObjectId;
+use anyhow::{Context, anyhow};
 use serde::Deserialize;
 use sqlx::{FromRow, query, query_as};
 use time::OffsetDateTime;
@@ -8,6 +9,7 @@ use uuid::Uuid;
 use super::AppTx;
 use crate::{
     db,
+    federation::webfinger,
     response_error::{ResponseError, ResponseResult},
 };
 
@@ -58,6 +60,25 @@ impl Bookmark {
     pub fn edit_path(&self) -> String {
         let id = self.id;
         format!("/bookmarks/{id}/edit")
+    }
+
+    /// Return Ok if that URL is a followable user
+    pub fn is_followable(&self, base_url: &Url) -> ResponseResult<webfinger::Resource> {
+        // TODO check if user exists
+        let parsed_url = Url::parse(&self.url)?;
+        let username = parsed_url
+            .path_segments()
+            .context("No path segments in URL")?
+            .next_back()
+            .context("No final path segment")?;
+
+        if parsed_url.domain() != base_url.domain() {
+            return Err(anyhow!("Can only follow local users at the moment").into());
+        }
+
+        let resource = webfinger::Resource::from_name_and_url(username.to_string(), &parsed_url)?;
+
+        Ok(resource)
     }
 }
 
