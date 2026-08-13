@@ -57,13 +57,15 @@ async fn get_show(
         }
     }
 
-    Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
-        links,
-        list,
-        metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
-        backlinks,
-    })))
+    Ok(HtmfResponse(views::show_list::view(
+        &views::show_list::Data {
+            layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
+            links,
+            list,
+            metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
+            backlinks,
+        },
+    )))
 }
 
 async fn post_create(

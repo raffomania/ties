@@ -31,7 +31,8 @@ pub fn view(
                     .with(layout.authed_info.as_ref().and_then(|authed_info| {
                         (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
                     }))
-                    .with(backlink_section(backlinks)),
+                    .with(backlink_section(backlinks))
+                    .with(a(href(list.explore_path())).with("Explore activity")),
             )
             .with(layout::upper_border())
             .with(
