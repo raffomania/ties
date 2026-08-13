@@ -19,25 +19,26 @@ impl<F> SuppressExpectedSlow<F> {
 }
 
 struct SuppressVisitor {
-    should_suppress: bool,
+    expected_slow: bool,
+    is_slow_query_log: bool,
 }
 
 impl Visit for SuppressVisitor {
     fn record_str(&mut self, field: &tracing::field::Field, value: &str) {
-        if field.name() == "slow_threshold" && value.contains(EXPECTED_SLOW_MARKER) {
-            self.should_suppress = true;
+        if field.name() == "slow_threshold" {
+            self.is_slow_query_log = true;
         }
         if value.contains(EXPECTED_SLOW_MARKER) {
-            self.should_suppress = true;
+            self.expected_slow = true;
         }
     }
 
     fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
         if field.name() == "slow_threshold" {
-            self.should_suppress = true;
+            self.is_slow_query_log = true;
         }
         if format!("{value:?}").contains(EXPECTED_SLOW_MARKER) {
-            self.should_suppress = true;
+            self.expected_slow = true;
         }
     }
 }
@@ -49,10 +50,11 @@ fn should_suppress(event: &tracing::Event<'_>) -> bool {
         return false;
     }
     let mut visitor = SuppressVisitor {
-        should_suppress: false,
+        expected_slow: false,
+        is_slow_query_log: false,
     };
     event.record(&mut visitor);
-    visitor.should_suppress
+    visitor.expected_slow && visitor.is_slow_query_log
 }
 
 impl<S, N, F> FormatEvent<S, N> for SuppressExpectedSlow<F>
