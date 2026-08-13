@@ -311,7 +311,7 @@ pub async fn update_search_index(
                 -- ties:expected_slow
                 update bookmarks
                 set search =
-                    setweight(to_tsvector('english', bookmarks.title), 'A')
+                    setweight(to_tsvector('english', coalesce(bookmarks.title, '')), 'A')
                     ||
                     setweight(to_tsvector('english', coalesce((select archives.extracted_html from archives where archives.bookmark_id = bookmarks.id), '')), 'B')
                     ||

@@ -284,6 +284,30 @@ async fn update_bookmark_updates_search_index() -> anyhow::Result<()> {
         "should not find bookmark by old title after rename"
     );
 
+    // Remove title
+    let mut tx = app.tx().await;
+    db::bookmarks::update_local(
+        &mut tx,
+        bookmark.id,
+        UpdateBookmark { title: None },
+        bookmark.ap_user_id,
+    )
+    .await?;
+    tx.commit().await?;
+
+    // Verify bookmark can still be found via URL
+    let search_results = app
+        .req()
+        .get("/search?q=example.com")
+        .await
+        .test_page()
+        .await;
+    let html = search_results.dom.htmls();
+    assert!(
+        html.contains("Untitled Bookmark"),
+        "should find bookmark by domain after removing title"
+    );
+
     Ok(())
 }
 
