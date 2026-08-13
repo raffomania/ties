@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                -- ties:expected_slow\n                update bookmarks\n                set search =\n                    setweight(to_tsvector('english', coalesce(bookmarks.title, '')), 'A')\n                    ||\n                    setweight(to_tsvector('english', coalesce((select archives.extracted_html from archives where archives.bookmark_id = bookmarks.id), '')), 'B')\n                    ||\n                    setweight(\n                        to_tsvector('english',\n                            regexp_replace(bookmarks.url, '[\\./]', ' ', 'g'))\n                        ||\n                        to_tsvector('english', bookmarks.url)\n                    , 'C')\n                where bookmarks.id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "66286129bc5269db9de1873e69b796312ceb9c3fc59ffe3f70233db021ec2839"
+}
