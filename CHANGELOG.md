@@ -18,6 +18,10 @@ Adding a bookmark now requires only the URL.
 After submission, you'll be directed to the edit form where you can set the bookmark title and assign it to lists.
 Bookmarks are not published until they are added to a public list.
 
+### Bugfixes
+
+- Fix an error preventing bookmarks from being deleted.
+
 ## 0.3.0
 
 _Released on 2026-07-24_

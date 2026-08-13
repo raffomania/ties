@@ -108,6 +108,23 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
 }
 
 #[test_log::test(tokio::test)]
+async fn delete() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let owner = app.create_test_user().await;
+    app.login_test_user().await;
+
+    let bookmark = app
+        .create_bookmark(&owner, "https://example.com", "Test")
+        .await;
+
+    app.req()
+        .delete(&format!("/bookmarks/{}", bookmark.id))
+        .await;
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
 async fn only_owner_can_delete_bookmark() -> anyhow::Result<()> {
     let mut app = TestApp::new().await;
     let owner = app.create_user("owner", "longpassword").await;
