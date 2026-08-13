@@ -39,3 +39,7 @@ pub fn link_destination(destination: &LinkDestination) -> String {
         LinkDestination::List(l) => list(l.id),
     }
 }
+
+pub fn explore_list(list_id: Uuid) -> String {
+    format!("/lists/{list_id}/explore")
+}

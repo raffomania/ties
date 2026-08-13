@@ -34,6 +34,7 @@ pub fn router() -> Router<AppState> {
         .route("/lists/create", get(get_create).post(post_create))
         .route("/lists/{list_id}", get(get_show))
         .route("/lists/{list_id}/feed.atom", get(get_feed))
+        .route("/lists/{list_id}/explore", get(get_explore))
         .route("/lists/{list_id}/edit_private", post(edit_private))
         .route("/lists/{list_id}/edit_title", post(post_edit_title))
         .route("/lists/{list_id}/edit_title", get(get_edit_title))
@@ -61,13 +62,48 @@ async fn get_show(
         layout = layout.with_feed_link(state.base_url.join(&route_paths::list_feed(list.id))?);
     }
 
-    Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout,
-        links,
-        list,
-        metadata,
-        backlinks,
-    })))
+    Ok(HtmfResponse(views::show_list::view(
+        &views::show_list::Data {
+            layout,
+            links,
+            list,
+            metadata,
+            backlinks,
+        },
+    )))
+}
+
+async fn get_explore(
+    auth_user: Option<AuthUser>,
+    extract::Tx(mut tx): extract::Tx,
+    Path(list_id): Path<Uuid>,
+) -> ResponseResult<HtmfResponse> {
+    let maybe_ap_user_id = auth_user.as_ref().map(|u| u.ap_user_id);
+    let news = db::explore::public_activity_in_list(&mut tx, list_id).await?;
+    let db::ListWithMetadata { list, metadata } =
+        db::lists::by_id_with_metadata(&mut tx, list_id, maybe_ap_user_id).await?;
+
+    match &auth_user {
+        Some(user) => {
+            if list.private && list.ap_user_id != user.ap_user_id {
+                return Err(ResponseError::NotFound);
+            }
+        }
+        None => {
+            if list.private {
+                return Err(ResponseError::NotFound);
+            }
+        }
+    }
+
+    Ok(HtmfResponse(views::explore_list::view(
+        &views::explore_list::Data {
+            layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
+            list,
+            metadata,
+            items: news,
+        },
+    )))
 }
 
 async fn get_feed(

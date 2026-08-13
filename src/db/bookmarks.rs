@@ -26,14 +26,14 @@ pub struct Bookmark {
 }
 
 #[derive(FromRow, Debug)]
-struct BookmarkRow {
-    id: Uuid,
-    created_at: OffsetDateTime,
-    ap_user_id: Uuid,
+pub struct BookmarkRow {
+    pub id: Uuid,
+    pub created_at: OffsetDateTime,
+    pub ap_user_id: Uuid,
 
-    url: String,
-    title: Option<String>,
-    ap_id: String,
+    pub url: String,
+    pub title: Option<String>,
+    pub ap_id: String,
 }
 
 impl TryFrom<BookmarkRow> for Bookmark {

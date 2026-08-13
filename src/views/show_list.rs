@@ -3,6 +3,7 @@ use htmf::prelude_builder::*;
 use super::{common, layout};
 use crate::{
     db::{self, LinkWithContent, layout::AuthedInfo},
+    route_paths,
     views::common::pluralize,
 };
 
@@ -31,7 +32,8 @@ pub fn view(
                     .with(layout.authed_info.as_ref().and_then(|authed_info| {
                         (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
                     }))
-                    .with(backlink_section(backlinks)),
+                    .with(backlink_section(backlinks))
+                    .with(explore_section(list)),
             )
             .with(layout::upper_border())
             .with(
@@ -63,12 +65,12 @@ fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Ele
                     class("dark:hover:text-neutral-200 hover:text-neutral-600"),
                 ])
                 .with(format!("by {}", metadata.username)),
-                text(" ∙ "),
-                span([]).with(format!("{} bookmarks", metadata.linked_bookmark_count)),
-                text(" ∙ "),
-                span([]).with(pluralize(metadata.linked_list_count, "list", "lists")),
-                text(" ∙ "),
-                span(id("private_indicator")).with(if list.private { "private" } else { "public" }),
+                text("∙"),
+                p([]).with(format!("{} bookmarks", metadata.linked_bookmark_count)),
+                text("∙"),
+                p([]).with(pluralize(metadata.linked_list_count, "list", "lists")),
+                text("∙"),
+                p(id("private_indicator")).with(if list.private { "private" } else { "public" }),
             ]),
         ])
         .with(list.content.as_ref().and_then(|content| {
@@ -121,6 +123,12 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
             ),
             p((), link_elems),
         ],
+    )
+}
+
+fn explore_section(list: &db::List) -> Element {
+    section(class("mt-4")).with(
+        a([href(route_paths::explore_list(list.id)), class("underline")]).with("Explore Activity"),
     )
 }
 
@@ -211,7 +219,7 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
         }),
         if let Some(authed_info) = &layout.authed_info {
             div(class(
-                "flex flex-wrap justify-end flex-1 pt-2 text-sm basis-32 gap-x-1 \
+                "flex flex-wrap justify-end flex-1 pt-2 text-sm basis-32 gap-x-2 \
                  dark:text-neutral-400 text-neutral-500",
             ))
             .with([
@@ -222,7 +230,7 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
                 .with("Connect"),
                 if authed_info.ap_user_id == list.ap_user_id {
                     fragment().with([
-                        span(()).with(" ∙ "),
+                        span(()).with("∙"),
                         button([
                             class("dark:hover:text-neutral-100 hover:text-neutral-800"),
                             attr("hx-delete", format!("/links/{}", link.id)),
@@ -242,17 +250,14 @@ fn list_item(link: &LinkWithContent, Data { layout, list, .. }: &Data) -> Elemen
 
 fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
     fragment().with([
-        p(()).with(
-            a([
-                class(
-                    "block overflow-hidden leading-8 dark:text-orange-100 text-orange-900 \
-                     dark:hover:text-orange-300 hover:text-orange-700 text-ellipsis \
-                     whitespace-nowrap",
-                ),
-                href(format!("/bookmarks/{}", bookmark.id)),
-            ])
-            .with(common::bookmark_title(&bookmark.title)),
-        ),
+        a([
+            class(
+                "block overflow-hidden leading-8 dark:text-orange-100 text-orange-900 \
+                 dark:hover:text-orange-300 hover:text-orange-700 text-ellipsis whitespace-nowrap",
+            ),
+            href(format!("/bookmarks/{}", bookmark.id)),
+        ])
+        .with(common::bookmark_title(&bookmark.title)),
         common::link_url(&bookmark.url),
     ])
 }
@@ -261,17 +266,14 @@ fn list_item_list(inner_list: &db::ListWithMetadata, authed_info: Option<&Authed
     // TODO show owning user if it's different than this list's owner
     // https://github.com/raffomania/ties/issues/152
     fragment().with([
-        p(()).with(
-            a([
-                class(
-                    "block overflow-hidden font-medium tracking-tight leading-8 \
-                     dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis \
-                     whitespace-nowrap",
-                ),
-                href(format!("/lists/{}", inner_list.list.id)),
-            ])
-            .with(&inner_list.list.title),
-        ),
+        a([
+            class(
+                "block overflow-hidden font-medium tracking-tight leading-8 \
+                 dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis whitespace-nowrap",
+            ),
+            href(format!("/lists/{}", inner_list.list.id)),
+        ])
+        .with(&inner_list.list.title),
         fragment().with(inner_list.list.content.as_ref().and_then(|content| {
             (!content.is_empty()).then_some(p(class("max-w-2xl mb-2")).with(content))
         })),
@@ -290,13 +292,13 @@ fn list_item_list(inner_list: &db::ListWithMetadata, authed_info: Option<&Authed
                             href(format!("/user/{}", inner_list.metadata.username)),
                             class("dark:hover:text-neutral-200 hover:text-neutral-600"),
                         ])
-                        .with(format!(" by {}", inner_list.metadata.username)),
-                        text(" ∙ "),
+                        .with(format!("by {}", inner_list.metadata.username)),
+                        text("∙"),
                     ])
                 },
-                span([]).with(pluralize(bookmark_count, "bookmark", "bookmarks")),
-                text(" ∙ "),
-                span([]).with(pluralize(list_count, "list", "lists")),
+                p([]).with(pluralize(bookmark_count, "bookmark", "bookmarks")),
+                text("∙"),
+                p([]).with(pluralize(list_count, "list", "lists")),
             ])
         },
     ])
