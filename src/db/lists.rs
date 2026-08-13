@@ -20,6 +20,12 @@ pub struct List {
     pub pinned: bool,
 }
 
+/// Enough to show a link to a list in the web UI.
+pub struct ListRef {
+    pub id: Uuid,
+    pub title: String,
+}
+
 #[derive(FromRow, Debug, Deserialize, Clone)]
 pub struct Metadata {
     pub linked_bookmark_count: i64,
@@ -31,6 +37,11 @@ impl List {
     pub fn path(&self) -> String {
         let id = self.id;
         format!("/lists/{id}")
+    }
+
+    pub fn explore_path(&self) -> String {
+        let id = self.id;
+        format!("/lists/{id}/explore")
     }
 }
 

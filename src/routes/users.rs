@@ -275,7 +275,7 @@ async fn get_profile(
         crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
     )
     .await?;
-    let maybe_local_user = db::users::by_ap_user_id(&mut tx, ap_user.id).await?;
+    let maybe_local_user = db::users::local_by_ap_user_id(&mut tx, ap_user.id).await?;
     let public_lists = if let Some(user) = &maybe_local_user {
         db::lists::list_public_by_user(&mut tx, user.ap_user_id).await?
     } else {

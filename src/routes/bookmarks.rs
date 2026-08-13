@@ -28,7 +28,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/bookmarks/create", get(get_create).post(post_create))
         .route("/bookmarks/unsorted", get(get_unsorted))
-        .route("/bookmarks/{id}", delete(delete_by_id).get(get_by_id))
+        .route("/bookmarks/{id}", delete(delete_by_id).get(get_show))
         .route("/bookmarks/{id}/edit", get(get_edit))
         .route("/bookmarks/{id}/rename", get(get_edit).post(post_rename))
         .route(
@@ -323,7 +323,7 @@ async fn post_connect(
     Ok(data.view().into())
 }
 
-async fn get_by_id(
+async fn get_show(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     Path(id): Path<Uuid>,

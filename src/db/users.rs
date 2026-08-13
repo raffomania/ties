@@ -131,7 +131,7 @@ pub async fn by_username(tx: &mut AppTx, username: &str) -> ResponseResult<User>
     Ok(user)
 }
 
-pub async fn by_ap_user_id(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Option<User>> {
+pub async fn local_by_ap_user_id(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Option<User>> {
     let user = query_as!(
         User,
         r#"

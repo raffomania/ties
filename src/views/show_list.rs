@@ -31,7 +31,8 @@ pub fn view(
                     .with(layout.authed_info.as_ref().and_then(|authed_info| {
                         (authed_info.ap_user_id == list.ap_user_id).then(|| edit_buttons(data))
                     }))
-                    .with(backlink_section(backlinks)),
+                    .with(backlink_section(backlinks))
+                    .with(explore_section(list)),
             )
             .with(layout::upper_border())
             .with(
@@ -122,6 +123,11 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
             p((), link_elems),
         ],
     )
+}
+
+fn explore_section(list: &db::List) -> Element {
+    section(class("mt-4"))
+        .with(a([href(list.explore_path()), class("underline")]).with("Explore Activity"))
 }
 
 fn edit_buttons(Data { list, .. }: &Data) -> Element {
