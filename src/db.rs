@@ -2,11 +2,14 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use sqlx::{ConnectOptions, PgPool, postgres::PgConnectOptions};
+use url::Url;
 
 pub mod all;
 pub mod ap_users;
 pub mod archives;
 pub use archives::Archive;
+pub mod explore;
+pub use explore::Activity;
 pub mod follows;
 pub mod invites;
 
@@ -20,7 +23,6 @@ pub use links::{LinkDestination, LinkDestinationWithMetadata, LinkWithContent};
 pub mod lists;
 pub use lists::{List, ListWithMetadata};
 pub mod users;
-use url::Url;
 pub use users::User;
 pub mod bookmarks;
 pub mod migration_hooks;

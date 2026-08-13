@@ -32,6 +32,11 @@ impl List {
         let id = self.id;
         format!("/lists/{id}")
     }
+
+    pub fn explore_path(&self) -> String {
+        let id = self.id;
+        format!("/lists/{id}/explore")
+    }
 }
 
 #[derive(Deserialize)]

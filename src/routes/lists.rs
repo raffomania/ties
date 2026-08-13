@@ -27,6 +27,7 @@ pub fn router() -> Router<AppState> {
     router
         .route("/lists/create", get(get_create).post(post_create))
         .route("/lists/{list_id}", get(get_show))
+        .route("/lists/{list_id}/explore", get(get_explore))
         .route("/lists/{list_id}/edit_private", post(edit_private))
         .route("/lists/{list_id}/edit_title", post(post_edit_title))
         .route("/lists/{list_id}/edit_title", get(get_edit_title))
@@ -57,13 +58,46 @@ async fn get_show(
         }
     }
 
-    Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
-        links,
-        list,
-        metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
-        backlinks,
-    })))
+    Ok(HtmfResponse(views::show_list::view(
+        &views::show_list::Data {
+            layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
+            links,
+            list,
+            metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
+            backlinks,
+        },
+    )))
+}
+
+async fn get_explore(
+    auth_user: Option<AuthUser>,
+    extract::Tx(mut tx): extract::Tx,
+    Path(list_id): Path<Uuid>,
+) -> ResponseResult<HtmfResponse> {
+    let news = db::explore::public_activity_in_list(&mut tx, list_id).await?;
+    let list = db::lists::by_id(&mut tx, list_id).await?;
+
+    match &auth_user {
+        Some(user) => {
+            if list.private && list.ap_user_id != user.ap_user_id {
+                return Err(ResponseError::NotFound);
+            }
+        }
+        None => {
+            if list.private {
+                return Err(ResponseError::NotFound);
+            }
+        }
+    }
+
+    Ok(HtmfResponse(views::explore_list::view(
+        &views::explore_list::Data {
+            layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
+            list,
+            metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
+            items: news,
+        },
+    )))
 }
 
 async fn post_create(
