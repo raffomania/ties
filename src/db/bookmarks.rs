@@ -183,6 +183,16 @@ pub async fn list_unsorted(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<V
 }
 
 pub async fn delete_by_id(tx: &mut AppTx, id: Uuid, ap_user_id: Uuid) -> ResponseResult<Bookmark> {
+    query!(
+        r#"
+        delete from archives
+        where bookmark_id = $1;
+        "#,
+        id
+    )
+    .execute(&mut **tx)
+    .await?;
+
     let deleted_bookmark = query_as!(
         BookmarkRow,
         r#"
@@ -194,16 +204,6 @@ pub async fn delete_by_id(tx: &mut AppTx, id: Uuid, ap_user_id: Uuid) -> Respons
         ap_user_id
     )
     .fetch_one(&mut **tx)
-    .await?;
-
-    query!(
-        r#"
-        delete from archives
-        where bookmark_id = $1;
-        "#,
-        deleted_bookmark.id
-    )
-    .execute(&mut **tx)
     .await?;
 
     deleted_bookmark.try_into()
