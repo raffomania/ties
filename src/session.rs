@@ -133,11 +133,13 @@ impl FromRequestParts<AppState> for Session {
 
 fn extract_session_key(cookie_headers: Vec<&str>) -> Option<Uuid> {
     for cookie_header in cookie_headers {
-        if let Some((name, value)) = cookie_header.split_once('=')
-            && name.trim() == COOKIE_NAME
-            && let Ok(uuid) = value.trim().parse::<Uuid>()
-        {
-            return Some(uuid);
+        for cookie in cookie_header.split(';') {
+            if let Some((name, value)) = cookie.split_once('=')
+                && name.trim() == COOKIE_NAME
+                && let Ok(uuid) = value.trim().parse::<Uuid>()
+            {
+                return Some(uuid);
+            }
         }
     }
     None
