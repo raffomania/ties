@@ -56,7 +56,8 @@ async fn post_login(
         .into_response());
     }
 
-    let logged_in = authentication::login(&mut tx, session, &input.credentials).await;
+    let logged_in =
+        authentication::login(&mut tx, session, &input.credentials, &state.base_url).await;
     let cookie = match logged_in {
         Ok(cookie) => cookie,
         Err(e) => {
@@ -97,7 +98,7 @@ async fn get_login_oidc(
     let authorize_url = attempt.authorize_url.clone();
 
     session.contents.oidc_login_attempt = Some(attempt);
-    let cookie = session.persist(&mut tx).await?;
+    let cookie = session.persist(&mut tx, &state.base_url).await?;
     tx.commit().await?;
 
     let mut res = Redirect::to(authorize_url.as_str()).into_response();
@@ -137,7 +138,7 @@ async fn get_login_oidc_redirect(
         // Authenticate existing users in session
         Ok(existing_user) => {
             let cookie = session
-                .persist_logged_in_user(&mut tx, &existing_user)
+                .persist_logged_in_user(&mut tx, &existing_user, &state.base_url)
                 .await?;
             tx.commit().await?;
 
@@ -150,7 +151,7 @@ async fn get_login_oidc_redirect(
         Err(ResponseError::NotFound) => {
             let mut session = session.rotate(&mut tx).await?;
             session.contents.oidc_user_info = Some(authed_oidc_info);
-            let cookie = session.persist(&mut tx).await?;
+            let cookie = session.persist(&mut tx, &state.base_url).await?;
             tx.commit().await?;
 
             let mut res = HtmfResponse(oidc_select_username::view(
@@ -303,11 +304,15 @@ async fn get_profile(
     Ok(HtmfResponse(elem))
 }
 
-async fn logout(extract::Tx(mut tx): extract::Tx, session: Session) -> ResponseResult<Response> {
+async fn logout(
+    extract::Tx(mut tx): extract::Tx,
+    State(state): State<AppState>,
+    session: Session,
+) -> ResponseResult<Response> {
     db::sessions::delete(&mut tx, session).await?;
     tx.commit().await?;
 
     let mut res = Redirect::to("/login").into_response();
-    attach_cookie(&mut res, session::clear_cookie_header()?);
+    attach_cookie(&mut res, session::clear_cookie_header(&state.base_url)?);
     Ok(res)
 }

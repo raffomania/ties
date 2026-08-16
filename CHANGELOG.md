@@ -21,6 +21,7 @@ Bookmarks are not published until they are added to a public list.
 ### Bugfixes
 
 - Fix an error preventing bookmarks from being deleted.
+- Only add the `Secure` flag to session cookies when the `BASE_URL` uses `https://`.
 
 ## 0.3.0
 

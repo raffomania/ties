@@ -66,12 +66,13 @@ pub async fn login(
     tx: &mut AppTx,
     session: Session,
     creds: &Credentials,
+    base_url: &Url,
 ) -> ResponseResult<HeaderValue> {
     let user = db::users::by_username(tx, &creds.username).await?;
 
     verify_password(&user, &creds.password)?;
 
-    session.persist_logged_in_user(tx, &user).await
+    session.persist_logged_in_user(tx, &user, base_url).await
 }
 
 pub async fn create_and_login_temp_user(
@@ -86,7 +87,7 @@ pub async fn create_and_login_temp_user(
     create.validate().context("Invalid demo user generated")?;
     let user = db::users::insert(tx, create, None, base_url).await?;
 
-    session.persist_logged_in_user(tx, &user).await
+    session.persist_logged_in_user(tx, &user, base_url).await
 }
 
 pub async fn create_and_login_oidc_user(
@@ -105,7 +106,7 @@ pub async fn create_and_login_oidc_user(
         Err(_) => return Err(anyhow!("Failed to look up user by OIDC id").into()),
     };
 
-    session.persist_logged_in_user(tx, &user).await
+    session.persist_logged_in_user(tx, &user, base_url).await
 }
 
 /// Extractor for requiring a logged in user in routes.

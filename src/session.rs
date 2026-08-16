@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub const COOKIE_NAME: &str = "ties-session";
-const COOKIE_ATTRIBUTES: &str = "Path=/; HttpOnly; SameSite=Lax; Secure";
+
 pub const SESSION_EXPIRY_DURATION: Duration = Duration::weeks(2);
 
 impl Session {
@@ -35,22 +35,27 @@ impl Session {
 
     /// Persist current state to the database and return a `Set-Cookie` header
     /// for the current session key.
-    pub async fn persist(&mut self, tx: &mut AppTx) -> ResponseResult<HeaderValue> {
+    pub async fn persist(
+        &mut self,
+        tx: &mut AppTx,
+        base_url: &url::Url,
+    ) -> ResponseResult<HeaderValue> {
         crate::db::sessions::upsert(tx, self).await?;
-        set_cookie_header(&self.key)
+        set_cookie_header(&self.key, base_url)
     }
 
     pub async fn persist_logged_in_user(
         self,
         tx: &mut AppTx,
         user: &User,
+        base_url: &url::Url,
     ) -> ResponseResult<HeaderValue> {
         let mut session = self.rotate(tx).await?;
         session.contents.auth_user = Some(AuthUser {
             user_id: user.id,
             ap_user_id: user.ap_user_id,
         });
-        session.persist(tx).await
+        session.persist(tx, base_url).await
     }
 
     pub fn expires_in(&self) -> Duration {
@@ -58,22 +63,33 @@ impl Session {
     }
 }
 
-pub fn set_cookie_header(key: &str) -> ResponseResult<HeaderValue> {
+pub fn set_cookie_header(key: &str, base_url: &url::Url) -> ResponseResult<HeaderValue> {
+    let secure_flag = if base_url.scheme() == "https" {
+        "; Secure"
+    } else {
+        ""
+    };
     Ok(HeaderValue::try_from(format!(
-        "{}={}; {}; Max-Age={}",
+        "{}={}; Path=/; HttpOnly; SameSite=Lax{}; Max-Age={}",
         COOKIE_NAME,
         key,
-        COOKIE_ATTRIBUTES,
+        secure_flag,
         SESSION_EXPIRY_DURATION.whole_seconds(),
     ))
     .context("Failed to create cookie header value")?)
 }
 
-pub fn clear_cookie_header() -> ResponseResult<HeaderValue> {
-    Ok(
-        HeaderValue::try_from(format!("{COOKIE_NAME}=; Max-Age=0; {COOKIE_ATTRIBUTES}"))
-            .context("Failed to create cookie header value")?,
-    )
+pub fn clear_cookie_header(base_url: &url::Url) -> ResponseResult<HeaderValue> {
+    let secure_flag = if base_url.scheme() == "https" {
+        "; Secure"
+    } else {
+        ""
+    };
+    Ok(HeaderValue::try_from(format!(
+        "{}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax{}",
+        COOKIE_NAME, secure_flag
+    ))
+    .context("Failed to create cookie header value")?)
 }
 
 impl FromRequestParts<AppState> for Session {
