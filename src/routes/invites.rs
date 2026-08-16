@@ -106,6 +106,7 @@ async fn post_accept(
             username: form_input.username,
             password: form_input.password,
         },
+        &state.base_url,
     )
     .await?;
 
