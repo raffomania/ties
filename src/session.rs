@@ -86,8 +86,7 @@ pub fn clear_cookie_header(base_url: &url::Url) -> ResponseResult<HeaderValue> {
         ""
     };
     Ok(HeaderValue::try_from(format!(
-        "{}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax{}",
-        COOKIE_NAME, secure_flag
+        "{COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax{secure_flag}"
     ))
     .context("Failed to create cookie header value")?)
 }

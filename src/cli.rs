@@ -31,7 +31,8 @@ struct SharedConfig {
     /// Public URL the server is reachable at.
     /// This forms the domain part of user handles, e.g. "rafael@ties.pub", and
     /// cannot be changed once the first user has been created.
-    /// For localhost `http` deployments, `Secure` attribute is not set for the session cookie.
+    /// For localhost `http` deployments, `Secure` attribute is not set for the
+    /// session cookie.
     #[clap(long, env, help_heading = Some("Required Options"))]
     base_url: Url,
 }
