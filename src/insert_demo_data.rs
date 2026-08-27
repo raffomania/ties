@@ -117,6 +117,7 @@ pub async fn insert_demo_data(
     }
 
     tracing::debug!("Creating links...");
+    let all_public_lists_flat: Vec<_> = all_public_lists.values().flatten().cloned().collect();
     for (user_ref, lists) in &all_public_lists {
         // Public-to-public links
         // Here, we make bookmarks public by linking to them from public lists.
@@ -129,7 +130,7 @@ pub async fn insert_demo_data(
                 all_private_bookmarks
                     .get(user_ref)
                     .ok_or(anyhow!("Missing private bookmarks for user"))?,
-                lists,
+                &all_public_lists_flat,
             )?;
 
             let create_link = CreateLink { src, dest };
