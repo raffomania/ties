@@ -12,6 +12,7 @@ pub mod explore;
 pub use explore::Activity;
 pub mod follows;
 pub mod invites;
+pub mod list_follows;
 
 pub use invites::Invite;
 pub mod run_migrations;

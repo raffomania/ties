@@ -95,6 +95,8 @@ async fn post_create(
         return Ok(Redirect::to(&route_paths::link_destination(src)).into_response());
     }
 
+    // TODO create list follow if necessary
+
     Ok(
         HtmfResponse(views::create_link::view(views::create_link::Data {
             layout,
