@@ -84,7 +84,7 @@ impl ActivityHandler for UndoFollow {
         let following = self.object.object.dereference(data).await?;
 
         let mut tx = data.db_pool.begin().await?;
-        db::follows::remove(
+        db::follows::remove_if_exists(
             &mut tx,
             db::follows::Insert {
                 follower_ap_user_id: follower.id,

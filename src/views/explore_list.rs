@@ -16,7 +16,7 @@ pub struct Data {
 }
 
 pub fn view(
-    data @ Data {
+    Data {
         layout,
         list,
         metadata,

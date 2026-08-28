@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into follows\n        (\n            follower_id,\n            following_id\n        )\n        values ($1, $2)\n        on conflict (follower_id, following_id)\n            do nothing\n        returning *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "follower_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "following_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ebcd878efef070b7bf6fb365302ad7877ed93e7fae38c00d680732c4acf6d06d"
+}

@@ -2,8 +2,8 @@ use axum::http::StatusCode;
 use uuid::Uuid;
 
 use crate::{
-    db::{self, bookmarks::InsertBookmark},
-    forms::{self, links::CreateLink, lists::CreateList},
+    db::{self, bookmarks::InsertBookmark, follows, list_follows},
+    forms::{self, bookmarks::ConnectToList, links::CreateLink, lists::CreateList},
     tests::util::{dom::assert_form_matches, test_app::TestApp},
 };
 
@@ -150,6 +150,44 @@ async fn only_owner_can_delete_bookmark() -> anyhow::Result<()> {
         .expect_status(StatusCode::NOT_FOUND)
         .delete(&format!("/bookmarks/{}", Uuid::new_v4()))
         .await;
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn connecting_bookmark_to_public_list_inserts_follows() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let owner = app.create_test_user().await;
+    app.login_test_user().await;
+
+    let followed = app.create_user("followed", "longpassword").await;
+
+    let bookmark = app
+        .create_bookmark(
+            &owner,
+            &format!("{}/user/followed", app.base_url),
+            "Followed User Profile",
+        )
+        .await;
+
+    let public_list = app.create_list(&owner, "my public list").await;
+
+    app.req()
+        .post(
+            &format!("/bookmarks/{}/connect", bookmark.id),
+            &ConnectToList {
+                connect_list_id: Some(public_list.id),
+            },
+        )
+        .await;
+
+    let mut tx = app.tx().await;
+
+    let follow =
+        follows::read_by_follower_and_following(&mut tx, owner.ap_user_id, followed.ap_user_id)
+            .await?;
+
+    list_follows::read(&mut tx, public_list.id, bookmark.id, follow.id).await?;
 
     Ok(())
 }
