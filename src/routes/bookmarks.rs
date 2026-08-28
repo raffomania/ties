@@ -185,12 +185,18 @@ async fn post_disconnect(
     extract::Tx(mut tx): extract::Tx,
     auth_user: AuthUser,
     State(state): State<AppState>,
-    Path(id): Path<Uuid>,
+    Path(bookmark_id): Path<Uuid>,
     QsQuery(search_query): QsQuery<forms::bookmarks::EditQuery>,
     QsForm(input): QsForm<forms::bookmarks::Disconnect>,
 ) -> ResponseResult<HtmfResponse> {
-    let mut loaded =
-        views::edit_bookmark::load(&mut tx, &auth_user, id, search_query, &state.base_url).await?;
+    let loaded = views::edit_bookmark::load(
+        &mut tx,
+        &auth_user,
+        bookmark_id,
+        search_query,
+        &state.base_url,
+    )
+    .await?;
 
     // Since this is intended to be used in the bookmark edit form only,
     // and that form is only intended to work on your own bookmarks, we can be
@@ -199,24 +205,50 @@ async fn post_disconnect(
         return Err(ResponseError::NotFound);
     }
 
-    match db::links::delete_by_id(&mut tx, input.delete_link_id, auth_user.user_id).await {
+    let mut view_data = views::edit_bookmark::ViewData::from(loaded);
+    let link = match db::links::delete_by_id(&mut tx, input.delete_link_id, auth_user.user_id).await
+    {
         // Ignore not found errors, might be caused by a page refresh after deleting a
         // link.
-        Err(ResponseError::NotFound) => {}
-        result => {
-            let link = result?;
-            // Make sure the link actually pointed to that bookmark.
-            if link.dest_bookmark_id != Some(id) {
-                return Err(ResponseError::NotFound);
-            }
+        Err(ResponseError::NotFound) => {
+            return Ok(view_data.view().into());
         }
+        result => result?,
+    };
+
+    // Make sure the link actually pointed to that bookmark.
+    if link.dest_bookmark_id != Some(bookmark_id) {
+        return Err(ResponseError::NotFound);
     }
 
-    loaded
+    if let Some(src_list_id) = link.src_list_id {
+        db::follows::remove_list_follow_by_list_id_if_exists(&mut tx, src_list_id).await?;
+    }
+
+    if !db::bookmarks::is_public(&mut tx, bookmark_id).await? {
+        let bookmark = db::bookmarks::by_id(&mut tx, bookmark_id).await?;
+
+        if let Ok(resource) = bookmark.is_followable(&state.base_url) {
+            let followed_ap_user = db::ap_users::read_by_username(&mut tx, resource).await?;
+
+            db::follows::remove_if_exists(
+                &mut tx,
+                db::follows::Insert {
+                    follower_ap_user_id: auth_user.ap_user_id,
+                    following_ap_user_id: followed_ap_user.id,
+                },
+            )
+            .await?;
+        };
+    }
+
+    // TODO: remove user follow if not in any public lists anymore
+
+    view_data
         .connected_lists
         .retain(|link| link.link_id != input.delete_link_id);
 
-    let view_data = views::edit_bookmark::ViewData { ..loaded.into() }
+    view_data = view_data
         .load_search_results(&mut tx, auth_user.ap_user_id)
         .await?;
 
@@ -295,11 +327,22 @@ async fn post_connect(
         {
             let followed_ap_user = db::ap_users::read_by_username(&mut tx, resource).await?;
 
-            db::follows::upsert(
+            let follow = db::follows::upsert(
                 &mut tx,
                 db::follows::Insert {
                     follower_ap_user_id: auth_user.ap_user_id,
                     following_ap_user_id: followed_ap_user.id,
+                },
+            )
+            .await?;
+
+            db::follows::insert_list_follow(
+                &mut tx,
+                db::follows::ListBookmarkedUserFollowInsert {
+                    list_id: target_list.id,
+                    bookmark_id,
+                    followed_ap_user_id: followed_ap_user.id,
+                    follow_id: follow.id,
                 },
             )
             .await?;

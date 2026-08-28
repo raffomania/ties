@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        delete from list_bookmarked_user_follows\n        where list_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d4c08e087c3364702b36fc6b00b5ea90478416fa69344d91aa191c6a0f23cc65"
+}

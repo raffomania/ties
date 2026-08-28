@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into list_bookmarked_user_follows\n        (\n            list_id,\n            bookmark_id,\n            followed_ap_user_id,\n            follow_id\n        )\n        values ($1, $2, $3, $4)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "69e602a2b2e2fda9f5f46ff454850923cfffa6203883a01bb53f6d8644dae21b"
+}
