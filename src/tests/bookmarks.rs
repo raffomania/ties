@@ -1,9 +1,10 @@
 use axum::http::StatusCode;
+use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{
     db::{self, bookmarks::InsertBookmark},
-    forms::{self, links::CreateLink, lists::CreateList},
+    forms::{self, bookmarks::ConnectToList, links::CreateLink, lists::CreateList},
     tests::util::{dom::assert_form_matches, test_app::TestApp},
 };
 
@@ -150,6 +151,60 @@ async fn only_owner_can_delete_bookmark() -> anyhow::Result<()> {
         .expect_status(StatusCode::NOT_FOUND)
         .delete(&format!("/bookmarks/{}", Uuid::new_v4()))
         .await;
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn connecting_bookmark_to_public_list_inserts_follows() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let owner = app.create_test_user().await;
+    app.login_test_user().await;
+
+    let followed = app.create_user("followed", "longpassword").await;
+
+    let bookmark = app
+        .create_bookmark(
+            &owner,
+            &format!("{}/user/followed", app.base_url),
+            "Followed User Profile",
+        )
+        .await;
+
+    let public_list = app.create_list(&owner, "my public list").await;
+
+    app.req()
+        .post(
+            &format!("/bookmarks/{}/connect", bookmark.id),
+            &ConnectToList {
+                connect_list_id: Some(public_list.id),
+            },
+        )
+        .await;
+
+    let mut tx = app.tx().await;
+
+    let follow_row = sqlx::query(
+        r"select id from follows
+           where follower_id = $1 and following_id = $2",
+    )
+    .bind(owner.ap_user_id)
+    .bind(followed.ap_user_id)
+    .fetch_one(&mut *tx)
+    .await?;
+    let follow_id: uuid::Uuid = follow_row.get("id");
+
+    sqlx::query(
+        r"select id from list_bookmarked_user_follows
+           where list_id = $1 and bookmark_id = $2 and follow_id = $3",
+    )
+    .bind(public_list.id)
+    .bind(bookmark.id)
+    .bind(follow_id)
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
 
     Ok(())
 }

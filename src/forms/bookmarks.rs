@@ -36,7 +36,7 @@ pub struct Disconnect {
     pub delete_link_id: Uuid,
 }
 
-#[derive(Validate, Default, Deserialize, Clone, Debug)]
+#[derive(Validate, Default, Deserialize, Serialize, Clone, Debug)]
 pub struct ConnectToList {
     #[serde(default)]
     #[garde(skip)]
