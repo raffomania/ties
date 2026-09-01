@@ -20,8 +20,8 @@ pub struct Insert {
 }
 
 pub async fn upsert(tx: &mut AppTx, insert: Insert) -> ResponseResult<()> {
-    // Don't return the follow because the `on conflict ... do nothing` won't return
-    // anything on conflict
+    // Don't return the follow because the `on conflict ... do nothing` won't
+    // return anything on conflict
     query!(
         r"
         insert into follows

@@ -25,8 +25,8 @@ pub async fn search(
     ap_user_id: Uuid,
     page: i64,
 ) -> ResponseResult<Results> {
-    // Note: when changing the filtering here, remember to update it in the second
-    // query below as well.
+    // Note: when changing the filtering here, remember to update it in the
+    // second query below as well.
     let bookmarks = query_as!(
         Result,
         r#"

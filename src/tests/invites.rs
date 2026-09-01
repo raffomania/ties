@@ -64,8 +64,8 @@ async fn create_invite_and_use_it() -> anyhow::Result<()> {
         "Invite should be deleted after account creation"
     );
 
-    // Verify the invited user can log in using the session cookie from the invite
-    // acceptance
+    // Verify the invited user can log in using the session cookie from the
+    // invite acceptance
     let invite_cookie = accept_response
         .cookie(crate::session::COOKIE_NAME)
         .expect("accept response should set a session cookie");

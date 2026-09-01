@@ -149,8 +149,8 @@ pub async fn insert_demo_data(
     }
 
     // Private-to-public links
-    // Here, we can only link to public bookmarks, and private bookmarks from the
-    // same user.
+    // Here, we can only link to public bookmarks, and private bookmarks from
+    // the same user.
     for (user_ref, lists) in all_private_lists {
         // list to public bookmark
         for _ in 0..100 {

@@ -117,8 +117,9 @@ impl FromRequestParts<AppState> for Session {
             Session::new()
         };
 
-        // If a session has less time to live than this, extend its expiry on activity.
-        // This way, we don't write to the DB on every request.
+        // If a session has less time to live than this, extend its expiry on
+        // activity. This way, we don't write to the DB on every
+        // request.
         let minimum_expiry_duration = SESSION_EXPIRY_DURATION - Duration::days(1);
         if state_inner.expires_in() < minimum_expiry_duration {
             let mut tx = state.pool.begin().await?;

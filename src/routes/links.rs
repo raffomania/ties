@@ -74,8 +74,8 @@ async fn post_create(
         None => Vec::new(),
     };
 
-    // TODO if the link points to a public list and we haven't sent an activity for
-    // this src bookmark before, send an activity now
+    // TODO if the link points to a public list and we haven't sent an activity
+    // for this src bookmark before, send an activity now
     // https://github.com/raffomania/ties/issues/175
     if let (Some(src), Some(dest), true) = (&src_from_db, &dest_from_db, input.submitted) {
         db::links::insert(

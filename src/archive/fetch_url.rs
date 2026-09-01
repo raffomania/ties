@@ -26,8 +26,8 @@ fn is_domain_url(url: &Url) -> bool {
 pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive::Error> {
     let url = Url::parse(unvalidated_url)?;
 
-    // Do not allow protocols other than http/s - this can pose a security risk, and
-    // ties is meant to be used with http-based websites.
+    // Do not allow protocols other than http/s - this can pose a security risk,
+    // and ties is meant to be used with http-based websites.
     match url.scheme() {
         "http" | "https" => {}
         scheme => {
@@ -37,8 +37,8 @@ pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive:
         }
     }
 
-    // Do not allow URLs pointing to IPs directly - this can pose a security risk,
-    // and ties is meant to be used with domain-based websites.
+    // Do not allow URLs pointing to IPs directly - this can pose a security
+    // risk, and ties is meant to be used with domain-based websites.
     if !is_domain_url(&url) {
         return Err(archive::Error::IpUrl);
     }
@@ -53,8 +53,8 @@ pub async fn fetch_url_as_text(unvalidated_url: &str) -> Result<String, archive:
         }
     });
 
-    // TODO include version in user agent, or use a different user agent that won't
-    // get us blocked on so many sites
+    // TODO include version in user agent, or use a different user agent that
+    // won't get us blocked on so many sites
     let client = reqwest::Client::builder()
         .user_agent("ties")
         .dns_resolver(safe_ips::SafeDnsResolver)

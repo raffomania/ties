@@ -47,8 +47,8 @@ pub async fn view(
     }: &Data,
 ) -> ResponseResult<Element> {
     let metadata = get_metadata(&mut tx, ap_user.id).await?;
-    // TODO find out what the user-visible domain of the ApUser is and show it here
-    // https://github.com/raffomania/ties/issues/154
+    // TODO find out what the user-visible domain of the ApUser is and show it
+    // here https://github.com/raffomania/ties/issues/154
     let children = fragment([
         header(
             [class("p-4 dark:bg-neutral-900 bg-stone-100")],

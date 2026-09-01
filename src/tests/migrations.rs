@@ -20,8 +20,8 @@ async fn generate_missing_ap_users_migration() -> Result<()> {
     let pool = super::util::db::new_test_pool().await;
     let base_url = Url::parse("http://localhost:3000")?;
 
-    // First, run up to and including the migration that creates the ap_users table
-    // and adds the ap_user_id column, but don't run the Rust
+    // First, run up to and including the migration that creates the ap_users
+    // table and adds the ap_user_id column, but don't run the Rust
     // migration that generates AP users yet
     let sql_migration_version = Some(2025_01_27_102308);
     db::migrate(&pool, &base_url, sql_migration_version).await?;
@@ -100,8 +100,8 @@ async fn generate_missing_bookmark_ap_ids_migration() -> Result<()> {
     let pool = super::util::db::new_test_pool().await;
     let base_url = Url::parse("http://localhost:3000")?;
 
-    // First, run up to and including the migration that creates the ap_users table
-    // and adds the ap_user_id column, but don't run the Rust
+    // First, run up to and including the migration that creates the ap_users
+    // table and adds the ap_user_id column, but don't run the Rust
     // migration that generates AP users yet
     let sql_migration_version = Some(2025_11_05_100411);
     db::migrate(&pool, &base_url, sql_migration_version).await?;

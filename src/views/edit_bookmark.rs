@@ -372,8 +372,8 @@ pub fn archive_title_view(
                     .take(archived_title.floor_char_boundary(500))
                     .collect();
 
-                // Use separate form from the title input to not send two values for the title
-                // until this issue is fixed: https://github.com/samscott89/serde_qs/issues/171
+                // Use separate form from the title input to not send two values
+                // for the title until this issue is fixed: https://github.com/samscott89/serde_qs/issues/171
                 let sq = search_query.query_string();
                 form(
                     [

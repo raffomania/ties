@@ -10,8 +10,8 @@ pub fn assert_form_matches<I: Serialize>(form: &visdom::types::Elements, input: 
         serde_qs::to_string(input).expect("Input should serialize to query string");
 
     // Parse query string into HashMap
-    // However, do *not* use qs here so field names will keep the syntax from the
-    // HTML itself
+    // However, do *not* use qs here so field names will keep the syntax from
+    // the HTML itself
     let input_entries: HashMap<String, String> =
         url::form_urlencoded::parse(input_as_qs_fields.as_bytes())
             .filter(|(_k, v)| !v.is_empty())
@@ -29,7 +29,8 @@ pub fn assert_form_matches<I: Serialize>(form: &visdom::types::Elements, input: 
         );
     }
 
-    // Check that each required form field has a corresponding value in the input
+    // Check that each required form field has a corresponding value in the
+    // input
     for form_element in form.find("input") {
         tracing::debug!("Checking HTML field {}", form_element.outer_html());
 

@@ -87,8 +87,8 @@ async fn get_login_oidc(
     mut session: Session,
     extract::Tx(mut tx): extract::Tx,
 ) -> ResponseResult<Response> {
-    // TODO: Store the CSRF and none states in a way that is more secure than this,
-    // although the current method is already quite secure.
+    // TODO: Store the CSRF and none states in a way that is more secure than
+    // this, although the current method is already quite secure.
     let oidc_config = state
         .oidc_state
         .get_config()

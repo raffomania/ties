@@ -63,8 +63,8 @@ impl Queue {
 
         tracing::debug!("Processed all high-priority tasks");
 
-        // No incoming messages at the moment, process an arbitrary pending bookmark if
-        // it exists.
+        // No incoming messages at the moment, process an arbitrary pending
+        // bookmark if it exists.
         let pending_archive_id = self.get_pending_archive_id().await;
 
         if let Some(pending_archive_id) = pending_archive_id {
@@ -90,8 +90,8 @@ impl Queue {
             Message::ArchiveBookmark(task) => {
                 let archive = self.archive(task.archive_id).await;
 
-                // Code requesting the archive might not care about the result, so ignore any
-                // errors here.
+                // Code requesting the archive might not care about the result,
+                // so ignore any errors here.
                 let _e = task.respond_to.send(archive);
             }
         }
@@ -119,8 +119,8 @@ impl Queue {
         let archive = self.save_archive(&mut tx, &pending, &article).await;
         match &archive {
             Ok(archive) => {
-                // Notifying receivers of completed archives is low-priority, so errors can be
-                // ignored.
+                // Notifying receivers of completed archives is low-priority, so
+                // errors can be ignored.
                 let _err = self.processed_archive_id_sender.send(archive.id);
             }
             Err(_) => {
@@ -171,8 +171,8 @@ impl QueueHandle {
     pub fn new(db_pool: sqlx::PgPool) -> Self {
         let (sender, receiver) = mpsc::channel(50);
 
-        // Since the messages here are only UUIDs, we can afford a large buffer size to
-        // support slow receivers.
+        // Since the messages here are only UUIDs, we can afford a large buffer
+        // size to support slow receivers.
         let (processed_archive_id_sender, _) = broadcast::channel(200);
 
         let queue = Queue::new(receiver, db_pool, processed_archive_id_sender.clone());
