@@ -121,7 +121,7 @@ async fn get_edit_title(
     Ok(views::edit_list_title::view(views::edit_list_title::Data {
         layout,
         errors: FormErrors::default(),
-        form_input: forms::lists::EditTitle::default(),
+        form_input: forms::lists::EditTitle { title: list.title },
         list_id,
     })
     .into())
@@ -137,6 +137,19 @@ async fn post_edit_title(
 
     if list.ap_user_id != auth_user.ap_user_id {
         return Err(ResponseError::NotFound);
+    }
+
+    if let Err(errors) = input.validate() {
+        let layout = layout::Template::from_db(&mut tx, Some(&auth_user)).await?;
+        return Ok(HtmfResponse::from(views::edit_list_title::view(
+            views::edit_list_title::Data {
+                layout,
+                form_input: input,
+                errors: errors.into(),
+                list_id,
+            },
+        ))
+        .into_response());
     }
 
     db::lists::edit_title(&mut tx, list_id, input.title).await?;

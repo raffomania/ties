@@ -12,8 +12,9 @@ pub struct CreateList {
     pub private: bool,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Validate, Deserialize, Default)]
 pub struct EditTitle {
+    #[garde(length(min = 1, max = 100))]
     pub title: String,
 }
 
