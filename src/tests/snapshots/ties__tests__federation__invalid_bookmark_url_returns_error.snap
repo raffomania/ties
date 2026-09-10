@@ -1,0 +1,7 @@
+---
+source: src/tests/federation.rs
+assertion_line: 109
+expression: "format!(\"{error:#}\")"
+---
+url: not a valid url: relative URL without a base
+: Invalid form
