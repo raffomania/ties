@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+
 use crate::views;
 
 #[derive(Debug)]
@@ -26,5 +28,11 @@ impl From<garde::Report> for FormErrors {
 impl Default for FormErrors {
     fn default() -> Self {
         Self(garde::Report::new())
+    }
+}
+
+impl From<FormErrors> for anyhow::Error {
+    fn from(value: FormErrors) -> Self {
+        anyhow!("Invalid form").context(value.0)
     }
 }

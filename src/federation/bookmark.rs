@@ -6,12 +6,14 @@ use activitypub_federation::{
     traits::Object,
 };
 use anyhow::anyhow;
+use garde::Validate;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use url::Url;
 
 use crate::{
     db::{self, bookmarks::InsertBookmark},
+    forms,
     response_error::{ResponseError, into_option},
 };
 
@@ -87,17 +89,16 @@ impl TryFrom<Json> for InsertBookmark {
         }
         .ok_or_else(|| anyhow!("Missing URL"))?;
 
-        let create_bookmark = InsertBookmark {
-            url,
-            title: value.name,
-        };
+        let mut insert: InsertBookmark =
+            forms::bookmarks::CreateBookmark { url: url.clone() }.try_into()?;
 
-        // TODO how to validate InsertBookmark?
-        // ideally, we'd find a single point for the validation rules that
-        // now live in CreateBookmark
-        // https://github.com/raffomania/ties/issues/163
+        if let Some(title) = value.name {
+            let rename = forms::bookmarks::Rename { title };
+            rename.validate()?;
+            insert.title = Some(rename.title);
+        }
 
-        Ok(create_bookmark)
+        Ok(insert)
     }
 }
 
@@ -177,9 +178,7 @@ impl Object for db::Bookmark {
     ) -> Result<(), Self::Error> {
         verify_domains_match(json.id.inner(), expected_domain)?;
         verify_is_remote_object(&json.id, data)?;
-        // TODO see validation todo above
-        // InsertBookmark::try_from(json.clone())?.validate()?;
-        // https://github.com/raffomania/ties/issues/163
+        InsertBookmark::try_from(json.clone())?;
         Ok(())
     }
 

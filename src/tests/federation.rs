@@ -5,7 +5,10 @@ use axum::http::StatusCode;
 use crate::{
     db::{self},
     federation::{self, webfinger},
-    forms::users::{Credentials, Login},
+    forms::{
+        bookmarks::CreateBookmark,
+        users::{Credentials, Login},
+    },
     tests::util::test_app::TestApp,
 };
 
@@ -90,11 +93,24 @@ async fn can_resolve_bookmark() -> Result<()> {
     let app_b_bookmark = bookmark.ap_id.dereference(&ap_cx_b).await?;
     // Check that bookmark is now in the DB of app b
     let mut tx = app_b.pool.begin().await?;
-    db::bookmarks::by_ap_id(&mut tx, bookmark.ap_id).await?;
+    db::bookmarks::by_ap_id(&mut tx, bookmark.ap_id.clone()).await?;
 
     assert_ne!(app_b_bookmark.id, bookmark.id);
+    assert_eq!(app_b_bookmark.ap_id, bookmark.ap_id);
     assert_eq!(app_b_bookmark.url, bookmark.url);
     assert_eq!(app_b_bookmark.title, bookmark.title);
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn invalid_bookmark_url_returns_error() -> Result<()> {
+    let invalid_bookmark = CreateBookmark {
+        url: "not-a-valid-url".to_string(),
+    };
+    let result: Result<db::bookmarks::InsertBookmark, _> = invalid_bookmark.try_into();
+    let error: anyhow::Error = result.err().unwrap().into();
+    insta::assert_snapshot!(format!("{error:#}"));
 
     Ok(())
 }
