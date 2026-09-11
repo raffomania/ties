@@ -13,3 +13,6 @@ development_cert
 
 # Various editors & IDEs
 .idea/
+
+# Bombadil test output
+bombadil-output/

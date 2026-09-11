@@ -325,3 +325,48 @@ ensure-command +command:
 
 benchmark-hot-compilation:
     bin/benchmark-hot-compilation.sh
+
+[doc("Run bombadil property-based tests against the running app.")]
+[group('Testing')]
+test-bombadil time_limit="2m":
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    APP_URL="${BASE_URL}"
+
+    # Determine curl flags based on URL scheme
+    if [[ "${APP_URL}" == https://* ]]; then
+        CURL_FLAGS="-sk"
+    else
+        CURL_FLAGS="-s"
+    fi
+
+    # Ensure the app is running
+    if ! curl ${CURL_FLAGS} -o /dev/null -w "%{http_code}" "${APP_URL}/" 2>/dev/null | grep -q "200\|302\|303"; then
+        echo "Starting ties app..."
+        just run start &
+        # Wait for the app to be ready
+        for i in $(seq 1 30); do
+            if curl ${CURL_FLAGS} -o /dev/null -w "%{http_code}" "${APP_URL}/" 2>/dev/null | grep -q "200\|302\|303"; then
+                echo "App is ready."
+                break
+            fi
+            sleep 1
+        done
+    else
+        echo "App is already running."
+    fi
+
+    # Run bombadil in a container
+    podman run --rm \
+        --network=host \
+        -v ./bombadil:/bombadil:ro \
+        -v ./bombadil-output:/output \
+        docker.io/antithesishq/bombadil:0.7.2 \
+        browser test \
+        --time-limit={{ time_limit }} \
+        --exit-on-violation \
+        --output-path=/output \
+        --no-sandbox \
+        "${APP_URL}" \
+        /bombadil/specification.ts
