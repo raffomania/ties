@@ -225,7 +225,7 @@
     },
     {
       "author": "Michael Howell <michael@notriddle.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.2",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.4",
       "description": "HTML Sanitization",
       "externalReferences": [
         {
@@ -240,7 +240,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "17e913097e1a2124b46746c980134e8c954bc17a6a59bb3fde96f088d126dde6"
+          "content": "dc6d763210e2eb7670d1a5183a08bebefa3f97db2a738a684f2ce00bd49f681d"
         }
       ],
       "licenses": [
@@ -249,10 +249,10 @@
         }
       ],
       "name": "ammonia",
-      "purl": "pkg:cargo/ammonia@4.1.2",
+      "purl": "pkg:cargo/ammonia@4.1.4",
       "scope": "required",
       "type": "library",
-      "version": "4.1.2"
+      "version": "4.1.4"
     },
     {
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#anstream@1.0.0",
@@ -2151,37 +2151,6 @@
     },
     {
       "author": "Simon Sapin <simon.sapin@exyr.org>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.35.0",
-      "description": "Rust implementation of CSS Syntax Level 3",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/cssparser/"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/rust-cssparser"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "4e901edd733a1472f944a45116df3f846f54d37e67e68640ac8bb69689aca2aa"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MPL-2.0"
-        }
-      ],
-      "name": "cssparser",
-      "purl": "pkg:cargo/cssparser@0.35.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.35.0"
-    },
-    {
-      "author": "Simon Sapin <simon.sapin@exyr.org>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.36.0",
       "description": "Rust implementation of CSS Syntax Level 3",
       "externalReferences": [
@@ -2210,6 +2179,37 @@
       "scope": "required",
       "type": "library",
       "version": "0.36.0"
+    },
+    {
+      "author": "Simon Sapin <simon.sapin@exyr.org>",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.37.0",
+      "description": "Rust implementation of CSS Syntax Level 3",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/cssparser/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/servo/rust-cssparser"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8c9cdaae01d5ed7882b04d795e7f752f46ff52d2fa3b50a20d28c464510bba98"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ],
+      "name": "cssparser",
+      "purl": "pkg:cargo/cssparser@0.37.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.37.0"
     },
     {
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#curve25519-dalek-derive@0.1.1",
@@ -4608,37 +4608,6 @@
     },
     {
       "author": "The html5ever Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.35.0",
-      "description": "High-performance browser-grade HTML5 parser",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/html5ever"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/html5ever"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "55d958c2f74b664487a2035fe1dadb032c48718a03b63f3ab0b8537db8549ed4"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "html5ever",
-      "purl": "pkg:cargo/html5ever@0.35.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.35.0"
-    },
-    {
-      "author": "The html5ever Project Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.36.1",
       "description": "High-performance browser-grade HTML5 parser",
       "externalReferences": [
@@ -4667,6 +4636,37 @@
       "scope": "required",
       "type": "library",
       "version": "0.36.1"
+    },
+    {
+      "author": "The html5ever Project Developers",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.39.0",
+      "description": "High-performance browser-grade HTML5 parser",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/html5ever"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/servo/html5ever"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "46a1761807faccc9a19e86944bbf40610014066306f96edcdedc2fb714bcb7b8"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "html5ever",
+      "purl": "pkg:cargo/html5ever@0.39.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.39.0"
     },
     {
       "author": "ganmin <jxz_211@163.com>",
@@ -6079,37 +6079,6 @@
     },
     {
       "author": "The html5ever Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.35.0",
-      "description": "Common code for xml5ever and html5ever",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/markup5ever"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/html5ever"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "311fe69c934650f8f19652b3946075f0fc41ad8757dbb68f1ca14e7900ecc1c3"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "markup5ever",
-      "purl": "pkg:cargo/markup5ever@0.35.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.35.0"
-    },
-    {
-      "author": "The html5ever Project Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.36.1",
       "description": "Common code for xml5ever and html5ever",
       "externalReferences": [
@@ -6140,6 +6109,37 @@
       "version": "0.36.1"
     },
     {
+      "author": "The html5ever Project Developers",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.39.0",
+      "description": "Common code for xml5ever and html5ever",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/markup5ever"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/servo/html5ever"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7122d987ec5f704ee56f6e5b41a7d93722e9aae27ae07cafa4036c4d3f9757de"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "markup5ever",
+      "purl": "pkg:cargo/markup5ever@0.39.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.39.0"
+    },
+    {
       "author": "Pig Fang <g-plane@hotmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#markup_fmt@0.19.1",
       "description": "Configurable HTML, Vue, Svelte, Astro, Angular, Jinja, Twig, Nunjucks and Vento formatter.",
@@ -6165,37 +6165,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.19.1"
-    },
-    {
-      "author": "The html5ever Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#match_token@0.35.0",
-      "description": "Procedural macro for html5ever.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/match_token"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/html5ever"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "ac84fd3f360fcc43dc5f5d186f02a94192761a080e8bc58621ad4d12296a58cf"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "match_token",
-      "purl": "pkg:cargo/match_token@0.35.0",
-      "scope": "required",
-      "type": "library",
-      "version": "0.35.0"
     },
     {
       "author": "Eliza Weisman <eliza@buoyant.io>",
@@ -7089,33 +7058,6 @@
     },
     {
       "author": "Steven Fackler <sfackler@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf@0.11.3",
-      "description": "Runtime support for perfect hash function data structures",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-phf/rust-phf"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "phf",
-      "purl": "pkg:cargo/phf@0.11.3",
-      "scope": "required",
-      "type": "library",
-      "version": "0.11.3"
-    },
-    {
-      "author": "Steven Fackler <sfackler@gmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf@0.13.1",
       "description": "Runtime support for perfect hash function data structures",
       "externalReferences": [
@@ -7140,33 +7082,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.13.1"
-    },
-    {
-      "author": "Steven Fackler <sfackler@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_codegen@0.11.3",
-      "description": "Codegen library for PHF types",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-phf/rust-phf"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "aef8048c789fa5e851558d709946d6d79a8ff88c0440c587967f8e94bfb1216a"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "phf_codegen",
-      "purl": "pkg:cargo/phf_codegen@0.11.3",
-      "scope": "excluded",
-      "type": "library",
-      "version": "0.11.3"
     },
     {
       "author": "Steven Fackler <sfackler@gmail.com>",
@@ -7197,33 +7112,6 @@
     },
     {
       "author": "Steven Fackler <sfackler@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.11.3",
-      "description": "PHF generation logic",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-phf/rust-phf"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "3c80231409c20246a13fddb31776fb942c38553c51e871f8cbd687a4cfb5843d"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "phf_generator",
-      "purl": "pkg:cargo/phf_generator@0.11.3",
-      "scope": "required",
-      "type": "library",
-      "version": "0.11.3"
-    },
-    {
-      "author": "Steven Fackler <sfackler@gmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.13.1",
       "description": "PHF generation logic",
       "externalReferences": [
@@ -7251,33 +7139,6 @@
     },
     {
       "author": "Steven Fackler <sfackler@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.11.3",
-      "description": "Macros to generate types in the phf crate",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-phf/rust-phf"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "f84ac04429c13a7ff43785d75ad27569f2951ce0ffd30a3321230db2fc727216"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "phf_macros",
-      "purl": "pkg:cargo/phf_macros@0.11.3",
-      "scope": "required",
-      "type": "library",
-      "version": "0.11.3"
-    },
-    {
-      "author": "Steven Fackler <sfackler@gmail.com>",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.13.1",
       "description": "Macros to generate types in the phf crate",
       "externalReferences": [
@@ -7302,33 +7163,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.13.1"
-    },
-    {
-      "author": "Steven Fackler <sfackler@gmail.com>",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3",
-      "description": "Support code shared by PHF libraries",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/rust-phf/rust-phf"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "phf_shared",
-      "purl": "pkg:cargo/phf_shared@0.11.3",
-      "scope": "required",
-      "type": "library",
-      "version": "0.11.3"
     },
     {
       "author": "Steven Fackler <sfackler@gmail.com>",
@@ -10121,37 +9955,6 @@
     },
     {
       "author": "The Servo Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache@0.8.9",
-      "description": "A string interning library for Rust, developed as part of the Servo project.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/string_cache"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/string-cache"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "bf776ba3fa74f83bf4b63c3dcbbf82173db2632ed8452cb2d891d33f459de70f"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "string_cache",
-      "purl": "pkg:cargo/string_cache@0.8.9",
-      "scope": "required",
-      "type": "library",
-      "version": "0.8.9"
-    },
-    {
-      "author": "The Servo Project Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache@0.9.0",
       "description": "A string interning library for Rust, developed as part of the Servo project.",
       "externalReferences": [
@@ -10180,37 +9983,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.9.0"
-    },
-    {
-      "author": "The Servo Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache_codegen@0.5.4",
-      "description": "A codegen library for string-cache, developed as part of the Servo project.",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/string_cache_codegen/"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/string-cache"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "c711928715f1fe0fe509c53b43e993a9a557babc2d0a3567d0a3006f1ac931a0"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "string_cache_codegen",
-      "purl": "pkg:cargo/string_cache_codegen@0.5.4",
-      "scope": "excluded",
-      "type": "library",
-      "version": "0.5.4"
     },
     {
       "author": "The Servo Project Developers",
@@ -10525,6 +10297,33 @@
       "scope": "required",
       "type": "library",
       "version": "0.4.3"
+    },
+    {
+      "author": "Keegan McAllister <mcallister.keegan@gmail.com>, Simon Sapin <simon.sapin@exyr.org>, Chris Morgan <me@chrismorgan.info>",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#tendril@0.5.1",
+      "description": "Compact buffer/string type for zero-copy parsing",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/servo/html5ever"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5fed54709c5b3a53d09bb1c113ea4f5ceafd1e772ddcb0030a82e1d56c087b08"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "tendril",
+      "purl": "pkg:cargo/tendril@0.5.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.5.1"
     },
     {
       "author": "David Tolnay <dtolnay@gmail.com>",
@@ -12027,37 +11826,6 @@
     },
     {
       "author": "The html5ever Project Developers",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.1.3",
-      "description": "Atoms for xml5ever and html5ever",
-      "externalReferences": [
-        {
-          "type": "documentation",
-          "url": "https://docs.rs/web_atoms"
-        },
-        {
-          "type": "vcs",
-          "url": "https://github.com/servo/html5ever"
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "57ffde1dc01240bdf9992e3205668b235e59421fd085e8a317ed98da0178d414"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT OR Apache-2.0"
-        }
-      ],
-      "name": "web_atoms",
-      "purl": "pkg:cargo/web_atoms@0.1.3",
-      "scope": "required",
-      "type": "library",
-      "version": "0.1.3"
-    },
-    {
-      "author": "The html5ever Project Developers",
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.2.4",
       "description": "Atoms for xml5ever and html5ever",
       "externalReferences": [
@@ -12598,7 +12366,7 @@
     {
       "dependsOn": [
         "git+https://github.com/raffomania/activitypub-federation-rust?branch=update-axum#activitypub_federation@0.6.5",
-        "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.2",
+        "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.4",
         "registry+https://github.com/rust-lang/crates.io-index#anyhow@1.0.102",
         "registry+https://github.com/rust-lang/crates.io-index#argon2@0.5.3",
         "registry+https://github.com/rust-lang/crates.io-index#async-trait@0.1.89",
@@ -12679,13 +12447,12 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.35.0",
-        "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.35.0",
+        "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.37.0",
+        "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.39.0",
         "registry+https://github.com/rust-lang/crates.io-index#maplit@1.0.2",
-        "registry+https://github.com/rust-lang/crates.io-index#tendril@0.4.3",
         "registry+https://github.com/rust-lang/crates.io-index#url@2.5.8"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.2"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#ammonia@4.1.4"
     },
     {
       "dependsOn": [
@@ -13102,20 +12869,18 @@
         "registry+https://github.com/rust-lang/crates.io-index#cssparser-macros@0.6.1",
         "registry+https://github.com/rust-lang/crates.io-index#dtoa-short@0.3.5",
         "registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.18",
-        "registry+https://github.com/rust-lang/crates.io-index#phf@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.35.0"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#cssparser-macros@0.6.1",
-        "registry+https://github.com/rust-lang/crates.io-index#dtoa-short@0.3.5",
-        "registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.18",
         "registry+https://github.com/rust-lang/crates.io-index#phf@0.13.1",
         "registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.36.0"
+    },
+    {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#dtoa-short@0.3.5",
+        "registry+https://github.com/rust-lang/crates.io-index#itoa@1.0.18",
+        "registry+https://github.com/rust-lang/crates.io-index#smallvec@1.15.1"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#cssparser@0.37.0"
     },
     {
       "dependsOn": [
@@ -13663,17 +13428,16 @@
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.29",
-        "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.35.0",
-        "registry+https://github.com/rust-lang/crates.io-index#match_token@0.35.0"
+        "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.36.1"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.35.0"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.36.1"
     },
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.29",
-        "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.36.1"
+        "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.39.0"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.36.1"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#html5ever@0.39.0"
     },
     {
       "dependsOn": [
@@ -14002,17 +13766,17 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.29",
         "registry+https://github.com/rust-lang/crates.io-index#tendril@0.4.3",
-        "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.1.3"
+        "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.2.4"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.35.0"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.36.1"
     },
     {
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#log@0.4.29",
-        "registry+https://github.com/rust-lang/crates.io-index#tendril@0.4.3",
+        "registry+https://github.com/rust-lang/crates.io-index#tendril@0.5.1",
         "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.2.4"
       ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.36.1"
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#markup5ever@0.39.0"
     },
     {
       "dependsOn": [
@@ -14023,14 +13787,6 @@
         "registry+https://github.com/rust-lang/crates.io-index#tiny_pretty@0.2.1"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#markup_fmt@0.19.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
-        "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
-        "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#match_token@0.35.0"
     },
     {
       "dependsOn": [
@@ -14136,7 +13892,7 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#base64@0.21.7",
+        "registry+https://github.com/rust-lang/crates.io-index#base64@0.22.1",
         "registry+https://github.com/rust-lang/crates.io-index#chrono@0.4.44",
         "registry+https://github.com/rust-lang/crates.io-index#http@1.4.0",
         "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.6",
@@ -14245,25 +14001,11 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#phf@0.11.3"
-    },
-    {
-      "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.13.1",
         "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.13.1",
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#phf@0.13.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_codegen@0.11.3"
     },
     {
       "dependsOn": [
@@ -14274,27 +14016,10 @@
     },
     {
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#rand@0.8.6"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.11.3"
-    },
-    {
-      "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#fastrand@2.4.1",
         "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.13.1"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.13.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
-        "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
-        "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.11.3"
     },
     {
       "dependsOn": [
@@ -14305,12 +14030,6 @@
         "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_macros@0.13.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#siphasher@1.0.2"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3"
     },
     {
       "dependsOn": [
@@ -15131,29 +14850,10 @@
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#new_debug_unreachable@1.0.6",
         "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#precomputed-hash@0.1.1",
-        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache@0.8.9"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#new_debug_unreachable@1.0.6",
-        "registry+https://github.com/rust-lang/crates.io-index#parking_lot@0.12.5",
         "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.13.1",
         "registry+https://github.com/rust-lang/crates.io-index#precomputed-hash@0.1.1"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache@0.9.0"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf_generator@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_shared@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
-        "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#string_cache_codegen@0.5.4"
     },
     {
       "dependsOn": [
@@ -15218,6 +14918,12 @@
         "registry+https://github.com/rust-lang/crates.io-index#utf-8@0.7.6"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#tendril@0.4.3"
+    },
+    {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#new_debug_unreachable@1.0.6"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#tendril@0.5.1"
     },
     {
       "dependsOn": [
@@ -15532,15 +15238,6 @@
         "registry+https://github.com/rust-lang/crates.io-index#try-lock@0.2.5"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#want@0.3.1"
-    },
-    {
-      "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#phf@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#phf_codegen@0.11.3",
-        "registry+https://github.com/rust-lang/crates.io-index#string_cache@0.8.9",
-        "registry+https://github.com/rust-lang/crates.io-index#string_cache_codegen@0.5.4"
-      ],
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#web_atoms@0.1.3"
     },
     {
       "dependsOn": [
