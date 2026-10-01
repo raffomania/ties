@@ -31,7 +31,7 @@ pub fn bookmark_title(title: &Option<String>) -> &str {
 }
 
 pub fn format_date(date: OffsetDateTime) -> String {
-    let maybe_formatted = format_description::parse("[year]-[month]-[day]")
+    let maybe_formatted = format_description::parse_borrowed::<3>("[year]-[month]-[day]")
         .context("Invalid date format description")
         .and_then(|fmt| date.format(&fmt).context("Failed to format date"));
 

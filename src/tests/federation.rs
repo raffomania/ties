@@ -53,7 +53,7 @@ async fn spin_up_two_instances() -> anyhow::Result<()> {
 async fn can_resolve_user() -> Result<()> {
     let app_a = TestApp::new().await;
     let user = app_a.create_user("testa", "testpassword").await;
-    let app_a_ap_user = db::ap_users::read_by_username(
+    let a_ap_user = db::ap_users::read_by_username(
         &mut app_a.pool.begin().await?,
         webfinger::Resource::from_name_and_url(user.username, &app_a.base_url)?,
     )
@@ -64,12 +64,12 @@ async fn can_resolve_user() -> Result<()> {
     let ap_cx_b = app_b.state.federation_config.to_request_data();
 
     // Check that instance B can resolve user on instance A
-    let app_b_ap_user = app_a_ap_user.ap_id.dereference(&ap_cx_b).await?;
+    let b_ap_user = a_ap_user.ap_id.dereference(&ap_cx_b).await?;
 
-    assert_ne!(app_b_ap_user.id, app_a_ap_user.id);
-    assert_eq!(app_b_ap_user.username, app_a_ap_user.username);
-    assert_eq!(app_b_ap_user.inbox_url, app_a_ap_user.inbox_url);
-    assert_eq!(app_b_ap_user.ap_id, app_a_ap_user.ap_id);
+    assert_ne!(b_ap_user.id, a_ap_user.id);
+    assert_eq!(b_ap_user.username, a_ap_user.username);
+    assert_eq!(b_ap_user.inbox_url, a_ap_user.inbox_url);
+    assert_eq!(b_ap_user.ap_id, a_ap_user.ap_id);
 
     Ok(())
 }

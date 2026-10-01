@@ -1,5 +1,5 @@
 use anyhow::{Context, anyhow};
-use argon2::PasswordVerifier;
+use argon2::{PasswordHasher, PasswordVerifier};
 use axum::{
     extract::{FromRequestParts, OptionalFromRequestParts, OriginalUri},
     http::{HeaderValue, request::Parts},
@@ -19,9 +19,6 @@ use crate::{
 };
 
 pub fn hash_password(password: &str) -> ResponseResult<String> {
-    let salt =
-        argon2::password_hash::SaltString::generate(&mut argon2::password_hash::rand_core::OsRng);
-
     #[cfg(test)]
     let argon2 = argon2::Argon2::new(
         argon2::Algorithm::default(),
@@ -40,11 +37,10 @@ pub fn hash_password(password: &str) -> ResponseResult<String> {
     #[cfg(not(test))]
     let argon2 = argon2::Argon2::default();
 
-    Ok(
-        argon2::PasswordHasher::hash_password(&argon2, password.as_bytes(), &salt)
-            .map_err(|e| anyhow!("Failed to hash password: {e}"))?
-            .to_string(),
-    )
+    Ok(argon2
+        .hash_password(password.as_bytes())
+        .map_err(|e| anyhow!("Failed to hash password: {e}"))?
+        .to_string())
 }
 
 pub fn verify_password(user: &db::User, password: &str) -> ResponseResult<()> {
