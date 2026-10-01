@@ -269,14 +269,12 @@ fn random_article(title: Option<String>, url: String) -> Result<legible::Article
                 .clone(),
         ),
         text_content: content.clone().join("\n\n"),
-        content: content
-            .into_iter()
-            .map(|p| format!("<p>{p}</p>"))
-            .join("\n"),
+        content: content.iter().map(|p| format!("<p>{p}</p>")).join("\n"),
         site_name: Some(url),
         // TODO use random date
         // https://github.com/raffomania/ties/issues/333
         published_time: None,
+        markdown_content: content.into_iter().join("\n\n"),
     })
 }
 

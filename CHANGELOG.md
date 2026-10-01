@@ -25,8 +25,7 @@ Bookmarks are not published until they are added to a public list.
 
 ### Security
 
-- Update quinn-proto dependency, fixing [a vulnerability](https://github.com/advisories/GHSA-4w2j-m93h-cj5j)
-- Update rustls dependency, fixing [a vulnerability](https://github.com/advisories/GHSA-2mjx-qc3c-rqvc)
+- Update all dependencies, fixing [a vulnerability in quinn-proto](https://github.com/advisories/GHSA-4w2j-m93h-cj5j) and a [a vulnerability in rustls](https://github.com/advisories/GHSA-2mjx-qc3c-rqvc)
 
 ## 0.3.0
 
