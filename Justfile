@@ -251,9 +251,9 @@ clippy-lint *args:
     cargo clippy --all-targets {{ args }} -- -D warnings
 
 [group('Code Quality')]
-fix-lints *args: generate-sbom generate-database-info
+fix-lints *args: && format generate-sbom generate-database-info
     cargo clippy --allow-no-vcs --all-targets --fix {{ args }}
-    cargo fix --allow-no-vcs --allow-staged --allow-dirty --all-targets
+    cargo fix --allow-no-vcs --allow-staged --allow-dirty --all-targets {{ args }}
 
 [group('Code Quality')]
 reuse-lint *args: (ensure-command "reuse")
