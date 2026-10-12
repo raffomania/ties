@@ -1,5 +1,3 @@
-use core::f64;
-
 use anyhow::Result;
 use easy_cast::Conv;
 use encoding_rs::{Encoding, UTF_8};
