@@ -249,9 +249,9 @@ clippy-lint *args:
     cargo clippy {{ args }} -- -D warnings
 
 [group('Code Quality')]
-fix-lints *args: reuse-lint
+fix-lints *args: && format
     cargo clippy --fix {{ args }}
-    cargo fix --allow-staged --allow-dirty --all-targets
+    cargo fix --allow-staged --allow-dirty --all-targets {{ args }}
 
 [group('Code Quality')]
 reuse-lint *args: (ensure-command "reuse")
