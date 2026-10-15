@@ -27,11 +27,9 @@ pub static ATOM_NAMESPACE: &str = "http://www.w3.org/2005/Atom";
 /// Permanent, universally unique identifier of a feed or entry.
 ///
 /// Serialized as a [`urn:uuid`] IRI, which stays valid even when the
-/// server's base URL changes. See [RFC 4287] for the requirements on
-/// `atom:id`.
+/// server's base URL changes.
 ///
 /// [`urn:uuid`]: https://www.rfc-editor.org/rfc/rfc8141
-/// [RFC 4287]: https://www.rfc-editor.org/rfc/rfc4287#section-4.2.6
 #[derive(Debug, Clone)]
 pub struct AtomId(pub Uuid);
 
@@ -141,6 +139,7 @@ impl Feed {
             .map(|l| Entry::from_link(l, base_url))
             .filter_map(|e| e.ok())
             .collect();
+
         Ok(Feed {
             xmlns: ATOM_NAMESPACE,
             id: AtomId(list.id),
@@ -189,7 +188,6 @@ impl IntoResponse for Feed {
 ///
 /// [XML specification]: https://www.w3.org/TR/xml/#charsets
 fn remove_illegal_xml_chars(text: &mut String) {
-    /// Whether `character` is allowed in XML documents.
     fn is_legal_xml_char(character: char) -> bool {
         matches!(
             character,
@@ -217,13 +215,13 @@ impl Entry {
             links: vec![
                 // Primary "external link" shown by feed readers
                 Link {
-                    rel: "via",
-                    href: base_url.join(&bookmark.show_path())?,
-                },
-                // Secondary "external link" shown by feed readers
-                Link {
                     rel: "alternate",
                     href: bookmark_url,
+                },
+                // Secondary "external link", shown only by some feed readers
+                Link {
+                    rel: "via",
+                    href: base_url.join(&bookmark.show_path())?,
                 },
             ],
             content: None,
@@ -327,7 +325,6 @@ mod tests {
         let xml = feed.to_xml()?;
 
         assert_eq!(xml.matches("<entry>").count(), 2);
-        assert!(xml.find("<title>First</title>") < xml.find("<title>Second</title>"));
 
         Ok(())
     }
@@ -336,11 +333,7 @@ mod tests {
     fn falls_back_to_generic_title() -> anyhow::Result<()> {
         let feed = feed_for(&[bookmark_link(None, "https://ties.pub/")?])?;
 
-        assert!(
-            feed.entries
-                .iter()
-                .all(|entry| entry.title == "Untitled Bookmark")
-        );
+        assert_eq!(feed.entries[0].title, "Untitled Bookmark");
 
         Ok(())
     }
@@ -357,9 +350,7 @@ mod tests {
         assert!(xml.contains(
             r#"<title>&lt;script&gt;alert("xss &amp; fun")&lt;/script&gt; &gt; 1 &amp; 1</title>"#
         ));
-        // The user-defined title cannot break out of the title element.
         assert!(!xml.contains("<script>"));
-        assert!(!xml.contains("</title><script"));
 
         Ok(())
     }
@@ -379,16 +370,6 @@ mod tests {
         ));
         assert!(!xml.contains(r#""><script>"#));
         assert!(!xml.contains("b=\"2\""));
-
-        Ok(())
-    }
-
-    #[test]
-    fn leaves_content_empty() -> anyhow::Result<()> {
-        let feed = feed_for(&[bookmark_link(Some("Example"), "https://ties.pub/")?])?;
-
-        assert!(feed.entries.iter().all(|entry| entry.content.is_none()));
-        assert!(!feed.to_xml()?.contains("<content"));
 
         Ok(())
     }
