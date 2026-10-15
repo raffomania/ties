@@ -10,7 +10,6 @@ use crate::{forms::lists::CreateList, response_error::ResponseResult};
 pub struct List {
     pub id: Uuid,
     #[serde(with = "time::serde::iso8601")]
-    #[expect(dead_code, reason = "Kept for reference on the DB schema")]
     pub created_at: OffsetDateTime,
     pub ap_user_id: Uuid,
 
