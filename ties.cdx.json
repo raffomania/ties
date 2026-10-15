@@ -7503,6 +7503,36 @@
       "version": "1.0.106"
     },
     {
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#quick-xml@0.42.0",
+      "description": "High performance xml reader and writer",
+      "externalReferences": [
+        {
+          "type": "documentation",
+          "url": "https://docs.rs/quick-xml"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/tafia/quick-xml"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "quick-xml",
+      "purl": "pkg:cargo/quick-xml@0.42.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.42.0"
+    },
+    {
       "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#quinn-proto@0.11.14",
       "description": "State machine for the QUIC transport protocol",
       "externalReferences": [
@@ -12392,6 +12422,7 @@
         "registry+https://github.com/rust-lang/crates.io-index#mime_guess@2.0.5",
         "registry+https://github.com/rust-lang/crates.io-index#openidconnect@4.0.1",
         "registry+https://github.com/rust-lang/crates.io-index#percent-encoding@2.3.2",
+        "registry+https://github.com/rust-lang/crates.io-index#quick-xml@0.42.0",
         "registry+https://github.com/rust-lang/crates.io-index#railwind@0.1.5",
         "registry+https://github.com/rust-lang/crates.io-index#rand@0.10.1",
         "registry+https://github.com/rust-lang/crates.io-index#redact@0.1.11",
@@ -14090,6 +14121,13 @@
         "registry+https://github.com/rust-lang/crates.io-index#unicode-ident@1.0.24"
       ],
       "ref": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106"
+    },
+    {
+      "dependsOn": [
+        "registry+https://github.com/rust-lang/crates.io-index#memchr@2.8.0",
+        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
+      ],
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#quick-xml@0.42.0"
     },
     {
       "dependsOn": [

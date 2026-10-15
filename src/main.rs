@@ -12,6 +12,7 @@ pub mod server;
 mod session;
 mod views;
 
+pub mod atom;
 mod built_version;
 mod date_time;
 mod federation;
