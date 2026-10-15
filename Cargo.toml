@@ -112,6 +112,7 @@ openidconnect = "4.0.1"
 time = { version = "0.3.47", default-features = false, features = [
     "serde",
     "parsing",
+    "formatting",
 ] }
 tokio = { version = "1.50.0", features = [
     "macros",
@@ -154,6 +155,7 @@ encoding_rs = "0.8.35"
 derive_more = { version = "2.1.1", features = ["debug"] }
 # For passing LogLevels to sqlx
 log = "0.4.29"
+quick-xml = { version = "0.42.0", features = ["serialize"] }
 
 [patch.crates-io]
 activitypub_federation = { git = "https://github.com/raffomania/activitypub-federation-rust", branch = "update-axum" }

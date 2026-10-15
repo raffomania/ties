@@ -71,7 +71,7 @@ SPDX-License-Identifier = "MIT"
 path = [
     ".sqlx/*.json",
     "Cargo.lock",
-    "src/tests/snapshots/*.snap",
+    "src/*/snapshots/*.snap",
     "ties.cdx.json",
 ]
 SPDX-FileCopyrightText = "ties Contributors"
