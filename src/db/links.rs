@@ -69,6 +69,17 @@ pub struct LinkWithContent {
     pub dest: LinkDestinationWithMetadata,
 }
 
+impl LinkWithContent {
+    pub fn created_at(&self) -> OffsetDateTime {
+        match &self.dest {
+            LinkDestinationWithMetadata::Bookmark(bookmark) => bookmark.created_at,
+            LinkDestinationWithMetadata::List(list_with_metadata) => {
+                list_with_metadata.list.created_at
+            }
+        }
+    }
+}
+
 /// Validate that the link source belongs to the user creating the new link.
 fn validate_src_belongs_to_creator(src: &db::List, ap_user_id: Uuid) -> ResponseResult<()> {
     if src.ap_user_id != ap_user_id {

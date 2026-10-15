@@ -1,0 +1,21 @@
+---
+source: src/atom/feed.rs
+expression: feed.to_xml()?
+---
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <id>urn:uuid:00000000-0000-0000-0000-000000001235</id>
+  <title>list title</title>
+  <updated>1970-01-01T00:00:00Z</updated>
+  <link rel="self" href="https://ties.pub/lists/00000000-0000-0000-0000-000000001235/feed.atom"/>
+  <link rel="alternate" href="https://ties.pub/lists/00000000-0000-0000-0000-000000001235"/>
+  <author>
+    <name>username</name>
+  </author>
+  <entry>
+    <id>urn:uuid:00000000-0000-0000-0000-000000001234</id>
+    <title>Example</title>
+    <updated>1970-01-01T00:00:00Z</updated>
+    <link rel="via" href="https://ties.pub/bookmarks/00000000-0000-0000-0000-000000001234"/>
+    <link rel="alternate" href="https://ties.pub/"/>
+  </entry>
+</feed>
