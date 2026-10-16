@@ -29,3 +29,7 @@ The source is always a list, the destination can be a list or a bookmark.
 - Links to public items are visible for anyone. Links to private items are only visible for the item's owner.
 - Links to and from private items may only be created by the items' owner.
 - Links can only be changed or deleted by their owner.
+
+## Atom feeds
+
+Atom feeds are only available for public lists, and show only links to public bookmarks or lists.

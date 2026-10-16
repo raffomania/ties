@@ -1,6 +1,6 @@
 use axum::{
-    Router,
-    extract::Path,
+    Router, debug_handler,
+    extract::{Path, State},
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
@@ -9,17 +9,19 @@ use serde_qs::web::QsForm;
 use uuid::Uuid;
 
 use crate::{
+    atom::{self, Feed},
     authentication::AuthUser,
     db::{self},
     extract::{self},
     form_errors::FormErrors,
-    forms,
-    forms::lists::{CreateList, EditListPinned, EditListPrivate},
+    forms::{
+        self,
+        lists::{CreateList, EditListPinned, EditListPrivate},
+    },
     htmf_response::HtmfResponse,
     response_error::{ResponseError, ResponseResult},
     server::AppState,
-    views,
-    views::layout,
+    views::{self, layout},
 };
 
 pub fn router() -> Router<AppState> {
@@ -27,6 +29,7 @@ pub fn router() -> Router<AppState> {
     router
         .route("/lists/create", get(get_create).post(post_create))
         .route("/lists/{list_id}", get(get_show))
+        .route("/lists/{list_id}/feed.atom", get(get_feed))
         .route("/lists/{list_id}/edit_private", post(edit_private))
         .route("/lists/{list_id}/edit_title", post(post_edit_title))
         .route("/lists/{list_id}/edit_title", get(get_edit_title))
@@ -64,6 +67,23 @@ async fn get_show(
         metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
         backlinks,
     })))
+}
+
+#[debug_handler]
+async fn get_feed(
+    extract::Tx(mut tx): extract::Tx,
+    Path(list_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> ResponseResult<atom::Feed> {
+    let list = db::lists::by_id(&mut tx, list_id).await?;
+
+    if list.private {
+        return Err(ResponseError::NotFound);
+    }
+
+    let links = db::links::list_by_list(&mut tx, list_id, None).await?;
+
+    Ok(Feed::for_list(&list, &links, &state.base_url)?)
 }
 
 async fn post_create(
