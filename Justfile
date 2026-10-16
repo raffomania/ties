@@ -246,11 +246,11 @@ lint: clippy-lint format-lint reuse-lint
 
 [group('Code Quality')]
 clippy-lint *args:
-    cargo clippy {{ args }} -- -D warnings
+    cargo clippy --all-targets {{ args }} -- -D warnings
 
 [group('Code Quality')]
-fix-lints *args: reuse-lint
-    cargo clippy --fix {{ args }}
+fix-lints *args:
+    cargo clippy --all-targets --fix {{ args }}
     cargo fix --allow-staged --allow-dirty --all-targets
 
 [group('Code Quality')]
