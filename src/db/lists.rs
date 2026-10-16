@@ -228,6 +228,51 @@ pub async fn list_public_by_user(
     Ok(lists)
 }
 
+pub async fn by_id_with_metadata(
+    tx: &mut AppTx,
+    list_id: Uuid,
+    ap_user_id: Option<Uuid>,
+) -> ResponseResult<ListWithMetadata> {
+    let record = query!(
+        r#"
+        select lists.* as l,
+            ap_users.username,
+            count(links.dest_bookmark_id) as "linked_bookmark_count!",
+            count(links.dest_list_id) as "linked_list_count!"
+        from lists
+
+        join ap_users on lists.ap_user_id = ap_users.id
+        left join links
+            on lists.id = links.src_list_id
+        where (lists.ap_user_id = $1 or not private)
+            and lists.id = $2
+        group by lists.id, ap_users.username
+        "#,
+        ap_user_id,
+        list_id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+    let lists = ListWithMetadata {
+        list: List {
+            id: record.id,
+            created_at: record.created_at,
+            ap_user_id: record.ap_user_id,
+            title: record.title,
+            content: record.content,
+            private: record.private,
+            pinned: record.pinned,
+        },
+        metadata: Metadata {
+            linked_bookmark_count: record.linked_bookmark_count,
+            linked_list_count: record.linked_list_count,
+            username: record.username,
+        },
+    };
+
+    Ok(lists)
+}
+
 pub async fn search(tx: &mut AppTx, term: &str, ap_user_id: Uuid) -> ResponseResult<Vec<List>> {
     let lists = query_as!(
         List,

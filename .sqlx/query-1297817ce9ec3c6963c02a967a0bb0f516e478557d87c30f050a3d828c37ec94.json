@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select lists.* as l,\n            ap_users.username,\n            count(links.dest_bookmark_id) as \"linked_bookmark_count!\",\n            count(links.dest_list_id) as \"linked_list_count!\"\n        from lists\n\n        join ap_users on lists.ap_user_id = ap_users.id\n        left join links\n            on lists.id = links.src_list_id\n        where (lists.ap_user_id = $1 or not private)\n            and lists.id = $2\n        group by lists.id, ap_users.username\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "private",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "pinned",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "ap_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "linked_bookmark_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "linked_list_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "1297817ce9ec3c6963c02a967a0bb0f516e478557d87c30f050a3d828c37ec94"
+}
