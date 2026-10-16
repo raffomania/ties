@@ -53,6 +53,8 @@ iter_over_hash_type = { level = "allow" }
 doc_markdown = { level = "allow" }
 inline_trait_bounds = { level = "allow" }
 rest_pattern_accessible_field = { level = "allow" }
+assert_is_empty = { level = "allow" }
+needless_raw_string_hashes = { level = "allow" }
 
 # TODO: go over each of these and decide which to deny.
 # These are currently failing for our codebase but we chose to allow them

@@ -40,7 +40,7 @@ async fn create_invite_and_use_it() -> anyhow::Result<()> {
         .req()
         .expect_status(StatusCode::SEE_OTHER)
         .post(
-            &invite_url.path(),
+            invite_url.path(),
             &forms::users::CreateUser {
                 username: "invited_user".to_string(),
                 password: "securepassword123".to_string(),
