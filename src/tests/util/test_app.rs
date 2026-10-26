@@ -77,6 +77,12 @@ impl TestApp {
         RequestBuilder::new(&self.router, self.logged_in_cookie.clone())
     }
 
+    /// Rebuild the router with demo mode turned on or off.
+    pub fn set_demo_mode(&mut self, demo_mode: bool) {
+        self.state.demo_mode = demo_mode;
+        self.router = app(self.state.clone()).unwrap();
+    }
+
     /// Since there's no route for creating users yet, we're doing this via the
     /// DB for now.
     pub async fn create_user(&self, username: &str, password: &str) -> db::User {

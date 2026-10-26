@@ -25,6 +25,12 @@ Bookmarks are not published until they are added to a public list.
 
 ### Security
 
+- The demo signup page allowed anyone to create an account even when demo mode was disabled. This is now fixed.
+  To check if any unauthorized users were created, you can use this command for the default docker-compose file:
+
+      docker-compose exec db psql ties ties -c 'select username from users;'
+
+  Check the resulting list of usernames for any users other than the admin user you've configured. Ties does not yet support deleting users - if you need this, please open an issue!
 - Update all dependencies, fixing [a vulnerability in quinn-proto](https://github.com/advisories/GHSA-4w2j-m93h-cj5j) and a [a vulnerability in rustls](https://github.com/advisories/GHSA-2mjx-qc3c-rqvc)
 
 ## 0.3.0
