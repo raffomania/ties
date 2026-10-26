@@ -1,4 +1,4 @@
-use htmf::prelude::*;
+use htmf::prelude_builder::*;
 
 use super::{content, layout};
 use crate::{
@@ -77,7 +77,7 @@ fn title_and_description(list: &db::List, metadata: &db::lists::Metadata) -> Ele
 }
 
 fn backlink_section(backlinks: &[db::List]) -> Element {
-    use htmf::prelude_inline::*;
+    use htmf::prelude::*;
 
     if backlinks.is_empty() {
         return nothing();

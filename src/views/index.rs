@@ -1,4 +1,4 @@
-use htmf::{attr::Attrs, prelude_inline::*};
+use htmf::{attr::Attrs, prelude::*};
 use url::Url;
 use uuid::Uuid;
 

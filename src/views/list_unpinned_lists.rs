@@ -1,6 +1,6 @@
 use std::ops::Not;
 
-use htmf::prelude_inline::*;
+use htmf::prelude::*;
 
 use crate::{db, views::layout};
 

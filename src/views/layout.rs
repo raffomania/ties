@@ -1,4 +1,4 @@
-use htmf::{into_elements::IntoElements, prelude::*};
+use htmf::{into_elements::IntoElements, prelude_builder::*};
 
 use super::base_document::base_document;
 use crate::{

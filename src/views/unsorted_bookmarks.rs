@@ -1,4 +1,4 @@
-use htmf::prelude::*;
+use htmf::prelude_builder::*;
 
 use super::{content, layout};
 use crate::db::{self, Bookmark};

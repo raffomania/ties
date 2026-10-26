@@ -1,4 +1,4 @@
-use htmf::{element::Element, prelude_inline::*};
+use htmf::{element::Element, prelude::*};
 
 use crate::{
     db,

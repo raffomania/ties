@@ -1,4 +1,4 @@
-use htmf::{into_attrs::IntoAttrs, prelude_inline::*};
+use htmf::{into_attrs::IntoAttrs, prelude::*};
 use sqlx::query_as;
 use uuid::Uuid;
 

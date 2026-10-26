@@ -130,7 +130,7 @@ impl Object for db::Bookmark {
         }];
 
         let content = {
-            use htmf::prelude_inline::*;
+            use htmf::prelude::*;
 
             let description = match &self.title {
                 Some(title) => p((), title),
