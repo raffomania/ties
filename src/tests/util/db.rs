@@ -10,8 +10,8 @@ pub async fn new_test_pool() -> Pool<Postgres> {
     let test_path = Uuid::new_v4().to_string();
     let args = TestArgs {
         // We might want to use the real test path here for debuggability
-        // but that requires some macro magic that I'm not willing to investigate
-        // for now, leaking is fine since we're in a test context
+        // but that requires some macro magic that I'm not willing to
+        // investigate for now, leaking is fine since we're in a test context
         test_path: test_path.leak(),
         migrator: Some(&MIGRATOR),
         fixtures: &[],

@@ -138,8 +138,8 @@ pub fn view(
                                     "bg-neutral-300 py-1.5 px-3 text-neutral-900 rounded mt-4 \
                                      self-end",
                                 ),
-                                // TODO is there a cleaner way to make this form work embedded
-                                // on the lists page?
+                                // TODO is there a cleaner way to make this form
+                                // work embedded on the lists page?
                                 attr("hx-post", "/links/create"),
                                 attr("hx-select", "main"),
                                 attr("hx-target", "main"),

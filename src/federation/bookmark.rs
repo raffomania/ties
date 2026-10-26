@@ -121,9 +121,9 @@ impl Object for db::Bookmark {
         let author = db::ap_users::read_by_id(&mut tx, self.ap_user_id).await?;
         let attachments = vec![Link {
             href: self.url.clone(),
-            // TODO according to ActivityStreams, this "identifies the MIME media type of the
-            // referenced resource", but we currently do not fetch remote URLs so we
-            // have no way of knowing the media type
+            // TODO according to ActivityStreams, this "identifies the MIME
+            // media type of the referenced resource", but we currently do not
+            // fetch remote URLs so we have no way of knowing the media type
             // https://github.com/raffomania/ties/issues/164
             media_type: None,
             kind: LinkType::Link,

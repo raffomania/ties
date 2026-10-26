@@ -59,8 +59,8 @@ fn search(previous_input: Option<&str>) -> Element {
             class("inline-flex w-full"),
         ])
         .with([
-            // TODO: When using tridactyl's "go to input", switching to the button by pressing the
-            // tab key doesn't work
+            // TODO: When using tridactyl's "go to input", switching to the
+            // button by pressing the tab key doesn't work
             input([
                 type_("text"),
                 name("q"),

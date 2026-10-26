@@ -162,8 +162,9 @@ impl Queue {
 #[derive(Clone)]
 pub struct QueueHandle {
     sender: mpsc::Sender<Message>,
-    // Intentionally do not store a receiver here: there's no associated process that receives
-    // messages, so having a receiver here would clog up the channel
+    // Intentionally do not store a receiver here: there's no associated process
+    // that receives messages, so having a receiver here would clog up the
+    // channel
     processed_archive_id_sender: broadcast::Sender<Uuid>,
 }
 
