@@ -219,6 +219,10 @@ async fn post_login_demo(
     session: Session,
     State(state): State<AppState>,
 ) -> ResponseResult<Response> {
+    if !state.demo_mode {
+        return Err(ResponseError::NotFound);
+    }
+
     let cookie =
         authentication::create_and_login_temp_user(&mut tx, session, &state.base_url).await?;
     tx.commit().await?;

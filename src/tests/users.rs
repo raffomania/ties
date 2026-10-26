@@ -1,11 +1,16 @@
 use axum::http::{StatusCode, header};
+use serde::Serialize;
 
 use crate::{
     db::{self, ap_users},
     federation::webfinger,
     forms::users::{CreateOidcUser, Credentials, Login},
+    session,
     tests::util::test_app::TestApp,
 };
+
+#[derive(Serialize, Default)]
+struct EmptyForm;
 
 #[test_log::test(tokio::test)]
 async fn can_login() -> anyhow::Result<()> {
@@ -33,6 +38,48 @@ async fn can_login() -> anyhow::Result<()> {
     let cookie = cookie.to_str()?.split_once(';').unwrap().0;
 
     app.req().header(header::COOKIE, cookie).get("/").await;
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn demo_login_unavailable_without_demo_mode() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+
+    // The demo login must not create accounts when demo mode is disabled.
+    let response = app
+        .req()
+        .expect_status(StatusCode::NOT_FOUND)
+        .post("/login_demo", &EmptyForm)
+        .await;
+
+    // No account should have been logged in either.
+    assert!(response.cookie(session::COOKIE_NAME).is_none());
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn demo_login_creates_account_in_demo_mode() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    app.set_demo_mode(true);
+
+    let response = app
+        .req()
+        .expect_status(StatusCode::SEE_OTHER)
+        .post("/login_demo", &EmptyForm)
+        .await;
+
+    assert_eq!(response.headers().get("location").unwrap(), "/");
+    let cookie = response
+        .cookie(session::COOKIE_NAME)
+        .expect("demo login should set a session cookie");
+    assert!(!cookie.is_empty());
+
+    // The temporary account should be able to access pages that require a
+    // login.
+    app.logged_in_cookie = Some(cookie);
+    app.req().get("/lists/create").await;
 
     Ok(())
 }
