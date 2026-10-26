@@ -1,4 +1,4 @@
-use htmf::prelude::*;
+use htmf::prelude_builder::*;
 
 pub fn errors(errors: &[String]) -> Element {
     fragment().with(

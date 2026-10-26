@@ -1,4 +1,4 @@
-use htmf::prelude_inline::*;
+use htmf::prelude::*;
 use uuid::Uuid;
 
 use crate::{

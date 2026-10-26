@@ -1,4 +1,4 @@
-use htmf::prelude_inline::*;
+use htmf::prelude::*;
 
 use super::base_document::base_document;
 use crate::{form_errors::FormErrors, forms::users::OidcSelectUsername};

@@ -1,4 +1,4 @@
-use htmf::prelude_inline::*;
+use htmf::prelude::*;
 use url::Url;
 
 use crate::{db, response_error::ResponseResult, views::layout};

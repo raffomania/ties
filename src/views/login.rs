@@ -1,6 +1,6 @@
 use garde::Report;
 #[allow(clippy::wildcard_imports)]
-use htmf::prelude::*;
+use htmf::prelude_builder::*;
 
 use super::base_document::base_document;
 use crate::{
