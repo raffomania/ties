@@ -219,7 +219,8 @@ fn archive_contents(archive: Option<&db::Archive>, bookmark_id: Uuid, is_owner: 
     div(
         [
             class("prose dark:prose-invert mx-4 my-2"),
-            // Ammonia strips hx- and data-hx- attributes, but it can't hurt to be extra safe
+            // Ammonia strips hx- and data-hx- attributes, but it can't hurt to
+            // be extra safe
             attr("hx-disable", ""),
         ],
         unsafe_raw_html(html),

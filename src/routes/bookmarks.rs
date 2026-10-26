@@ -194,8 +194,8 @@ async fn post_disconnect(
     }
 
     match db::links::delete_by_id(&mut tx, input.delete_link_id, auth_user.user_id).await {
-        // Ignore not found errors, might be caused by a page refresh after deleting a
-        // link.
+        // Ignore not found errors, might be caused by a page refresh after
+        // deleting a link.
         Err(ResponseError::NotFound) => {}
         result => {
             let link = result?;

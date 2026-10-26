@@ -490,7 +490,8 @@ fn connect(
                                 name("search_term"),
                                 value(&search_input.search_term),
                                 placeholder("Search lists to connect..."),
-                                // Adding an id will make htmx keep the keyboard focus
+                                // Adding an id will make htmx keep the keyboard
+                                // focus
                                 id("connect-search-term"),
                                 class(
                                     "py-1.5 px-3 bg-white border border-neutral-300 \
