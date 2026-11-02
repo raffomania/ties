@@ -156,35 +156,19 @@ async fn only_owner_can_delete_bookmark() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// This test documents a known bug on purpose: it checks what the code does
-/// today, even though that is wrong, so that the test starts failing as soon as
-/// the bug is fixed. The failure message tells whoever fixes the bug what to
-/// check instead.
-///
-/// The bug is in `db::bookmarks::upsert_remote`, the function that saves a
-/// bookmark we received from another ties server. Saving a bookmark we have
-/// not seen before works fine. But when a bookmark we already know has changed
-/// on the other server, the update writes to the wrong columns: the id of the
-/// newly created row ends up in the column that stores who owns the bookmark.
-/// No user with that id exists, so the database rejects the update and nothing
-/// changes.
-///
-/// This also matters for the rules in doc/permissions.md, which say that only
-/// the owner of a bookmark may change it. Saving must never change who owns a
-/// bookmark, and today it would if the database did not reject it.
-///
-/// When the bug is fixed, this test fails on purpose. Then replace its checks
-/// with checks for the correct behavior: the bookmark keeps its owner and gets
-/// the new URL and title.
+/// Saving a bookmark we received from another ties server must work both the
+/// first time we see the bookmark and later, when the bookmark has changed on
+/// the other server and we save it again. The second save must apply the new
+/// URL and title, and it must never change who owns the bookmark.
 #[test_log::test(tokio::test)]
-async fn upsert_remote_update_bug_is_still_present() -> anyhow::Result<()> {
+async fn upsert_remote_updates_a_known_bookmark_but_keeps_its_owner() -> anyhow::Result<()> {
     let app = TestApp::new().await;
     let user = app.create_test_user().await;
+    let other_user = app.create_user("otheruser", "longpassword").await;
 
     let ap_id = ObjectId::from(Url::parse("https://remote.example/ap/bookmark/1")?);
 
-    // Save the remote bookmark for the first time. There is nothing to update
-    // yet, so this works fine.
+    // Save the remote bookmark for the first time.
     let mut tx = app.tx().await;
     let first = db::bookmarks::upsert_remote(
         &mut tx,
@@ -198,12 +182,13 @@ async fn upsert_remote_update_bug_is_still_present() -> anyhow::Result<()> {
     .await?;
     tx.commit().await?;
     assert_eq!(first.url, "https://old.example");
+    assert_eq!(first.title.as_deref(), Some("Old Title"));
+    assert_eq!(first.ap_user_id, user.ap_user_id);
 
-    // Save the same remote bookmark again, now with a changed URL and title.
-    // This takes the "update the saved bookmark" path, which is where the bug
-    // is.
+    // Save the same remote bookmark again after it changed on the other
+    // server: the saved bookmark gets the new URL and title.
     let mut tx = app.tx().await;
-    let result = db::bookmarks::upsert_remote(
+    let updated = db::bookmarks::upsert_remote(
         &mut tx,
         user.ap_user_id,
         &ap_id,
@@ -212,23 +197,29 @@ async fn upsert_remote_update_bug_is_still_present() -> anyhow::Result<()> {
             title: Some("New Title".to_string()),
         },
     )
-    .await;
+    .await?;
+    tx.commit().await?;
+    assert_eq!(updated.url, "https://new.example");
+    assert_eq!(updated.title.as_deref(), Some("New Title"));
+    assert_eq!(updated.id, first.id);
+    assert_eq!(updated.ap_user_id, first.ap_user_id);
 
-    let err = result.expect_err(
-        "Saving a known remote bookmark again unexpectedly worked: the bug in \
-         the save query in src/db/bookmarks.rs seems to be fixed. Update this \
-         test to check the correct behavior instead: the saved bookmark has \
-         the URL \"https://new.example\", the title \"New Title\", and the same \
-         owner as before.",
-    );
-
-    // Today the update fails because it puts the id of the new row into the
-    // owner column, and no user with that id exists.
-    let msg = format!("{err:?}");
-    assert!(
-        msg.contains("bookmarks_ap_user_id_fkey"),
-        "Saving failed, but not with the error we expect from this bug: {msg:?}"
-    );
+    // Even a save that names another user as the author must not hand the
+    // bookmark over to that user: only the owner of a bookmark may change it
+    let mut tx = app.tx().await;
+    let after_other_author = db::bookmarks::upsert_remote(
+        &mut tx,
+        other_user.ap_user_id,
+        &ap_id,
+        InsertBookmark {
+            url: "https://other.example".to_string(),
+            title: Some("Other Title".to_string()),
+        },
+    )
+    .await?;
+    tx.commit().await?;
+    assert_eq!(after_other_author.id, first.id);
+    assert_eq!(after_other_author.ap_user_id, first.ap_user_id);
 
     Ok(())
 }
