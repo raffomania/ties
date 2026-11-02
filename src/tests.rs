@@ -5,6 +5,7 @@ mod bookmarks;
 mod federation;
 mod index;
 mod invites;
+mod links;
 mod lists;
 mod migrations;
 mod response_error;
