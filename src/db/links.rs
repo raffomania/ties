@@ -161,7 +161,11 @@ pub async fn list_by_list(
                         'linked_bookmark_count', count(lists_bookmarks.*)
                             filter (where lists_bookmarks.id is not null),
                         'linked_list_count', count(lists_lists.*)
-                            filter (where lists_lists.id is not null),
+                            filter (
+                                where lists_lists.id is not null
+                                    and (not lists_lists.private
+                                        or lists_lists.ap_user_id = $2)
+                            ),
                         'username', (select username from users where users.ap_user_id = lists.ap_user_id)
                     )
                 )
@@ -179,7 +183,6 @@ pub async fn list_by_list(
 
         where links.src_list_id = $1
             and (lists is null or not lists.private or lists.ap_user_id = $2)
-            and (lists_lists is null or not lists_lists.private or lists.ap_user_id = $2)
         group by links.id, lists.id, bookmarks.id
         order by links.created_at desc
         "#,
