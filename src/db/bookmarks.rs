@@ -226,9 +226,10 @@ pub async fn upsert_remote(
         (ap_id, id, ap_user_id, url, title)
         values ($1, $2, $3, $4, $5)
         on conflict(ap_id) do update set
-            ap_user_id = $2,
-            url = $3,
-            title = $4
+            -- Never change who owns an existing bookmark: only its owner may
+            -- change it.
+            url = $4,
+            title = $5
         returning id, created_at, ap_user_id, url, title, ap_id
         "#,
         ap_id.inner().as_str(),
