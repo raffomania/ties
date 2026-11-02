@@ -35,6 +35,7 @@ Bookmarks are not published until they are added to a public list.
   Check the resulting list of usernames for any users other than the admin user you've configured. Ties does not yet support deleting users - if you need this, please open an issue!
 - Update all dependencies, fixing [a vulnerability in quinn-proto](https://github.com/advisories/GHSA-4w2j-m93h-cj5j) and a [a vulnerability in rustls](https://github.com/advisories/GHSA-2mjx-qc3c-rqvc)
 - Tighten rules for connections between links. Connections from private lists, or to private bookmarks may now be made by their owner only.
+- Update the container to remove compromised CA certificates
 
 ## 0.3.0
 
