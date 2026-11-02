@@ -34,7 +34,8 @@ async fn nested_list_count(
 /// This test checks what the number does when a list links to a private list
 /// that belongs to a different user. A link to a private list may only be seen
 /// by the owner of that private list, no matter who owns the list the link
-/// starts from.
+/// starts from. So the link to a private list should only be counted for the
+/// owner of that private list.
 #[test_log::test(tokio::test)]
 async fn list_by_list_nested_counts_of_private_lists() -> anyhow::Result<()> {
     let app = TestApp::new().await;
@@ -100,24 +101,25 @@ async fn list_by_list_nested_counts_of_private_lists() -> anyhow::Result<()> {
         .execute(&mut *tx)
         .await?;
 
-    // Check the buggy behavior:
     // Result for lists_owner, who owns linked_list, but not the private list it
-    // links to. The query counts the link to private_list for them, even
-    // though they have no right to know that link exists.
+    // links to. The link to private_list is only visible to its owner, so it
+    // is not counted here. The link to the public linked_list itself is still
+    // shown.
     assert_eq!(
         nested_list_count(&mut tx, viewed_list.id, lists_owner.ap_user_id)
             .await?
             .as_slice(),
-        [1]
+        [0]
     );
 
-    // Result for private_list_owner, who owns private_list, but not linked_list.
-    // The query hides the link to linked_list from them completely, even
-    // though it is public and everyone may see it.
-    assert!(
+    // Result for private_list_owner, who owns the private list that linked_list
+    // links to. That link is visible to them and counted here. The link to
+    // linked_list is shown to them as well.
+    assert_eq!(
         nested_list_count(&mut tx, viewed_list.id, private_list_owner.ap_user_id)
             .await?
-            .is_empty()
+            .as_slice(),
+        [1]
     );
 
     Ok(())
