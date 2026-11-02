@@ -15462,10 +15462,10 @@
         }
       ],
       "name": "ties",
-      "purl": "pkg:cargo/ties@0.3.0?download_url=file://.#src/main.rs",
+      "purl": "pkg:cargo/ties@0.4.0?download_url=file://.#src/main.rs",
       "scope": "required",
       "type": "application",
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     "properties": [
       {

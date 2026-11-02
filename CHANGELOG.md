@@ -4,7 +4,9 @@
 
 [If you like ties, speed up development by supporting us via GitHub Sponsors!](https://github.com/sponsors/raffomania)
 
-## Unreleased
+## 0.4.0
+
+_Released on 2026-11-02_
 
 ### 💌 Invites
 
