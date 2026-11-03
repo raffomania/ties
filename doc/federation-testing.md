@@ -15,4 +15,8 @@ The easiest way to test federation features with Mastodon is to expose a local d
 
 You can now use any Mastodon instance to interact with your local ties instance, e.g. by pasting the handle to your local ties user (`@username@domain`).
 
-For debugging, we recommend https://activitypub.academy, a Mastodon instance with one-click signup and extra ActivityPub tools.
+For debugging, we recommend:
+
+- [browser.pub](https://browser.pub/), a viewer for ActivityPub data
+- [ActivityPub Academy](https://github.com/sgrj/mastodon), a mastodon fork with additional debugging tools (you'll need to self-host this currently)
+- Any other mastodon instance
