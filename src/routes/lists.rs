@@ -41,6 +41,7 @@ async fn get_show(
     auth_user: Option<AuthUser>,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
+    State(state): State<AppState>,
 ) -> ResponseResult<HtmfResponse> {
     let maybe_ap_user_id = auth_user.as_ref().map(|u| u.ap_user_id);
     let links = db::links::list_by_list(&mut tx, list_id, maybe_ap_user_id).await?;
@@ -61,7 +62,9 @@ async fn get_show(
     }
 
     Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout: layout::Template::from_db(&mut tx, auth_user.as_ref()).await?,
+        layout: layout::Template::from_db(&mut tx, auth_user.as_ref())
+            .await?
+            .with_feed_link(state.base_url.join(&list.feed_path())?),
         links,
         list,
         metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,

@@ -1,4 +1,5 @@
 use htmf::{into_elements::IntoElements, prelude_builder::*};
+use url::Url;
 
 use super::base_document::base_document;
 use crate::{
@@ -10,6 +11,9 @@ use crate::{
 pub struct Template {
     pub authed_info: Option<AuthedInfo>,
     pub previous_search_input: Option<String>,
+    /// If this page has an associated Atom feed, this is the link to it.
+    /// the `Url` type guarantees that this is absolute.
+    pub feed_link_url: Option<Url>,
 }
 
 impl Template {
@@ -22,7 +26,14 @@ impl Template {
         Ok(Template {
             authed_info: auth_info,
             previous_search_input: None,
+            feed_link_url: None,
         })
+    }
+
+    pub fn with_feed_link(mut self, url: Url) -> Self {
+        self.feed_link_url = Some(url);
+
+        self
     }
 }
 
@@ -40,6 +51,11 @@ pub fn layout<Children: IntoElements>(children: Children, layout: &Template) -> 
                 None => fragment(),
             },
         ]),
+        if let Some(url) = &layout.feed_link_url {
+            link([rel("alternate"), type_("application/atom+xml"), href(url)])
+        } else {
+            nothing()
+        },
     )
 }
 
