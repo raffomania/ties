@@ -124,7 +124,7 @@ fn backlink_section(backlinks: &[db::List]) -> Element {
     )
 }
 
-fn edit_buttons(Data { list, .. }: &Data) -> Element {
+fn edit_buttons(Data { list, layout, .. }: &Data) -> Element {
     section(class("flex flex-wrap mt-4 gap-x-4 gap-y-2")).with([
         a([
             class(
@@ -184,6 +184,16 @@ fn edit_buttons(Data { list, .. }: &Data) -> Element {
             href(format!("/lists/{}/edit_title", list.id)),
         ])
         .with([text("Rename")]),
+        layout.feed_link_url.as_ref().map_or_else(nothing, |url| {
+            common::clipboard_button(
+                class(
+                    "block px-4 py-1 border rounded dark:hover:bg-neutral-800 \
+                     hover:bg-neutral-200 dark:border-neutral-700 border-neutral-300 w-max",
+                ),
+                url.as_str(),
+                "Copy feed URL",
+            )
+        }),
     ])
 }
 

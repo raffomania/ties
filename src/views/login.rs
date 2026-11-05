@@ -57,6 +57,7 @@ pub fn login(template: &Template) -> Element {
             "flex flex-col justify-center max-w-md min-h-full px-4 mx-auto",
         ))
         .with([login_form(template), oidc_button(&template.oidc_info)]),
+        nothing(),
     )
 }
 
