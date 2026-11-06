@@ -1,7 +1,11 @@
 use htmf::prelude::*;
 use url::Url;
 
-use crate::{db, response_error::ResponseResult, views::layout};
+use crate::{
+    db,
+    response_error::ResponseResult,
+    views::{common, layout},
+};
 
 pub struct Created {
     pub layout: layout::Template,
@@ -41,7 +45,14 @@ pub fn created(
                         ),
                         invite_url.clone(),
                     ),
-                    clipboard_button(&invite_url),
+                    common::clipboard_button(
+                        class(
+                            "js-only px-4 py-2 bg-neutral-200 hover:bg-neutral-300 \
+                             dark:bg-neutral-700 dark:hover:bg-neutral-600 rounded",
+                        ),
+                        &invite_url,
+                        "Copy to clipboard",
+                    ),
                     p(
                         [],
                         format!(
@@ -54,27 +65,4 @@ pub fn created(
         ],
         &layout,
     ))
-}
-
-fn clipboard_button(invite_url: &str) -> Element {
-    let description = "Copy to clipboard";
-    button(
-        [
-            class(
-                "js-only px-4 py-2 bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 \
-                 dark:hover:bg-neutral-600 rounded",
-            ),
-            attr(
-                "onclick",
-                format!(
-                    "navigator.clipboard.writeText('{invite_url}')
-                    .then(() => {{
-                        event.target.textContent='Copied!';
-                        setTimeout(() => event.target.textContent = '{description}', 4000)
-                    }})",
-                ),
-            ),
-        ],
-        description,
-    )
 }

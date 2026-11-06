@@ -24,6 +24,29 @@ pub fn help_icon() -> Element {
     )
 }
 
+pub fn clipboard_button(
+    attrs: htmf::attr::Attrs,
+    text_to_copy: &str,
+    description: &str,
+) -> Element {
+    button(
+        [
+            attr(
+                "onclick",
+                format!(
+                    "navigator.clipboard.writeText('{text_to_copy}')
+                    .then(() => {{
+                        event.target.textContent='Copied!';
+                        setTimeout(() => event.target.textContent = '{description}', 4000)
+                    }})",
+                ),
+            ),
+            attrs,
+        ],
+        description,
+    )
+}
+
 /// Return the title, or if it's None, a generic "untitled" title description.
 #[expect(clippy::ref_option, reason = "It's easier to call this way.")]
 pub fn bookmark_title(title: &Option<String>) -> &str {
