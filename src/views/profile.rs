@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, AppTx},
     response_error::ResponseResult,
-    views::{content::pluralize, layout},
+    views::{common::pluralize, layout},
 };
 
 struct Metadata {

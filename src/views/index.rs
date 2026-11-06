@@ -7,7 +7,7 @@ use crate::{
     built_version,
     db::{AppTx, layout::AuthedInfo},
     response_error::ResponseResult,
-    views::content::BULLET,
+    views::common::BULLET,
 };
 
 pub struct Data<'a> {

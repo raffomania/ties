@@ -2,7 +2,7 @@ use htmf::{element::Element, prelude::*};
 
 use crate::{
     db,
-    views::{content, layout},
+    views::{common, layout},
 };
 
 pub struct Data {
@@ -99,8 +99,8 @@ fn list_item_bookmark(result: &db::search::Result) -> Element {
                 ),
                 href(format!("/bookmarks/{}", result.bookmark_id)),
             ],
-            content::bookmark_title(&result.title),
+            common::bookmark_title(&result.title),
         ),
-        content::link_url(&result.bookmark_url),
+        common::link_url(&result.bookmark_url),
     ])
 }

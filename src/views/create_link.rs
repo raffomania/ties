@@ -1,6 +1,6 @@
 use htmf::prelude::*;
 
-use super::content;
+use super::common;
 use crate::{
     db::{self, LinkDestination},
     form_errors::FormErrors,
@@ -162,9 +162,9 @@ fn link_dest(link_dest: &db::LinkDestination) -> Element {
         db::LinkDestination::Bookmark(bookmark) => fragment([
             p(
                 class("dark:text-orange-100 text-orange-900"),
-                format!("📄 {}", content::bookmark_title(&bookmark.title)),
+                format!("📄 {}", common::bookmark_title(&bookmark.title)),
             ),
-            content::link_url(&bookmark.url),
+            common::link_url(&bookmark.url),
         ]),
         db::LinkDestination::List(list) => p(
             class("dark:text-fuchsia-100 text-fuchsia-800"),
