@@ -1,6 +1,6 @@
 use htmf::prelude_builder::*;
 
-use super::{content, layout};
+use super::{common, layout};
 use crate::db::{self, Bookmark};
 
 pub struct Data {
@@ -44,8 +44,8 @@ fn bookmark_entry(bookmark: &Bookmark) -> Element {
                      whitespace-nowrap",
                 ),
             ])
-            .with(content::bookmark_title(&bookmark.title)),
-            content::link_url(&bookmark.url),
+            .with(common::bookmark_title(&bookmark.title)),
+            common::link_url(&bookmark.url),
         ]),
         div(class(
             "flex justify-end gap-2 grow dark:text-neutral-300 text-neutral-600",

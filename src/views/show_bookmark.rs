@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     db,
     views::{
-        content::{self, help_icon},
+        common::{self, help_icon},
         layout,
     },
 };
@@ -38,7 +38,7 @@ pub fn view(
                 [
                     h1(
                         class("text-3xl tracking-tight font-bold"),
-                        content::bookmark_title(&bookmark.title),
+                        common::bookmark_title(&bookmark.title),
                     ),
                     p(
                         class(
@@ -106,25 +106,25 @@ fn edit_button(bookmark: &db::Bookmark, is_owner: bool) -> Element {
 fn status(bookmark: &db::Bookmark, archive: Option<&db::Archive>, username: &str) -> Element {
     let archive_status = archive.map(|archive| match archive.status {
         db::archives::Status::Success => {
-            format!("archived on {}", content::format_date(archive.created_at))
+            format!("archived on {}", common::format_date(archive.created_at))
         }
         db::archives::Status::Error => format!(
             "last archive attempt on {}",
-            content::format_date(archive.created_at)
+            common::format_date(archive.created_at)
         ),
         db::archives::Status::Pending => format!(
             "archive requested on {}",
-            content::format_date(archive.created_at)
+            common::format_date(archive.created_at)
         ),
     });
-    let created_at = content::format_date(bookmark.created_at);
+    let created_at = common::format_date(bookmark.created_at);
 
     div(
         class("flex flex-wrap text-sm gap-x-1 dark:text-neutral-400 text-neutral-500 mb-4"),
         [
             p((), format!("bookmarked by {username} on {created_at}")),
             archive_status.map_or(nothing(), |status| {
-                fragment([text(content::BULLET), p((), status)])
+                fragment([text(common::BULLET), p((), status)])
             }),
         ],
     )

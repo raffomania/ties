@@ -18,7 +18,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, Bookmark},
     response_error::ResponseError,
-    views::content::bookmark_title,
+    views::common::bookmark_title,
 };
 
 /// XML namespace of the Atom syndication format.

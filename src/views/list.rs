@@ -1,9 +1,9 @@
 use htmf::prelude_builder::*;
 
-use super::{content, layout};
+use super::{common, layout};
 use crate::{
     db::{self, LinkWithContent, layout::AuthedInfo},
-    views::content::pluralize,
+    views::common::pluralize,
 };
 
 pub struct Data {
@@ -239,8 +239,8 @@ fn list_item_bookmark(bookmark: &db::Bookmark) -> Element {
             ),
             href(format!("/bookmarks/{}", bookmark.id)),
         ])
-        .with(content::bookmark_title(&bookmark.title)),
-        content::link_url(&bookmark.url),
+        .with(common::bookmark_title(&bookmark.title)),
+        common::link_url(&bookmark.url),
     ])
 }
 

@@ -9,7 +9,7 @@ use crate::{
     form_errors::FormErrors,
     forms::{self, bookmarks::EditQuery},
     response_error::ResponseResult,
-    views::content::help_icon,
+    views::common::help_icon,
 };
 
 /// Base data that is always needed, without form inputs, errors, search results

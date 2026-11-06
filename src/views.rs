@@ -2,7 +2,7 @@
 #![allow(clippy::too_many_lines)]
 pub mod accept_invite;
 pub mod base_document;
-pub mod content;
+pub mod common;
 pub mod create_bookmark;
 pub mod create_invite;
 pub mod create_link;
