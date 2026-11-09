@@ -26,6 +26,22 @@ pub struct Metadata {
     pub username: String,
 }
 
+/// Cheap-to-compute validation signal for a cached feed.
+///
+/// This covers everything in a feed that changes without updating the list
+/// row, except for edits to bookmarks that are already linked and edits to
+/// linked lists.
+#[derive(FromRow, Clone, PartialEq)]
+pub struct FeedCacheSignal {
+    pub private: bool,
+    pub title: String,
+    pub link_count: i64,
+    pub newest_link_created_at: Option<OffsetDateTime>,
+    /// Number of links to lists that are private and therefore hidden from
+    /// anonymous feed requests.
+    pub private_destination_count: i64,
+}
+
 impl List {
     pub fn path(&self) -> String {
         let id = self.id;
@@ -94,6 +110,35 @@ pub async fn by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<List> {
     .await?;
 
     Ok(list)
+}
+
+/// Load the signal used to validate a cached feed for `list_id`.
+///
+/// Returns `None` when the list doesn't exist.
+pub async fn feed_cache_signal(
+    tx: &mut AppTx,
+    list_id: Uuid,
+) -> ResponseResult<Option<FeedCacheSignal>> {
+    let signal = query_as!(
+        FeedCacheSignal,
+        r#"
+        select lists.private, lists.title,
+            count(links.id) as "link_count!",
+            max(links.created_at) as newest_link_created_at,
+            count(dest_lists.id) filter (where dest_lists.private)
+                as "private_destination_count!"
+        from lists
+        left join links on links.src_list_id = lists.id
+        left join lists as dest_lists on dest_lists.id = links.dest_list_id
+        where lists.id = $1
+        group by lists.id
+        "#,
+        list_id,
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+
+    Ok(signal)
 }
 
 pub async fn pointing_to_list(

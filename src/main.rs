@@ -18,6 +18,7 @@ mod built_version;
 mod date_time;
 mod federation;
 mod htmf_response;
+pub mod http_cache;
 #[cfg(debug_assertions)]
 mod insert_demo_data;
 #[cfg(test)]

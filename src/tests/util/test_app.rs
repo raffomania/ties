@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{Router, http::StatusCode};
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
@@ -6,6 +8,7 @@ use url::Url;
 use super::request_builder::RequestBuilder;
 use crate::{
     archive,
+    atom::cache,
     db::{self, AppTx},
     federation,
     forms::{self, users::CreateUser},
@@ -54,6 +57,7 @@ impl TestApp {
                 .await
                 .unwrap(),
             archive_queue: archive::QueueHandle::new(pool.clone()),
+            feed_cache: Arc::new(cache::FeedCache::new(crate::server::FEED_CACHE_TTL)),
         };
 
         TestApp {

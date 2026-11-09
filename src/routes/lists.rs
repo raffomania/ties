@@ -1,15 +1,18 @@
 use axum::{
     Router, debug_handler,
     extract::{Path, State},
+    http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
 use garde::Validate;
 use serde_qs::web::QsForm;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::{
-    atom::{self, Feed},
+    atom::Feed,
+    atom::cache,
     authentication::AuthUser,
     db::{self},
     extract::{self},
@@ -74,19 +77,35 @@ async fn get_show(
 
 #[debug_handler]
 async fn get_feed(
+    headers: HeaderMap,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
     State(state): State<AppState>,
-) -> ResponseResult<atom::Feed> {
-    let list = db::lists::by_id_with_metadata(&mut tx, list_id, None).await?;
+) -> ResponseResult<Response> {
+    let Some(signal) = db::lists::feed_cache_signal(&mut tx, list_id).await? else {
+        state.feed_cache.remove(&list_id);
+        return Err(ResponseError::NotFound);
+    };
 
-    if list.list.private {
+    if signal.private {
+        state.feed_cache.remove(&list_id);
         return Err(ResponseError::NotFound);
     }
 
-    let links = db::links::list_by_list(&mut tx, list_id, None).await?;
+    if let Some(entry) = state.feed_cache.get(&list_id, &signal) {
+        return cache::respond(&headers, &entry);
+    }
 
-    Ok(Feed::for_list(&list, &links, &state.base_url)?)
+    let list = db::lists::by_id_with_metadata(&mut tx, list_id, None).await?;
+    let links = db::links::list_by_list(&mut tx, list_id, None).await?;
+    let feed = Feed::for_list(&list, &links, &state.base_url)?;
+    let body = feed.to_xml()?;
+
+    let entry = cache::Entry::new(signal, body, OffsetDateTime::now_utc());
+    let response = cache::respond(&headers, &entry)?;
+    state.feed_cache.insert(list_id, entry);
+
+    Ok(response)
 }
 
 async fn post_create(

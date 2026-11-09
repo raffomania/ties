@@ -156,15 +156,23 @@ pub struct TestResponse {
 }
 
 impl TestResponse {
-    pub async fn dom(self) -> visdom::types::Elements<'static> {
-        let body = self
-            .response
+    async fn body_bytes(response: Response<Body>) -> Vec<u8> {
+        response
             .into_body()
             .collect()
             .await
             .unwrap()
             .to_bytes()
-            .to_vec();
+            .to_vec()
+    }
+
+    pub async fn body_string(self) -> String {
+        let body = Self::body_bytes(self.response).await;
+        String::from_utf8(body).expect("response body should be valid UTF-8")
+    }
+
+    pub async fn dom(self) -> visdom::types::Elements<'static> {
+        let body = Self::body_bytes(self.response).await;
         Vis::load(String::from_utf8(body).unwrap()).unwrap()
     }
 
@@ -183,20 +191,17 @@ impl TestResponse {
     }
 
     pub async fn test_page(self) -> TestPage {
-        let body = self
-            .response
-            .into_body()
-            .collect()
-            .await
-            .unwrap()
-            .to_bytes()
-            .to_vec();
+        let TestResponse {
+            response,
+            new_request_builder,
+        } = self;
+        let body = Self::body_bytes(response).await;
         let dom = Vis::load(String::from_utf8(body).unwrap()).unwrap();
 
         TestPage {
             dom,
             // TODO this doesn't persist the previous login cookie
-            request_builder: self.new_request_builder,
+            request_builder: new_request_builder,
         }
     }
 }

@@ -12,5 +12,6 @@ If you're interested in contributing to ties, check out the [Contribution Guide]
 ## Feature Planning
 
 - [Search](search.md)
+- [Plan for Caching Headers on the List Feed Route](feed-caching-plan.md)
 - [Plan for Implementing Federation](federation-planning.md)
 - [Testing federation with other software manually](federation-testing.md)

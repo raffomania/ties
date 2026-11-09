@@ -5,10 +5,6 @@
 //! [RFC 4287]: https://www.rfc-editor.org/rfc/rfc4287
 
 use anyhow::Result;
-use axum::{
-    http::header,
-    response::{IntoResponse, Response},
-};
 use quick_xml::se::Serializer as XmlSerializer;
 use serde::{Serialize, Serializer};
 use time::OffsetDateTime;
@@ -17,7 +13,6 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, Bookmark},
-    response_error::ResponseError,
     views::common::bookmark_title,
 };
 
@@ -163,19 +158,6 @@ impl Feed {
     }
 }
 
-impl IntoResponse for Feed {
-    fn into_response(self) -> Response {
-        match self.to_xml() {
-            Ok(document) => (
-                [(header::CONTENT_TYPE, "application/atom+xml; charset=utf-8")],
-                document,
-            )
-                .into_response(),
-            Err(error) => ResponseError::from(error).into_response(),
-        }
-    }
-}
-
 /// Remove characters that are not allowed in XML documents from `text`.
 ///
 /// User-defined input like bookmark titles can contain characters such as
@@ -257,11 +239,6 @@ impl Entry {
 mod tests {
     use activitypub_federation::fetch::object_id::ObjectId;
     use anyhow::Result;
-    use axum::{
-        body::to_bytes,
-        http::{HeaderValue, StatusCode, header},
-        response::IntoResponse,
-    };
     use pretty_assertions::assert_eq;
     use time::OffsetDateTime;
     use uuid::Uuid;
@@ -428,28 +405,6 @@ mod tests {
             feed.to_xml()?
                 .contains(r#"xmlns="http://www.w3.org/2005/Atom""#)
         );
-
-        Ok(())
-    }
-
-    /// The feed is served as an Atom document that looks exactly like
-    /// [`Feed::to_xml`] produces it.
-    #[tokio::test]
-    async fn responds_with_atom_xml() -> anyhow::Result<()> {
-        let feed = feed_for(&[bookmark_link(Some("Example"), "https://ties.pub/")?])?;
-        let expected_body = feed.to_xml()?;
-        let response = feed.into_response();
-
-        assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(
-            response.headers().get(header::CONTENT_TYPE),
-            Some(&HeaderValue::from_static(
-                "application/atom+xml; charset=utf-8"
-            ))
-        );
-
-        let body = to_bytes(response.into_body(), usize::MAX).await?;
-        assert_eq!(std::str::from_utf8(&body)?, expected_body);
 
         Ok(())
     }

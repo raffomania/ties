@@ -33,6 +33,7 @@ cfg_not_test = { level = "allow" }
 partial_pub_fields = { level = "allow" }
 error_impl_error = { level = "allow" }
 unused_trait_names = { level = "allow" }
+std_instead_of_alloc = { level = "allow" }
 std_instead_of_core = { level = "allow" }
 float_arithmetic = { level = "allow" }
 # Used extensively in sqlx macros
@@ -130,6 +131,7 @@ rustls = { version = "0.23.37", default-features = false, features = ["ring"] }
 htmf = { git = "https://github.com/raffomania/htmf", features = [
     "pretty-print",
 ] }
+httpdate = "1"
 percent-encoding = "2.3.2"
 activitypub_federation = { version = "0.6.5", default-features = false, features = [
     "axum",
