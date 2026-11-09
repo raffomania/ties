@@ -6,6 +6,7 @@ use url::Url;
 use super::request_builder::RequestBuilder;
 use crate::{
     archive,
+    atom::cache,
     db::{self, AppTx},
     federation,
     forms::{self, users::CreateUser},
@@ -32,6 +33,10 @@ pub struct TestApp {
 
 impl TestApp {
     pub async fn new() -> Self {
+        Self::with_feed_cache_ttl(crate::server::FEED_CACHE_TTL).await
+    }
+
+    pub async fn with_feed_cache_ttl(feed_cache_ttl: std::time::Duration) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("Failed to bind listener");
@@ -54,6 +59,7 @@ impl TestApp {
                 .await
                 .unwrap(),
             archive_queue: archive::QueueHandle::new(pool.clone()),
+            feed_cache: cache::FeedCache::new(feed_cache_ttl),
         };
 
         TestApp {

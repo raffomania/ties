@@ -11,7 +11,13 @@ use tower_http::trace::TraceLayer;
 use tower_livereload::LiveReloadLayer;
 use url::Url;
 
-use crate::{archive, cli::ListenArgs, db, federation, oidc, routes};
+use crate::{archive, atom::cache, cli::ListenArgs, db, federation, oidc, routes};
+
+/// How long a rendered feed may be served without revalidating its signal.
+///
+/// This is only a backstop for changes that [`db::lists::FeedCacheSignal`]
+/// cannot detect, such as edits to bookmarks that are already linked.
+pub const FEED_CACHE_TTL: Duration = Duration::from_hours(1);
 
 #[derive(Clone)]
 pub struct AppState {
@@ -21,6 +27,7 @@ pub struct AppState {
     pub oidc_state: oidc::State,
     pub federation_config: FederationConfig<federation::Context>,
     pub archive_queue: archive::QueueHandle,
+    pub feed_cache: cache::FeedCache,
 }
 
 pub fn app(state: AppState) -> anyhow::Result<Router> {

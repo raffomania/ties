@@ -11,7 +11,9 @@ use crate::insert_demo_data::insert_demo_data;
 #[cfg(debug_assertions)]
 use crate::tracing_format::DevelopmentFormat;
 use crate::{
-    archive, built_version, db, federation,
+    archive,
+    atom::cache,
+    built_version, db, federation,
     forms::users::CreateUser,
     oidc,
     server::{self, AppState},
@@ -216,6 +218,7 @@ pub async fn run() -> Result<()> {
                 oidc_state,
                 federation_config: federation::config::new_config(pool, base_url.clone()).await?,
                 archive_queue,
+                feed_cache: cache::FeedCache::new(server::FEED_CACHE_TTL),
             })?;
             server::start(listen_address, base_url.clone(), app, tls_cert, tls_key).await?;
         }
