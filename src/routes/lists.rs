@@ -1,6 +1,9 @@
+use std::time::SystemTime;
+
 use axum::{
     Router, debug_handler,
     extract::{Path, State},
+    http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
@@ -9,9 +12,10 @@ use serde_qs::web::QsForm;
 use uuid::Uuid;
 
 use crate::{
-    atom::{self, Feed},
+    atom::{Feed, cache},
     authentication::AuthUser,
-    db, extract,
+    db::{self, AppTx, lists::FeedCacheSignal},
+    extract,
     form_errors::FormErrors,
     forms::{
         self,
@@ -73,19 +77,42 @@ async fn get_show(
 
 #[debug_handler]
 async fn get_feed(
+    headers: HeaderMap,
     extract::Tx(mut tx): extract::Tx,
     Path(list_id): Path<Uuid>,
     State(state): State<AppState>,
-) -> ResponseResult<atom::Feed> {
-    let list = db::lists::by_id_with_metadata(&mut tx, list_id, None).await?;
-
-    if list.list.private {
+) -> ResponseResult<Response> {
+    // Private lists produce no signal, so they are never rendered or served.
+    let Some(signal) = db::lists::feed_cache_signal(&mut tx, list_id).await? else {
+        state.feed_cache.invalidate(&list_id);
         return Err(ResponseError::NotFound);
-    }
+    };
 
-    let links = db::links::list_by_list(&mut tx, list_id, None).await?;
+    let entry = match state.feed_cache.get(&list_id, &signal) {
+        Some(entry) => entry,
+        None => render_and_cache(&mut tx, &state, list_id, signal).await?,
+    };
 
-    Ok(Feed::for_list(&list, &links, &state.base_url)?)
+    entry.respond(&headers)
+}
+
+/// Render the feed for `list_id` and store the result in the feed cache.
+///
+/// This only runs on a cache miss, so storing the entry restarts its
+/// time-to-live exactly when the representation was re-rendered.
+async fn render_and_cache(
+    tx: &mut AppTx,
+    state: &AppState,
+    list_id: Uuid,
+    signal: FeedCacheSignal,
+) -> ResponseResult<cache::Entry> {
+    let list = db::lists::by_id_with_metadata(tx, list_id, None).await?;
+    let links = db::links::list_by_list(tx, list_id, None).await?;
+    let feed = Feed::for_list(&list, &links, &state.base_url)?;
+    let entry = cache::Entry::new_at(signal, feed.to_xml()?, SystemTime::now());
+
+    state.feed_cache.insert(list_id, entry.clone());
+    Ok(entry)
 }
 
 async fn post_create(
