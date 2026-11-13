@@ -207,6 +207,8 @@ ci-fast: check-database-info check-sbom && reuse-lint
     set -euo pipefail
 
     export RUSTFLAGS="-D warnings"
+    # Match CI: turn Cargo's own lint warnings into errors
+    export CARGO_BUILD_WARNINGS="deny"
     # Prevent full recompilations in the normal dev setup which has different rustflags
     export CARGO_TARGET_DIR="target_ci"
     export CARGO_TERM_QUIET="true"
