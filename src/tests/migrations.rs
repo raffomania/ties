@@ -8,11 +8,7 @@ use sqlx::{Postgres, Row, Transaction, query};
 use url::Url;
 use uuid::Uuid;
 
-use crate::{
-    authentication::hash_password,
-    db::{self},
-    forms::ap_users::CreateApUser,
-};
+use crate::{authentication::hash_password, db, forms::ap_users::CreateApUser};
 
 #[test_log::test(tokio::test)]
 async fn generate_missing_ap_users_migration() -> Result<()> {

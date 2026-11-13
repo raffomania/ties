@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::{
     authentication::AuthUser,
     db::{self, LinkDestination},
-    extract::{self},
+    extract,
     form_errors::FormErrors,
     forms::links::{CreateLink, PartialCreateLink},
     htmf_response::HtmfResponse,

@@ -19,8 +19,7 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::{
-    db::{self},
-    extract,
+    db, extract,
     federation::{self, person::Person},
     response_error::ResponseResult,
     server::AppState,

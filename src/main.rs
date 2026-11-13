@@ -28,6 +28,11 @@ mod tracing_filter;
 mod tracing_format;
 
 use anyhow::Result;
+// Shut up the cargo unused dependencies lint for this specific dependency.
+// It's only used in development and there's no good alternative to fix this.
+#[cfg(not(debug_assertions))]
+#[expect(unused_imports)]
+use fake;
 
 #[tokio::main]
 async fn main() -> Result<()> {

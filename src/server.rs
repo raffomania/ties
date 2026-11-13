@@ -10,12 +10,7 @@ use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 use url::Url;
 
-use crate::{
-    archive,
-    cli::ListenArgs,
-    db::{self},
-    federation, oidc, routes,
-};
+use crate::{archive, cli::ListenArgs, db, federation, oidc, routes};
 
 #[derive(Clone)]
 pub struct AppState {

@@ -3,14 +3,8 @@ use serde::{Deserialize, Serialize};
 use serde_qs::web::QsQuery;
 
 use crate::{
-    authentication::AuthUser,
-    db::{self},
-    extract,
-    htmf_response::HtmfResponse,
-    response_error::ResponseResult,
-    server::AppState,
-    views,
-    views::layout,
+    authentication::AuthUser, db, extract, htmf_response::HtmfResponse,
+    response_error::ResponseResult, server::AppState, views, views::layout,
 };
 pub fn router() -> Router<AppState> {
     let router: Router<AppState> = Router::new();
