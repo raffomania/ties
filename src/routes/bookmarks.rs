@@ -14,8 +14,7 @@ use uuid::Uuid;
 use crate::{
     authentication::AuthUser,
     db::{self, bookmarks::InsertBookmark},
-    extract::{self},
-    federation,
+    extract, federation,
     form_errors::FormErrors,
     forms::{self, bookmarks::CreateBookmark},
     htmf_response::HtmfResponse,

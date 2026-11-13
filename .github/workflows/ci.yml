@@ -9,6 +9,9 @@ on:
 env:
   CARGO_INCREMENTAL: 0
   RUSTFLAGS: "-D warnings"
+  # RUSTFLAGS can't catch Cargo's own lints (like unused dependencies),
+  # so fail the build on those separately.
+  CARGO_BUILD_WARNINGS: "deny"
 
 # Disable all permissions by default (https://docs.zizmor.sh/audits/#excessive-permissions)
 permissions: {}
