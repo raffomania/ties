@@ -30,10 +30,11 @@ pub struct Metadata {
 ///
 /// This covers everything in a feed that changes without updating the list
 /// row, except for edits to bookmarks that are already linked and edits to
-/// linked lists.
+/// linked lists. Private lists never produce a signal (see
+/// [`feed_cache_signal`]), so they are never rendered or served from the
+/// cache.
 #[derive(FromRow, Clone, PartialEq)]
 pub struct FeedCacheSignal {
-    pub private: bool,
     pub title: String,
     pub link_count: i64,
     pub newest_link_created_at: Option<OffsetDateTime>,
@@ -114,7 +115,8 @@ pub async fn by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<List> {
 
 /// Load the signal used to validate a cached feed for `list_id`.
 ///
-/// Returns `None` when the list doesn't exist.
+/// Returns `None` when the list doesn't exist or is private: private lists are
+/// invisible to the feed API.
 pub async fn feed_cache_signal(
     tx: &mut AppTx,
     list_id: Uuid,
@@ -122,7 +124,7 @@ pub async fn feed_cache_signal(
     let signal = query_as!(
         FeedCacheSignal,
         r#"
-        select lists.private, lists.title,
+        select lists.title,
             count(links.id) as "link_count!",
             max(links.created_at) as newest_link_created_at,
             count(dest_lists.id) filter (where dest_lists.private)
@@ -130,7 +132,7 @@ pub async fn feed_cache_signal(
         from lists
         left join links on links.src_list_id = lists.id
         left join lists as dest_lists on dest_lists.id = links.dest_list_id
-        where lists.id = $1
+        where lists.id = $1 and not lists.private
         group by lists.id
         "#,
         list_id,

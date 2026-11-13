@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select lists.title,\n            count(links.id) as \"link_count!\",\n            max(links.created_at) as newest_link_created_at,\n            count(dest_lists.id) filter (where dest_lists.private)\n                as \"private_destination_count!\"\n        from lists\n        left join links on links.src_list_id = lists.id\n        left join lists as dest_lists on dest_lists.id = links.dest_list_id\n        where lists.id = $1 and not lists.private\n        group by lists.id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "link_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "newest_link_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "private_destination_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "19bab084c2ccf5e4f1968565dd07c870f923e4c0abf304522f01945f794dae49"
+}

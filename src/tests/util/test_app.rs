@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{Router, http::StatusCode};
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
@@ -57,7 +55,7 @@ impl TestApp {
                 .await
                 .unwrap(),
             archive_queue: archive::QueueHandle::new(pool.clone()),
-            feed_cache: Arc::new(cache::FeedCache::new(crate::server::FEED_CACHE_TTL)),
+            feed_cache: cache::FeedCache::new(crate::server::FEED_CACHE_TTL),
         };
 
         TestApp {

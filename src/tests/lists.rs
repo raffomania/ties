@@ -172,7 +172,7 @@ async fn bookmark_edits_are_served_from_cache_until_the_entry_is_removed() -> an
     assert!(body.contains("<title>Original title</title>"));
     assert!(!body.contains("<title>Updated title</title>"));
 
-    app.state.feed_cache.remove(&list.id);
+    app.state.feed_cache.invalidate(&list.id);
 
     let body = app.req().get(&url).await.body_string().await;
     assert!(body.contains("<title>Updated title</title>"));
@@ -218,7 +218,7 @@ async fn bookmark_edits_are_served_after_the_ttl_expires() -> anyhow::Result<()>
     assert!(body.contains("<title>Original title</title>"));
 
     // Simulate the one-hour TTL elapsing without sleeping.
-    app.state.feed_cache.expire_entry(&list.id);
+    app.state.feed_cache.invalidate(&list.id);
 
     // The old ETag must no longer match the re-rendered body.
     let body = app

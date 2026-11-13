@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{net::SocketAddr, path::PathBuf};
 
 use anyhow::{Result, anyhow};
 use clap::{Args, Parser, Subcommand};
@@ -218,7 +218,7 @@ pub async fn run() -> Result<()> {
                 oidc_state,
                 federation_config: federation::config::new_config(pool, base_url.clone()).await?,
                 archive_queue,
-                feed_cache: Arc::new(cache::FeedCache::new(server::FEED_CACHE_TTL)),
+                feed_cache: cache::FeedCache::new(server::FEED_CACHE_TTL),
             })?;
             server::start(listen_address, base_url.clone(), app, tls_cert, tls_key).await?;
         }

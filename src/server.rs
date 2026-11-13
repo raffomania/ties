@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::Arc, time::Duration};
+use std::{path::PathBuf, time::Duration};
 
 use activitypub_federation::config::{FederationConfig, FederationMiddleware};
 use anyhow::{Context, anyhow};
@@ -32,7 +32,7 @@ pub struct AppState {
     pub oidc_state: oidc::State,
     pub federation_config: FederationConfig<federation::Context>,
     pub archive_queue: archive::QueueHandle,
-    pub feed_cache: Arc<cache::FeedCache>,
+    pub feed_cache: cache::FeedCache,
 }
 
 pub fn app(state: AppState) -> anyhow::Result<Router> {

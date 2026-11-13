@@ -42,29 +42,37 @@ backstop for changes the signal cannot see.
 Signal query (one indexed query per request):
 
 ```sql
-select lists.private, lists.title,
+select lists.title,
        count(links.id) as link_count,
-       max(links.created_at) as newest_link_created_at
+       max(links.created_at) as newest_link_created_at,
+       count(dest_lists.id) filter (where dest_lists.private)
+           as private_destination_count
 from lists
 left join links on links.src_list_id = lists.id
-where lists.id = $1
+left join lists as dest_lists on dest_lists.id = links.dest_list_id
+where lists.id = $1 and not lists.private
 group by lists.id
 ```
 
+The `not lists.private` filter means private lists never produce a signal, so
+access control lives in exactly one place: no signal -> `404`, and the route
+never renders or serves them.
+
 Detected instantly: new links, link deletions (count changes), list title
 edits (title is in the row, so including it is free), private flips, list
-deletion. Only detected after TTL expiry: bookmark title/URL edits, username
-changes.
+deletion, linked lists becoming private. Only detected after TTL expiry:
+bookmark title/URL edits, username changes.
 
 ### Request flow in the rewritten `get_feed`
 
-1. Run the signal query. No row -> `404` and evict the cache key.
-   `private = true` -> `404` and evict the cache key.
-2. Cache hit requires: entry exists, `cached_at` within TTL, and stored
+1. Run the signal query. No row (missing or private) -> `404` and evict the
+   cache key.
+2. Cache hit requires: entry exists, is younger than the TTL, and stored
    signal equals the current signal. On a hit, serve from the cache.
-3. On a miss, do the current full render (`by_id_with_metadata` +
-   `list_by_list` + `Feed::for_list` + `to_xml`), store
-   `{signal, body, etag, last_modified, cached_at}`, then serve.
+3. On a miss, `render_and_cache` does the full render (`by_id_with_metadata` +
+   `list_by_list` + `Feed::for_list` + `to_xml`), stores
+   `{signal, body, etag, last_modified}`, then serves. Storing only happens
+   on a miss, so a hit never restarts the TTL.
 4. Serving (both paths) evaluates conditional headers:
    `If-None-Match` match -> `304`; otherwise
    `If-Modified-Since >= last_modified` -> `304`; otherwise `200` with the
@@ -83,11 +91,16 @@ changes.
   Trade-off: such a client gets a `200` after each re-render even when the
   body is unchanged; ETag clients still get `304`. `If-None-Match` still
   takes precedence over `If-Modified-Since` per RFC 9110 section 13.2.2.
-- **Cache store**: hand-rolled `FeedCache` holding a
-  `Mutex<HashMap<Uuid, Entry>>` with lazy expiry, no `moka`, wrapped in an
-  `Arc` by `AppState`. One entry per list; entries are evicted on
-  404/private and replaced on re-render. Concurrent misses may both render;
-  last write wins, which is benign.
+- **Cache store**: `moka::sync::Cache<Uuid, Entry>` behind our own
+  `FeedCache` newtype, configured with a 1-hour TTL and `MAX_ENTRIES = 256`
+  (best-effort eviction of the least frequently used entries). Moka was
+  already in the dependency tree via `activitypub_federation`, so this adds no
+  new crates. The newtype keeps `AppState` (`feed_cache`, no `Arc` needed:
+  moka caches are cloneable handles) and the signal-validated `get` stable, so
+  a future store swap stays a one-file change. One entry per list; entries are
+  evicted on 404 and replaced on re-render. Concurrent misses may both render;
+  last write wins, which is benign. Entries are only inserted on a miss, so a
+  cache hit never extends the TTL.
 - **Date handling**: add `httpdate = "1"` as a direct dependency (already
   compiled as a transitive dependency of hyper, so zero new code). `time` is
   built without its `std` feature, so convert `OffsetDateTime` to and from
@@ -128,7 +141,7 @@ Integration tests in `src/tests/lists.rs` cover the caching behavior:
   becoming private disappears from the outer feed.
 - `feed_of_unknown_list_returns_not_found`: unknown list ids return `404`.
 
-`src/http_cache.rs` has unit tests for the `ETag`, `Last-Modified` and
+`src/atom/cache.rs` has unit tests for the `ETag`, `Last-Modified` and
 `FeedCache` behavior.
 
 ## Edge cases accepted
