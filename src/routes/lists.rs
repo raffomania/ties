@@ -11,8 +11,7 @@ use uuid::Uuid;
 use crate::{
     atom::{self, Feed},
     authentication::AuthUser,
-    db::{self},
-    extract::{self},
+    db, extract,
     form_errors::FormErrors,
     forms::{
         self,

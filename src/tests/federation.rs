@@ -3,7 +3,7 @@ use anyhow::Result;
 use axum::http::StatusCode;
 
 use crate::{
-    db::{self},
+    db,
     federation::{self, webfinger},
     forms::{
         bookmarks::CreateBookmark,

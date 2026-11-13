@@ -6,7 +6,7 @@ use crate::{
         self,
         bookmarks::{InsertBookmark, UpdateBookmark},
     },
-    routes::search::{self},
+    routes::search,
     tests::util::{request_builder::TestPage, test_app::TestApp},
 };
 
