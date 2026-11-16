@@ -8,6 +8,7 @@ use listenfd::ListenFd;
 use sqlx::PgPool;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
+use tower_livereload::LiveReloadLayer;
 use url::Url;
 
 use crate::{archive, cli::ListenArgs, db, federation, oidc, routes};
@@ -48,19 +49,10 @@ pub fn app(state: AppState) -> anyhow::Result<Router> {
                 .layer(FederationMiddleware::new(state.federation_config.clone())),
         );
 
-    #[cfg(all(debug_assertions, not(test)))]
-    {
-        use tower_livereload::LiveReloadLayer;
-
-        fn not_htmx_request_livereload_predicate(
-            req: &axum::http::Request<axum::body::Body>,
-        ) -> bool {
-            !req.headers().contains_key("hx-request")
-        }
-
+    if cfg!(all(debug_assertions, not(test))) {
         router = router
             .layer(LiveReloadLayer::new().request_predicate(not_htmx_request_livereload_predicate));
-    };
+    }
 
     Ok(router.with_state(state))
 }
@@ -180,4 +172,9 @@ async fn wipe_all_data(pool: &PgPool) -> anyhow::Result<()> {
     db::all::wipe_all_data(&mut tx).await?;
     tx.commit().await?;
     Ok(())
+}
+
+/// Return true if the given request was not made by htmx.
+fn not_htmx_request_livereload_predicate(req: &axum::http::Request<axum::body::Body>) -> bool {
+    !req.headers().contains_key("hx-request")
 }
