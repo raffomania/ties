@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, Bookmark},
+    reverse_routes,
     views::common::bookmark_title,
 };
 
@@ -156,6 +157,49 @@ impl Feed {
             entries,
         })
     }
+
+    pub fn for_user(
+        ap_user: &db::ApUser,
+        bookmarks: &[db::Bookmark],
+        lists: &[db::ListWithMetadata],
+        base_url: &Url,
+    ) -> Result<Self> {
+        let lists_created = lists.iter().map(|l| l.list.created_at);
+        let updated = bookmarks
+            .iter()
+            .map(|b| b.created_at)
+            .chain(lists_created)
+            .max()
+            .unwrap_or(ap_user.created_at);
+        let bookmark_entries = bookmarks.iter().map(|b| Entry::from_bookmark(b, base_url));
+        let list_entries = lists.iter().map(|l| Entry::from_list(&l.list, base_url));
+
+        let entries = bookmark_entries
+            .chain(list_entries)
+            .filter_map(|r| r.ok())
+            .collect();
+        Ok(Feed {
+            xmlns: ATOM_NAMESPACE,
+            id: AtomId(ap_user.id),
+            title: format!("{}'s bookmarks", ap_user.username),
+            updated,
+            author: Person {
+                name: ap_user.username.clone(),
+            },
+            links: vec![
+                Link {
+                    href: base_url
+                        .join(&reverse_routes::local_user_feed_path(&ap_user.username))?,
+                    rel: "self",
+                },
+                Link {
+                    href: base_url.join(&reverse_routes::local_user_path(&ap_user.username))?,
+                    rel: "alternate",
+                },
+            ],
+            entries,
+        })
+    }
 }
 
 /// Remove characters that are not allowed in XML documents from `text`.
@@ -240,16 +284,14 @@ mod tests {
     use activitypub_federation::fetch::object_id::ObjectId;
     use anyhow::Result;
     use pretty_assertions::assert_eq;
-    use time::OffsetDateTime;
+    use time::{Duration, OffsetDateTime};
     use uuid::Uuid;
 
     use super::{Content, Feed};
     use crate::db::{self, bookmarks::Bookmark};
 
-    /// A bookmark with the user-defined `title` and `url` as only variable
-    /// parts. The `id` is used as the last part of the bookmark's
-    /// ActivityPub id.
-    fn bookmark_link(title: Option<&str>, url: &str) -> anyhow::Result<db::LinkWithContent> {
+    /// A bookmark with the given title and url.
+    fn bookmark_link(title: Option<&str>, url: &str) -> Result<db::LinkWithContent> {
         let id = Uuid::from_u128(0x1234);
         Ok(db::LinkWithContent {
             id: Uuid::new_v4(),
@@ -405,6 +447,71 @@ mod tests {
             feed.to_xml()?
                 .contains(r#"xmlns="http://www.w3.org/2005/Atom""#)
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn user_feed_updated_reflects_newest_bookmark_and_list() -> anyhow::Result<()> {
+        // Create a feed with a bookmark and a list
+        let id = Uuid::from_u128(0x1234);
+        let bookmark = Bookmark {
+            id,
+            created_at: OffsetDateTime::UNIX_EPOCH,
+            ap_user_id: Uuid::from_u128(0x4321),
+            url: "https://ties.pub/".to_string(),
+            title: Some("Example".to_string()),
+            ap_id: format!("https://ties.pub/ap/bookmark/{id}").parse::<ObjectId<Bookmark>>()?,
+        };
+        let list = db::List {
+            id: Uuid::from_u128(0x1235),
+            created_at: OffsetDateTime::UNIX_EPOCH + Duration::days(1),
+            ap_user_id: Uuid::from_u128(0x4321),
+            title: "list title".to_string(),
+            content: None,
+            private: false,
+            pinned: false,
+        };
+        let user = db::User {
+            id: Uuid::from_u128(0x1236),
+            username: "username".to_string(),
+            invited_by: None,
+            password_hash: None,
+            email: None,
+            oidc_id: None,
+            ap_user_id: Uuid::from_u128(0x4321),
+        };
+        let ap_user = db::ApUser {
+            id: user.id,
+            created_at: OffsetDateTime::UNIX_EPOCH,
+            ap_id: format!("https://ties.pub/ap/user/{}", user.id)
+                .parse::<ObjectId<db::ApUser>>()?,
+            username: user.username.clone(),
+            inbox_url: "https://ties.pub/ap/user/inbox".parse()?,
+            public_key: String::new(),
+            private_key: None,
+            last_refreshed_at: OffsetDateTime::UNIX_EPOCH,
+            display_name: None,
+            bio: None,
+        };
+        let list = db::ListWithMetadata {
+            list: list.clone(),
+            metadata: db::lists::Metadata {
+                linked_bookmark_count: 0,
+                linked_list_count: 0,
+                username: user.username.clone(),
+            },
+        };
+        let feed = Feed::for_user(&ap_user, &[bookmark], &[list], &"https://ties.pub".parse()?)?;
+
+        // Check that the newest entry's updated matches the feeds updated value
+        let newest_entry_updated = feed
+            .entries
+            .iter()
+            .map(|entry| entry.updated)
+            .max()
+            .unwrap();
+        assert_eq!(feed.updated, newest_entry_updated);
 
         Ok(())
     }

@@ -1,4 +1,7 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use sqlx::{FromRow, query_as};
+use time::OffsetDateTime;
 use url::Url;
 use uuid::Uuid;
 
@@ -29,6 +32,13 @@ pub struct User {
 
     // ActivityPub data
     pub ap_user_id: Uuid,
+}
+
+impl User {
+    pub fn feed_path(&self) -> String {
+        let User { username, .. } = &self;
+        format!("/user/{username}/feed.atom")
+    }
 }
 
 pub async fn by_oidc_id(tx: &mut AppTx, oidc_id: &str) -> ResponseResult<User> {
@@ -165,4 +175,59 @@ pub async fn create_root_admin_if_not_exists(
         Err(other) => return Err(other),
     };
     Ok(actual_user)
+}
+
+/// Cheap-to-compute validation signal for a cached feed.
+#[derive(FromRow, Clone, PartialEq, Hash)]
+pub struct FeedCacheSignal {
+    pub username: String,
+    pub newest_bookmark_created_at: Option<OffsetDateTime>,
+    pub newest_list_created_at: Option<OffsetDateTime>,
+    pub newest_link_created_at: Option<OffsetDateTime>,
+    pub public_list_count: i64,
+    pub link_count: i64,
+}
+
+impl FeedCacheSignal {
+    /// Little wrapper around [Hash::hash]
+    pub fn get_hash(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+}
+
+pub async fn feed_cache_signal(
+    tx: &mut AppTx,
+    ap_user_id: Uuid,
+) -> ResponseResult<Option<FeedCacheSignal>> {
+    let signal = query_as!(
+        FeedCacheSignal,
+        r#"
+        select ap_users.username,
+            (select max(created_at) from bookmarks
+                where bookmarks.ap_user_id = ap_users.id)
+                as newest_bookmark_created_at,
+            (select max(created_at) from lists
+                where lists.ap_user_id = ap_users.id and not lists.private)
+                as newest_list_created_at,
+            (select max(created_at) from links
+                where links.user_id = users.id)
+                as newest_link_created_at,
+            (select count(*) from lists
+                where lists.ap_user_id = ap_users.id and not lists.private)
+                as "public_list_count!",
+            (select count(*) from links
+                where links.user_id = users.id)
+                as "link_count!"
+        from ap_users
+        join users on users.ap_user_id = ap_users.id
+        where ap_users.id = $1
+        "#,
+        ap_user_id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+
+    Ok(signal)
 }

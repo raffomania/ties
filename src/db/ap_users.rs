@@ -32,6 +32,12 @@ pub struct ApUser {
     pub bio: Option<String>,
 }
 
+impl ApUser {
+    pub fn is_local(&self, base_url: &Url) -> bool {
+        self.ap_id.inner().origin() == base_url.origin()
+    }
+}
+
 #[derive(FromRow, Debug)]
 struct ApUserRow {
     id: Uuid,

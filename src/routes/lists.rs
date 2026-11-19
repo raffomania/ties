@@ -1,7 +1,7 @@
 use std::time::SystemTime;
 
 use axum::{
-    Router, debug_handler,
+    Router,
     extract::{Path, State},
     http::HeaderMap,
     response::{IntoResponse, Redirect, Response},
@@ -69,7 +69,6 @@ async fn get_show(
     })))
 }
 
-#[debug_handler]
 async fn get_feed(
     headers: HeaderMap,
     extract::Tx(mut tx): extract::Tx,
@@ -78,11 +77,11 @@ async fn get_feed(
 ) -> ResponseResult<Response> {
     // Private lists produce no signal, so they are never rendered or served.
     let Some(signal) = db::lists::feed_cache_signal(&mut tx, list_id).await? else {
-        state.feed_cache.invalidate(&list_id);
+        state.feed_cache.invalidate(list_id);
         return Err(ResponseError::NotFound);
     };
 
-    let entry = match state.feed_cache.get(&list_id, &signal) {
+    let entry = match state.feed_cache.get(&list_id, signal.get_hash()) {
         Some(entry) => entry,
         None => render_and_cache(&mut tx, &state, list_id, signal).await?,
     };
@@ -103,7 +102,7 @@ async fn render_and_cache(
     let list = db::lists::by_id_with_metadata(tx, list_id, None).await?;
     let links = db::links::list_by_list(tx, list_id, None).await?;
     let feed = Feed::for_list(&list, &links, &state.base_url)?;
-    let entry = cache::Entry::new_at(signal, feed.to_xml()?, SystemTime::now());
+    let entry = cache::Entry::new_at(signal.get_hash(), feed.to_xml()?, SystemTime::now());
 
     state.feed_cache.insert(list_id, entry.clone());
     Ok(entry)

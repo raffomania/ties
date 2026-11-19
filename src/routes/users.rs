@@ -1,8 +1,10 @@
+use std::time::SystemTime;
+
 use anyhow::{Context, anyhow};
 use axum::{
     Router,
     extract::{Path, State},
-    http::{HeaderValue, header::SET_COOKIE},
+    http::{HeaderMap, HeaderValue, header::SET_COOKIE},
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
@@ -11,9 +13,9 @@ use serde::Deserialize;
 use serde_qs::web::{QsForm, QsQuery};
 
 use crate::{
+    atom::{Feed, cache},
     authentication::{self, AuthUser},
-    db,
-    db::sessions::Session,
+    db::{self, AppTx, sessions::Session, users::FeedCacheSignal},
     extract,
     forms::users::{CreateOidcUser, Login, OidcLoginQuery, OidcSelectUsername},
     htmf_response::HtmfResponse,
@@ -38,6 +40,7 @@ pub fn router() -> Router<AppState> {
         .route("/login_demo", post(post_login_demo))
         .route("/logout", post(logout))
         .route("/user/{username}", get(get_profile))
+        .route("/user/{username}/feed.atom", get(get_feed))
 }
 
 #[axum::debug_handler]
@@ -272,8 +275,6 @@ async fn get_profile(
     State(state): State<AppState>,
     auth_user: Option<AuthUser>,
 ) -> ResponseResult<HtmfResponse> {
-    let layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
-
     let ap_user = db::ap_users::read_by_username(
         &mut tx,
         crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
@@ -294,6 +295,11 @@ async fn get_profile(
         None
     };
 
+    let mut layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
+    if let Some(user) = &maybe_local_user {
+        layout = layout.with_feed_link(state.base_url.join(&user.feed_path())?);
+    }
+
     let elem = views::profile::view(
         tx,
         &views::profile::Data {
@@ -306,6 +312,55 @@ async fn get_profile(
     .await?;
 
     Ok(HtmfResponse(elem))
+}
+
+/// Only supported for local users.
+async fn get_feed(
+    headers: HeaderMap,
+    extract::Tx(mut tx): extract::Tx,
+    Path(handle): Path<String>,
+    State(state): State<AppState>,
+) -> ResponseResult<Response> {
+    let ap_user = db::ap_users::read_by_username(
+        &mut tx,
+        crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
+    )
+    .await?;
+
+    if !ap_user.is_local(&state.base_url) {
+        return Err(ResponseError::NotFound);
+    }
+
+    let Some(signal) = db::users::feed_cache_signal(&mut tx, ap_user.id).await? else {
+        state.feed_cache.invalidate(ap_user.id);
+        return Err(ResponseError::NotFound);
+    };
+
+    let entry = match state.feed_cache.get(&ap_user.id, signal.get_hash()) {
+        Some(entry) => entry,
+        None => render_and_cache(&mut tx, &state, &ap_user, signal).await?,
+    };
+
+    entry.respond(&headers)
+}
+
+/// Render the feed for this user and store the result in the feed cache.
+///
+/// This only runs on a cache miss, so storing the entry restarts its
+/// time-to-live exactly when the representation was re-rendered.
+async fn render_and_cache(
+    tx: &mut AppTx,
+    state: &AppState,
+    ap_user: &db::ApUser,
+    signal: FeedCacheSignal,
+) -> ResponseResult<cache::Entry> {
+    let bookmarks = db::bookmarks::list_public_by_user(tx, ap_user.id).await?;
+    let lists = db::lists::list_public_by_user(tx, ap_user.id).await?;
+    let feed = Feed::for_user(ap_user, &bookmarks, &lists, &state.base_url)?;
+    let entry = cache::Entry::new_at(signal.get_hash(), feed.to_xml()?, SystemTime::now());
+
+    state.feed_cache.insert(ap_user.id, entry.clone());
+    Ok(entry)
 }
 
 async fn logout(

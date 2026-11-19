@@ -12,13 +12,12 @@ pub struct Resource {
 impl Resource {
     pub fn parse_handle(handle: &str, local_domain: &Url) -> anyhow::Result<Self> {
         match handle.split_once('@') {
-            Some((name, domain)) =>
-        Ok(Resource {
-                    name: name.to_string(),
-                    domain: domain.to_string(),
-                })
-,
-            // Assume the handle is only a username, and assume it's located on the local domain
+            Some((name, domain)) => Ok(Resource {
+                name: name.to_string(),
+                domain: domain.to_string(),
+            }),
+            // Assume the handle is only a username, and assume it's located on
+            // the local domain
             None => Self::from_name_and_url(handle.to_string(), local_domain),
         }
     }
