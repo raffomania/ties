@@ -213,6 +213,34 @@ pub async fn list_unsorted(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<V
         .collect::<ResponseResult<Vec<_>>>()
 }
 
+pub async fn list_public_by_user(
+    tx: &mut AppTx,
+    ap_user_id: Uuid,
+) -> ResponseResult<Vec<Bookmark>> {
+    let bookmarks = query_as!(
+        BookmarkRow,
+        r#"
+        select
+            id as "id!",
+            created_at as "created_at!",
+            ap_user_id as "ap_user_id!",
+            url as "url!",
+            title,
+            ap_id as "ap_id!"
+        from public_bookmarks
+        where ap_user_id = $1;
+        "#,
+        ap_user_id,
+    )
+    .fetch_all(&mut **tx)
+    .await?;
+
+    bookmarks
+        .into_iter()
+        .map(Bookmark::try_from)
+        .collect::<ResponseResult<Vec<_>>>()
+}
+
 pub async fn delete_by_id(tx: &mut AppTx, id: Uuid, ap_user_id: Uuid) -> ResponseResult<Bookmark> {
     query!(
         r#"

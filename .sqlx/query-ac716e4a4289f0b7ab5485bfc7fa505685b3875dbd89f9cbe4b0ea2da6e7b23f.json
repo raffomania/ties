@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select ap_users.username,\n            (select max(created_at) from bookmarks\n                where bookmarks.ap_user_id = ap_users.id)\n                as newest_bookmark_created_at,\n            (select max(created_at) from lists\n                where lists.ap_user_id = ap_users.id and not lists.private)\n                as newest_list_created_at,\n            (select max(created_at) from links\n                where links.user_id = users.id)\n                as newest_link_created_at,\n            (select count(*) from lists\n                where lists.ap_user_id = ap_users.id and not lists.private)\n                as \"public_list_count!\",\n            (select count(*) from links\n                where links.user_id = users.id)\n                as \"link_count!\"\n        from ap_users\n        join users on users.ap_user_id = ap_users.id\n        where ap_users.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "newest_bookmark_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "newest_list_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "newest_link_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "public_list_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "link_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "ac716e4a4289f0b7ab5485bfc7fa505685b3875dbd89f9cbe4b0ea2da6e7b23f"
+}

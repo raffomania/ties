@@ -21,6 +21,7 @@ mod htmf_response;
 pub mod http_cache;
 #[cfg(debug_assertions)]
 mod insert_demo_data;
+pub mod reverse_routes;
 #[cfg(test)]
 mod tests;
 #[cfg(debug_assertions)]

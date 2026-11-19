@@ -13,7 +13,7 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::{db::lists::FeedCacheSignal, http_cache, response_error::ResponseResult};
+use crate::{http_cache, response_error::ResponseResult};
 
 /// Value of the `Cache-Control` header sent with cached responses.
 /// It's okay to send 'public' here: we only serve public lists, and if a list
@@ -29,7 +29,7 @@ const CONTENT_TYPE: HeaderValue = HeaderValue::from_static("application/atom+xml
 pub struct Entry {
     /// The signal at the time the entry was rendered. An entry is only served
     /// while the current signal matches this value.
-    signal: FeedCacheSignal,
+    signal_hash: u64,
     /// The rendered response body.
     body: Bytes,
     /// Strong entity tag for [`Self::body`].
@@ -41,10 +41,10 @@ pub struct Entry {
 impl Entry {
     /// Render a new cache entry for `body`, which matches `signal`, stamped
     /// with an explicit `last_modified` time.
-    pub fn new_at(signal: FeedCacheSignal, body: String, last_modified: SystemTime) -> Self {
+    pub fn new_at(signal_hash: u64, body: String, last_modified: SystemTime) -> Self {
         Self {
             etag: http_cache::etag_for(&body),
-            signal,
+            signal_hash,
             body: Bytes::from(body),
             last_modified,
         }
@@ -140,10 +140,10 @@ impl FeedCache {
 
     /// Return the cached entry for `key` if it is still fresh and its signal
     /// matches `signal`.
-    pub fn get(&self, key: &Uuid, signal: &FeedCacheSignal) -> Option<Entry> {
+    pub fn get(&self, key: &Uuid, signal_hash: u64) -> Option<Entry> {
         self.entries
             .get(key)
-            .filter(|entry| entry.signal == *signal)
+            .filter(|entry| entry.signal_hash == signal_hash)
     }
 
     /// Store `entry` for `key`, replacing any previous entry and restarting
@@ -157,8 +157,8 @@ impl FeedCache {
     /// The entry stops being served immediately; its memory is reclaimed
     /// later. This only frees memory: a stale entry can never be served
     /// anyway, because its signal would no longer match.
-    pub fn invalidate(&self, key: &Uuid) {
-        self.entries.invalidate(key);
+    pub fn invalidate(&self, key: Uuid) {
+        self.entries.invalidate(&key);
     }
 }
 
@@ -193,13 +193,15 @@ mod tests {
         http_cache::{etag_for, if_none_match_matches},
     };
 
-    fn signal() -> FeedCacheSignal {
-        FeedCacheSignal {
+    fn signal() -> u64 {
+        let signal = FeedCacheSignal {
             title: "List".to_string(),
             link_count: 0,
             newest_link_created_at: None,
             private_destination_count: 0,
-        }
+        };
+
+        signal.get_hash()
     }
 
     fn test_entry(body: &str, last_modified: SystemTime) -> Entry {
@@ -353,12 +355,21 @@ mod tests {
         let cache = FeedCache::new(Duration::from_hours(1));
         cache.insert(Uuid::nil(), test_entry("body", last_modified()));
 
-        let entry = cache.get(&Uuid::nil(), &signal()).unwrap();
+        let entry = cache.get(&Uuid::nil(), signal()).unwrap();
         assert_eq!(&*entry.body, b"body");
-        let mut other_signal = signal();
+        let mut other_signal = FeedCacheSignal {
+            title: "List".to_string(),
+            link_count: 0,
+            newest_link_created_at: None,
+            private_destination_count: 0,
+        };
+
         other_signal.link_count = 1;
-        assert!(cache.get(&Uuid::nil(), &other_signal).is_none());
-        assert!(cache.get(&Uuid::from_u128(1), &signal()).is_none());
+
+        let other_signal = other_signal.get_hash();
+
+        assert!(cache.get(&Uuid::nil(), other_signal).is_none());
+        assert!(cache.get(&Uuid::from_u128(1), signal()).is_none());
     }
 
     #[test]
@@ -368,9 +379,9 @@ mod tests {
 
         std::thread::sleep(Duration::from_millis(50));
 
-        assert!(cache.get(&Uuid::nil(), &signal()).is_none());
+        assert!(cache.get(&Uuid::nil(), signal()).is_none());
         // The entry stays hidden even though its memory is reclaimed later.
-        assert!(cache.get(&Uuid::nil(), &signal()).is_none());
+        assert!(cache.get(&Uuid::nil(), signal()).is_none());
     }
 
     #[test]
@@ -379,9 +390,9 @@ mod tests {
         cache.insert(Uuid::from_u128(1), test_entry("one", last_modified()));
         cache.insert(Uuid::from_u128(2), test_entry("two", last_modified()));
 
-        cache.invalidate(&Uuid::from_u128(1));
-        assert!(cache.get(&Uuid::from_u128(1), &signal()).is_none());
-        assert!(cache.get(&Uuid::from_u128(2), &signal()).is_some());
+        cache.invalidate(Uuid::from_u128(1));
+        assert!(cache.get(&Uuid::from_u128(1), signal()).is_none());
+        assert!(cache.get(&Uuid::from_u128(2), signal()).is_some());
     }
 
     #[test]
