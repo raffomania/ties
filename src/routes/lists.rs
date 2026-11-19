@@ -64,10 +64,14 @@ async fn get_show(
         }
     }
 
+    let mut layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
+
+    if !list.private {
+        layout = layout.with_feed_link(state.base_url.join(&list.feed_path())?);
+    }
+
     Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout: layout::Template::from_db(&mut tx, auth_user.as_ref())
-            .await?
-            .with_feed_link(state.base_url.join(&list.feed_path())?),
+        layout,
         links,
         list,
         metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
