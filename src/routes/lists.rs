@@ -51,14 +51,17 @@ async fn get_show(
     let db::ListWithMetadata { list, metadata } =
         db::lists::by_id_with_metadata(&mut tx, list_id, maybe_ap_user_id).await?;
 
-    let feed_link = state.base_url.join(&list.feed_path())?;
     let links = db::links::list_by_list(&mut tx, list_id, maybe_ap_user_id).await?;
     let backlinks = db::lists::pointing_to_list(&mut tx, list_id, maybe_ap_user_id).await?;
 
+    let mut layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
+
+    if !list.private {
+        layout = layout.with_feed_link(state.base_url.join(&list.feed_path())?);
+    }
+
     Ok(HtmfResponse(views::list::view(&views::list::Data {
-        layout: layout::Template::from_db(&mut tx, auth_user.as_ref())
-            .await?
-            .with_feed_link(feed_link),
+        layout,
         links,
         list,
         metadata,
