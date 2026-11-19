@@ -68,8 +68,8 @@ start-database:
         set -x
         podman create \
             --name "$container" \
-            --health-cmd="pg_isready" \
-            --health-startup-cmd="pg_isready" --health-startup-interval=2s \
+            --health-cmd="pg_isready -U postgres" \
+            --health-startup-cmd="pg_isready -U postgres" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME} \
             -p ${DATABASE_PORT}:5432 docker.io/postgres:15 \
             postgres
@@ -156,8 +156,8 @@ start-test-database:
         set -x
         podman create \
             --replace --name "${DATABASE_NAME_TEST}_postgres" --image-volume tmpfs \
-            --health-cmd pg_isready --health-interval 10s \
-            --health-startup-cmd="pg_isready" --health-startup-interval=2s \
+            --health-cmd "pg_isready -U postgres" --health-interval 10s \
+            --health-startup-cmd="pg_isready -U postgres" --health-startup-interval=2s \
             -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=${DATABASE_NAME_TEST} \
             -p ${DATABASE_PORT_TEST}:5432 --rm docker.io/postgres:16 \
             postgres \
