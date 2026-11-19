@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select users.username,\n            max(bookmarks.created_at) as newest_bookmark_created_at,\n            max(lists.created_at) as newest_list_created_at\n        from users\n        join bookmarks on bookmarks.ap_user_id = users.ap_user_id\n        join lists on lists.ap_user_id = users.ap_user_id\n        where users.id = $1\n        group by username\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "newest_bookmark_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "newest_list_created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "8e7230d3887f549b40ac0961f8811488b29681846e57422a17e89ffc122cab51"
+}

@@ -4,22 +4,8 @@ use uuid::Uuid;
 use crate::{
     atom::cache,
     db::{self, bookmarks::UpdateBookmark},
-    forms::links::CreateLink,
     tests::util::test_app::TestApp,
 };
-
-async fn create_link(
-    app: &TestApp,
-    user: &db::User,
-    src: Uuid,
-    dest: Uuid,
-) -> anyhow::Result<db::links::Link> {
-    let mut tx = app.tx().await;
-    let link =
-        db::links::insert(&mut tx, user.id, user.ap_user_id, CreateLink { src, dest }).await?;
-    tx.commit().await?;
-    Ok(link)
-}
 
 #[test_log::test(tokio::test)]
 async fn get_create_list() -> anyhow::Result<()> {
@@ -42,7 +28,7 @@ async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::
         .create_bookmark(&user, "https://example.com", "Example")
         .await;
     let list = app.create_list(&user, "Feed list").await;
-    create_link(&app, &user, list.id, bookmark.id).await?;
+    app.create_link(&user, list.id, bookmark.id).await;
 
     let url = list.feed_path();
     let response = app.req().get(&url).await;
@@ -86,7 +72,7 @@ async fn adding_a_link_invalidates_the_cached_feed() -> anyhow::Result<()> {
         .create_bookmark(&user, "https://example.com/1", "First")
         .await;
     let list = app.create_list(&user, "Feed list").await;
-    create_link(&app, &user, list.id, first_bookmark.id).await?;
+    app.create_link(&user, list.id, first_bookmark.id).await;
 
     let url = list.feed_path();
     let response = app.req().get(&url).await;
@@ -97,7 +83,7 @@ async fn adding_a_link_invalidates_the_cached_feed() -> anyhow::Result<()> {
     let second_bookmark = app
         .create_bookmark(&user, "https://example.com/2", "Second")
         .await;
-    create_link(&app, &user, list.id, second_bookmark.id).await?;
+    app.create_link(&user, list.id, second_bookmark.id).await;
 
     let response = app.req().get(&url).await;
     let second_etag = response.header_string(header::ETAG);
@@ -118,7 +104,7 @@ async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow:
         .create_bookmark(&user, "https://example.com", "Original title")
         .await;
     let list = app.create_list(&user, "Feed list").await;
-    create_link(&app, &user, list.id, bookmark.id).await?;
+    app.create_link(&user, list.id, bookmark.id).await;
 
     let url = list.feed_path();
     let response = app.req().get(&url).await;
@@ -173,7 +159,7 @@ async fn feed_revalidates_after_removing_the_newest_link() -> anyhow::Result<()>
     let bookmark = app
         .create_bookmark(&user, "https://example.com", "Example")
         .await;
-    let link = create_link(&app, &user, list.id, bookmark.id).await?;
+    let link = app.create_link(&user, list.id, bookmark.id).await;
 
     let url = list.feed_path();
     let response = app.req().get(&url).await;
@@ -232,7 +218,7 @@ async fn private_linked_lists_are_removed_from_the_cached_feed() -> anyhow::Resu
     let user = app.create_test_user().await;
     let outer_list = app.create_list(&user, "Outer list").await;
     let inner_list = app.create_list(&user, "Inner list").await;
-    create_link(&app, &user, outer_list.id, inner_list.id).await?;
+    app.create_link(&user, outer_list.id, inner_list.id).await;
 
     let url = outer_list.feed_path();
     let body = app.req().get(&url).await.body_string().await;

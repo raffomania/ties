@@ -140,6 +140,43 @@ async fn profile() -> anyhow::Result<()> {
 }
 
 #[test_log::test(tokio::test)]
+async fn user_feed_only_contains_publicly_linked_bookmarks() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let user = app.create_test_user().await;
+
+    let public_bookmark = app
+        .create_bookmark(&user, "https://example.com/public", "Public bookmark")
+        .await;
+    let public_list = app.create_list(&user, "Public list").await;
+    app.create_link(&user, public_list.id, public_bookmark.id)
+        .await;
+
+    let private_bookmark = app
+        .create_bookmark(&user, "https://example.com/private", "Private bookmark")
+        .await;
+    let private_list = app.create_list(&user, "Private list").await;
+    let mut tx = app.tx().await;
+    db::lists::set_private(&mut tx, private_list.id, true).await?;
+    tx.commit().await?;
+
+    app.create_link(&user, private_list.id, private_bookmark.id)
+        .await;
+
+    app.create_bookmark(&user, "https://example.com/unsorted", "Unsorted bookmark")
+        .await;
+
+    let body = app.req().get(&user.feed_path()).await.body_string().await;
+
+    assert!(body.contains("<title>Public bookmark</title>"));
+    assert!(!body.contains("<title>Private bookmark</title>"));
+    assert!(!body.contains("https://example.com/private"));
+    assert!(!body.contains("<title>Unsorted bookmark</title>"));
+    assert!(!body.contains("https://example.com/unsorted"));
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
 async fn profile_remote_user() -> anyhow::Result<()> {
     let mut app_a = TestApp::new().await;
     app_a.create_test_user().await;

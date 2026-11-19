@@ -1,3 +1,5 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use serde::Deserialize;
 use sqlx::{FromRow, query, query_as};
 use time::OffsetDateTime;
@@ -33,7 +35,7 @@ pub struct Metadata {
 /// linked lists. Private lists never produce a signal (see
 /// [`feed_cache_signal`]), so they are never rendered or served from the
 /// cache.
-#[derive(FromRow, Clone, PartialEq)]
+#[derive(FromRow, Clone, PartialEq, Hash)]
 pub struct FeedCacheSignal {
     pub title: String,
     pub link_count: i64,
@@ -41,6 +43,15 @@ pub struct FeedCacheSignal {
     /// Number of links to lists that are private and therefore hidden from
     /// anonymous feed requests.
     pub private_destination_count: i64,
+}
+
+impl FeedCacheSignal {
+    /// Little wrapper around [Hash::hash]
+    pub fn get_hash(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
 }
 
 impl List {

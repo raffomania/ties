@@ -156,6 +156,47 @@ impl Feed {
             entries,
         })
     }
+
+    pub fn for_user(
+        user: &db::User,
+        ap_user: &db::ApUser,
+        bookmarks: &[db::Bookmark],
+        lists: &[db::ListWithMetadata],
+        base_url: &Url,
+    ) -> Result<Self> {
+        let updated = bookmarks
+            .iter()
+            .map(|b| b.created_at)
+            .max()
+            .unwrap_or(ap_user.created_at);
+        let bookmark_entries = bookmarks.iter().map(|b| Entry::from_bookmark(b, base_url));
+        let list_entries = lists.iter().map(|l| Entry::from_list(&l.list, base_url));
+
+        let entries = bookmark_entries
+            .chain(list_entries)
+            .filter_map(|r| r.ok())
+            .collect();
+        Ok(Feed {
+            xmlns: ATOM_NAMESPACE,
+            id: AtomId(user.id),
+            title: format!("{}'s bookmarks", user.username),
+            updated,
+            author: Person {
+                name: user.username.clone(),
+            },
+            links: vec![
+                Link {
+                    href: base_url.join(&user.feed_path())?,
+                    rel: "self",
+                },
+                Link {
+                    href: base_url.join(&user.path())?,
+                    rel: "alternate",
+                },
+            ],
+            entries,
+        })
+    }
 }
 
 /// Remove characters that are not allowed in XML documents from `text`.
