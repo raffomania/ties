@@ -281,7 +281,7 @@ mod tests {
     use activitypub_federation::fetch::object_id::ObjectId;
     use anyhow::Result;
     use pretty_assertions::assert_eq;
-    use time::OffsetDateTime;
+    use time::{Duration, OffsetDateTime};
     use uuid::Uuid;
 
     use super::{Content, Feed};
@@ -323,6 +323,74 @@ mod tests {
         };
         let list_with_metadata = db::ListWithMetadata { list, metadata };
         Feed::for_list(&list_with_metadata, bookmarks, &"https://ties.pub".parse()?)
+    }
+
+    fn bookmark_created_at(created_at: OffsetDateTime) -> Result<Bookmark> {
+        let id = Uuid::from_u128(0x1234);
+        Ok(Bookmark {
+            id,
+            created_at,
+            ap_user_id: Uuid::from_u128(0x4321),
+            url: "https://ties.pub/".to_string(),
+            title: Some("Example".to_string()),
+            ap_id: format!("https://ties.pub/ap/bookmark/{id}").parse::<ObjectId<Bookmark>>()?,
+        })
+    }
+
+    fn list_created_at(created_at: OffsetDateTime) -> db::List {
+        db::List {
+            id: Uuid::from_u128(0x1235),
+            created_at,
+            ap_user_id: Uuid::from_u128(0x4321),
+            title: "list title".to_string(),
+            content: None,
+            private: false,
+            pinned: false,
+        }
+    }
+
+    fn user_feed_for(bookmarks: &[Bookmark], lists: &[db::List]) -> Result<Feed> {
+        let ap_user_id = Uuid::from_u128(0x4321);
+        let user = db::User {
+            id: Uuid::from_u128(0x1236),
+            username: "username".to_string(),
+            invited_by: None,
+            password_hash: None,
+            email: None,
+            oidc_id: None,
+            ap_user_id,
+        };
+        let ap_user = db::ApUser {
+            id: ap_user_id,
+            created_at: OffsetDateTime::UNIX_EPOCH,
+            ap_id: format!("https://ties.pub/ap/user/{ap_user_id}")
+                .parse::<ObjectId<db::ApUser>>()?,
+            username: user.username.clone(),
+            inbox_url: "https://ties.pub/ap/user/inbox".parse()?,
+            public_key: String::new(),
+            private_key: None,
+            last_refreshed_at: OffsetDateTime::UNIX_EPOCH,
+            display_name: None,
+            bio: None,
+        };
+        let lists = lists
+            .iter()
+            .map(|list| db::ListWithMetadata {
+                list: list.clone(),
+                metadata: db::lists::Metadata {
+                    linked_bookmark_count: 0,
+                    linked_list_count: 0,
+                    username: user.username.clone(),
+                },
+            })
+            .collect::<Vec<_>>();
+        Feed::for_user(
+            &user,
+            &ap_user,
+            bookmarks,
+            &lists,
+            &"https://ties.pub".parse()?,
+        )
     }
 
     #[test]
@@ -446,6 +514,23 @@ mod tests {
             feed.to_xml()?
                 .contains(r#"xmlns="http://www.w3.org/2005/Atom""#)
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn user_feed_updated_reflects_newest_bookmark_and_list() -> anyhow::Result<()> {
+        let bookmark = bookmark_created_at(OffsetDateTime::UNIX_EPOCH)?;
+        let list = list_created_at(OffsetDateTime::UNIX_EPOCH + Duration::days(1));
+        let feed = user_feed_for(&[bookmark], &[list])?;
+
+        let newest_entry_updated = feed
+            .entries
+            .iter()
+            .map(|entry| entry.updated)
+            .max()
+            .unwrap();
+        assert_eq!(feed.updated, newest_entry_updated);
 
         Ok(())
     }
