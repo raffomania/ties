@@ -2,6 +2,7 @@ use axum::{Router, http::StatusCode};
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
 use url::Url;
+use uuid::Uuid;
 
 use super::request_builder::RequestBuilder;
 use crate::{
@@ -129,6 +130,22 @@ impl TestApp {
         tx.commit().await.expect("Failed to commit transaction");
 
         bookmark
+    }
+
+    pub async fn create_link(&self, user: &db::User, src: Uuid, dest: Uuid) -> db::links::Link {
+        let mut tx = self.tx().await;
+        let link = db::links::insert(
+            &mut tx,
+            user.id,
+            user.ap_user_id,
+            forms::links::CreateLink { src, dest },
+        )
+        .await
+        .expect("Failed to insert link");
+
+        tx.commit().await.expect("Failed to commit transaction");
+
+        link
     }
 
     pub async fn create_list(&self, user: &db::User, title: &str) -> db::List {

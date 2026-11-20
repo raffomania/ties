@@ -1,8 +1,15 @@
 # ties Changelog
 
-*Note: This file does not contain any LLM-generated text.*
+*This file is exclusively authored by humans.*
 
 [If you like ties, speed up development by supporting us via GitHub Sponsors!](https://github.com/sponsors/raffomania)
+
+## Unreleased
+
+## Feeds
+
+Ties now serves atom feeds for users' profiles and for individual lists.
+You can simply paste the URL of a user or a list into your feed reader and it will discover the feed. Alternatively, you can use the little "copy feed link" buttons to get the feed URL directly.
 
 ## 0.4.0
 

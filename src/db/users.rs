@@ -1,4 +1,7 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use sqlx::{FromRow, query_as};
+use time::OffsetDateTime;
 use url::Url;
 use uuid::Uuid;
 
@@ -29,6 +32,18 @@ pub struct User {
 
     // ActivityPub data
     pub ap_user_id: Uuid,
+}
+
+impl User {
+    pub fn path(&self) -> String {
+        let User { username, .. } = &self;
+        format!("/user/{username}")
+    }
+
+    pub fn feed_path(&self) -> String {
+        let User { username, .. } = &self;
+        format!("/user/{username}/feed.atom")
+    }
 }
 
 pub async fn by_oidc_id(tx: &mut AppTx, oidc_id: &str) -> ResponseResult<User> {
@@ -165,4 +180,49 @@ pub async fn create_root_admin_if_not_exists(
         Err(other) => return Err(other),
     };
     Ok(actual_user)
+}
+
+/// Cheap-to-compute validation signal for a cached feed.
+#[derive(FromRow, Clone, PartialEq, Hash)]
+pub struct FeedCacheSignal {
+    pub username: String,
+    pub newest_bookmark_created_at: Option<OffsetDateTime>,
+    pub newest_list_created_at: Option<OffsetDateTime>,
+}
+
+impl FeedCacheSignal {
+    /// Little wrapper around [Hash::hash]
+    pub fn get_hash(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+}
+
+/// Load the signal used to validate a cached feed for `list_id`.
+///
+/// Returns `None` when the list doesn't exist or is private: private lists are
+/// invisible to the feed API.
+pub async fn feed_cache_signal(
+    tx: &mut AppTx,
+    user_id: Uuid,
+) -> ResponseResult<Option<FeedCacheSignal>> {
+    let signal = query_as!(
+        FeedCacheSignal,
+        r#"
+        select users.username,
+            max(bookmarks.created_at) as newest_bookmark_created_at,
+            max(lists.created_at) as newest_list_created_at
+        from users
+        join bookmarks on bookmarks.ap_user_id = users.ap_user_id
+        join lists on lists.ap_user_id = users.ap_user_id
+        where users.id = $1
+        group by username
+        "#,
+        user_id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+
+    Ok(signal)
 }

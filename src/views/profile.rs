@@ -4,7 +4,10 @@ use uuid::Uuid;
 use crate::{
     db::{self, AppTx},
     response_error::ResponseResult,
-    views::{common::pluralize, layout},
+    views::{
+        common::{self, pluralize},
+        layout,
+    },
 };
 
 struct Metadata {
@@ -78,6 +81,16 @@ pub async fn view(
                     .bio
                     .as_ref()
                     .map_or(nothing(), |bio| p(class("mt-4"), bio)),
+                layout.feed_link_url.as_ref().map_or_else(nothing, |url| {
+                    common::clipboard_button(
+                        class(
+                            "block mt-4 px-4 py-1 border rounded dark:hover:bg-neutral-800 \
+                             hover:bg-neutral-200 dark:border-neutral-700 border-neutral-300 w-max",
+                        ),
+                        url.as_str(),
+                        "Copy feed URL",
+                    )
+                }),
             ],
         ),
         view_lists(lists, &metadata),
