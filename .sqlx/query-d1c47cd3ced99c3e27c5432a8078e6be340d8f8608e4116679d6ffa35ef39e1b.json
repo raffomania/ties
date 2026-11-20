@@ -47,6 +47,11 @@
         "ordinal": 8,
         "name": "bio",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
@@ -63,7 +68,8 @@
       true,
       false,
       true,
-      true
+      true,
+      false
     ]
   },
   "hash": "d1c47cd3ced99c3e27c5432a8078e6be340d8f8608e4116679d6ffa35ef39e1b"

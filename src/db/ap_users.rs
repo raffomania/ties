@@ -14,6 +14,7 @@ use crate::{
 #[derive(FromRow, Debug)]
 pub struct ApUser {
     pub id: Uuid,
+    pub created_at: OffsetDateTime,
 
     /// For local users, this will have the format:
     /// `{base_url}/ap/user/{id}`
@@ -34,6 +35,7 @@ pub struct ApUser {
 #[derive(FromRow, Debug)]
 struct ApUserRow {
     id: Uuid,
+    created_at: OffsetDateTime,
 
     ap_id: String,
     username: String,
@@ -49,6 +51,7 @@ impl TryFrom<ApUserRow> for ApUser {
     fn try_from(value: ApUserRow) -> anyhow::Result<Self> {
         Ok(ApUser {
             id: value.id,
+            created_at: value.created_at,
             ap_id: value.ap_id.parse()?,
             username: value.username,
             inbox_url: value.inbox_url.parse()?,
