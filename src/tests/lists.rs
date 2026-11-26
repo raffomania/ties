@@ -1,4 +1,5 @@
 use axum::http::{StatusCode, header};
+use sqlx::query;
 use uuid::Uuid;
 
 use crate::{
@@ -19,6 +20,77 @@ async fn create_link(
         db::links::insert(&mut tx, user.id, user.ap_user_id, CreateLink { src, dest }).await?;
     tx.commit().await?;
     Ok(link)
+}
+
+#[test_log::test(tokio::test)]
+async fn list_metadata_counts_only_visible_bookmarks() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+    let list_owner = app.create_user("list_owner", "longpassword").await;
+    let bookmark_owner = app.create_user("bookmark_owner", "longpassword").await;
+
+    let list = app.create_list(&list_owner, "list").await;
+    let private_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/private", "")
+        .await;
+    let public_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/public", "")
+        .await;
+    let bookmark_owner_list = app.create_list(&bookmark_owner, "public").await;
+    create_link(
+        &app,
+        &bookmark_owner,
+        bookmark_owner_list.id,
+        public_bookmark.id,
+    )
+    .await?;
+    create_link(&app, &list_owner, list.id, public_bookmark.id).await?;
+
+    let mut tx = app.tx().await;
+    query(r"insert into links (user_id, src_list_id, dest_bookmark_id) values ($1, $2, $3)")
+        .bind(list_owner.id)
+        .bind(list.id)
+        .bind(private_bookmark.id)
+        .execute(&mut *tx)
+        .await?;
+
+    assert_eq!(
+        db::lists::by_id_with_metadata(&mut tx, list.id, None)
+            .await?
+            .metadata
+            .linked_bookmark_count,
+        1
+    );
+    assert_eq!(
+        db::lists::by_id_with_metadata(&mut tx, list.id, Some(bookmark_owner.ap_user_id))
+            .await?
+            .metadata
+            .linked_bookmark_count,
+        2
+    );
+    assert_eq!(
+        db::lists::by_id_with_metadata(&mut tx, list.id, None)
+            .await?
+            .metadata
+            .linked_bookmark_count,
+        1
+    );
+    assert_eq!(
+        db::lists::by_id_with_metadata(&mut tx, list.id, Some(bookmark_owner.ap_user_id))
+            .await?
+            .metadata
+            .linked_bookmark_count,
+        2
+    );
+
+    let lists = db::lists::list_public_by_user(&mut tx, list_owner.ap_user_id).await?;
+    let list_metadata = &lists
+        .iter()
+        .find(|l| l.list.id == list.id)
+        .unwrap()
+        .metadata;
+    assert_eq!(list_metadata.linked_bookmark_count, 1);
+
+    Ok(())
 }
 
 #[test_log::test(tokio::test)]

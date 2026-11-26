@@ -28,6 +28,7 @@ async fn get_metadata(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Metada
             from ap_users
             join lists on lists.ap_user_id = ap_users.id
             join links on links.src_list_id = lists.id
+            join public_bookmarks on public_bookmarks.id = links.dest_bookmark_id
             where ap_users.id = $1
                 and not lists.private
             "#,

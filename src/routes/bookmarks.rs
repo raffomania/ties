@@ -279,7 +279,6 @@ async fn post_connect(
             .push(views::edit_bookmark::LinkWithList {
                 link_id: link.id,
                 list_title: target_list.title,
-                list_private: target_list.private,
             });
     }
 

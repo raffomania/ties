@@ -47,30 +47,21 @@ async fn get_show(
     State(state): State<AppState>,
 ) -> ResponseResult<HtmfResponse> {
     let maybe_ap_user_id = auth_user.as_ref().map(|u| u.ap_user_id);
-    let links = db::links::list_by_list(&mut tx, list_id, maybe_ap_user_id).await?;
-    let list = db::lists::by_id(&mut tx, list_id).await?;
-    let backlinks = db::lists::pointing_to_list(&mut tx, list_id, maybe_ap_user_id).await?;
 
-    match &auth_user {
-        Some(user) => {
-            if list.private && list.ap_user_id != user.ap_user_id {
-                return Err(ResponseError::NotFound);
-            }
-        }
-        None => {
-            if list.private {
-                return Err(ResponseError::NotFound);
-            }
-        }
-    }
+    let db::ListWithMetadata { list, metadata } =
+        db::lists::by_id_with_metadata(&mut tx, list_id, maybe_ap_user_id).await?;
+
+    let feed_link = state.base_url.join(&list.feed_path())?;
+    let links = db::links::list_by_list(&mut tx, list_id, maybe_ap_user_id).await?;
+    let backlinks = db::lists::pointing_to_list(&mut tx, list_id, maybe_ap_user_id).await?;
 
     Ok(HtmfResponse(views::list::view(&views::list::Data {
         layout: layout::Template::from_db(&mut tx, auth_user.as_ref())
             .await?
-            .with_feed_link(state.base_url.join(&list.feed_path())?),
+            .with_feed_link(feed_link),
         links,
         list,
-        metadata: db::lists::metadata_by_id(&mut tx, list_id).await?,
+        metadata,
         backlinks,
     })))
 }

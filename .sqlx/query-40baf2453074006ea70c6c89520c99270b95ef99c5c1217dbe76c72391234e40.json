@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            (bookmarks.ap_user_id = $2) as \"owner!\",\n            exists(\n                select 1\n                from public_bookmarks\n                where public_bookmarks.id = $1\n            ) as \"is_public!\"\n        from bookmarks\n        where bookmarks.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 1,
+        "name": "is_public!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "40baf2453074006ea70c6c89520c99270b95ef99c5c1217dbe76c72391234e40"
+}

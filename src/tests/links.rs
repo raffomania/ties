@@ -3,7 +3,7 @@ use sqlx::query;
 use super::util::test_app::TestApp;
 use crate::{
     db::{self, LinkDestinationWithMetadata},
-    forms::{self, lists::CreateList},
+    forms::{self, links::CreateLink, lists::CreateList},
 };
 
 /// Look up what list_by_list reports to `viewer` about the number of lists that
@@ -26,6 +26,35 @@ async fn nested_list_count(
         })
         .collect::<Vec<_>>();
     Ok(counts)
+}
+
+fn bookmark_ids(links: &[db::LinkWithContent]) -> Vec<uuid::Uuid> {
+    let mut ids = links
+        .iter()
+        .filter_map(|link| match &link.dest {
+            LinkDestinationWithMetadata::Bookmark(bookmark) => Some(bookmark.id),
+            LinkDestinationWithMetadata::List(_) => None,
+        })
+        .collect::<Vec<_>>();
+    ids.sort();
+    ids
+}
+
+async fn nested_bookmark_count(
+    tx: &mut db::AppTx,
+    list_id: uuid::Uuid,
+    viewer: Option<uuid::Uuid>,
+) -> anyhow::Result<i64> {
+    let links = db::links::list_by_list(tx, list_id, viewer).await?;
+    let counts = links
+        .iter()
+        .filter_map(|link| match &link.dest {
+            LinkDestinationWithMetadata::List(list) => Some(list.metadata.linked_bookmark_count),
+            LinkDestinationWithMetadata::Bookmark(_) => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(counts.len(), 1);
+    Ok(counts[0])
 }
 
 /// When someone opens a list, its page shows how many other lists it links to.
@@ -120,6 +149,161 @@ async fn list_by_list_nested_counts_of_private_lists() -> anyhow::Result<()> {
             .await?
             .as_slice(),
         [1]
+    );
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn list_by_list_hides_private_bookmarks_from_non_owners() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+    let bookmark_owner = app.create_user("bookmark_owner", "longpassword").await;
+    let list_owner = app.create_user("list_owner", "longpassword").await;
+    let private_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/private", "")
+        .await;
+    let public_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/public", "")
+        .await;
+
+    let mut tx = app.tx().await;
+
+    let list = db::lists::insert(
+        &mut tx,
+        list_owner.ap_user_id,
+        CreateList {
+            title: "list".to_string(),
+            content: None,
+            private: false,
+        },
+    )
+    .await?;
+    let bookmark_owner_list = db::lists::insert(
+        &mut tx,
+        bookmark_owner.ap_user_id,
+        CreateList {
+            title: "public".to_string(),
+            content: None,
+            private: false,
+        },
+    )
+    .await?;
+    db::links::insert(
+        &mut tx,
+        bookmark_owner.id,
+        bookmark_owner.ap_user_id,
+        CreateLink {
+            src: bookmark_owner_list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+
+    db::links::insert(
+        &mut tx,
+        list_owner.id,
+        list_owner.ap_user_id,
+        CreateLink {
+            src: list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+    query(r"insert into links (user_id, src_list_id, dest_bookmark_id) values ($1, $2, $3)")
+        .bind(list_owner.id)
+        .bind(list.id)
+        .bind(private_bookmark.id)
+        .execute(&mut *tx)
+        .await?;
+
+    assert_eq!(
+        bookmark_ids(&db::links::list_by_list(&mut tx, list.id, None).await?),
+        vec![public_bookmark.id]
+    );
+    assert_eq!(
+        bookmark_ids(
+            &db::links::list_by_list(&mut tx, list.id, Some(list_owner.ap_user_id)).await?
+        ),
+        vec![public_bookmark.id]
+    );
+
+    let mut expected = vec![private_bookmark.id, public_bookmark.id];
+    expected.sort();
+    assert_eq!(
+        bookmark_ids(
+            &db::links::list_by_list(&mut tx, list.id, Some(bookmark_owner.ap_user_id)).await?
+        ),
+        expected
+    );
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn list_by_list_nested_counts_only_visible_bookmarks() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+    let list_owner = app.create_user("list_owner", "longpassword").await;
+    let bookmark_owner = app.create_user("bookmark_owner", "longpassword").await;
+
+    let viewed_list = app.create_list(&list_owner, "viewed").await;
+    let linked_list = app.create_list(&list_owner, "linked").await;
+    let private_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/private", "")
+        .await;
+    let public_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/public", "")
+        .await;
+    let bookmark_owner_list = app.create_list(&bookmark_owner, "public").await;
+
+    let mut tx = app.tx().await;
+    db::links::insert(
+        &mut tx,
+        list_owner.id,
+        list_owner.ap_user_id,
+        CreateLink {
+            src: viewed_list.id,
+            dest: linked_list.id,
+        },
+    )
+    .await?;
+    db::links::insert(
+        &mut tx,
+        bookmark_owner.id,
+        bookmark_owner.ap_user_id,
+        CreateLink {
+            src: bookmark_owner_list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+    db::links::insert(
+        &mut tx,
+        list_owner.id,
+        list_owner.ap_user_id,
+        CreateLink {
+            src: linked_list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+    query(r"insert into links (user_id, src_list_id, dest_bookmark_id) values ($1, $2, $3)")
+        .bind(list_owner.id)
+        .bind(linked_list.id)
+        .bind(private_bookmark.id)
+        .execute(&mut *tx)
+        .await?;
+
+    assert_eq!(
+        nested_bookmark_count(&mut tx, viewed_list.id, None).await?,
+        1
+    );
+    assert_eq!(
+        nested_bookmark_count(&mut tx, viewed_list.id, Some(list_owner.ap_user_id)).await?,
+        1
+    );
+    assert_eq!(
+        nested_bookmark_count(&mut tx, viewed_list.id, Some(bookmark_owner.ap_user_id)).await?,
+        2
     );
 
     Ok(())
