@@ -54,13 +54,6 @@ impl LinkDestination {
             LinkDestination::List(n) => n.id,
         }
     }
-
-    pub fn path(&self) -> String {
-        match self {
-            LinkDestination::Bookmark(b) => b.show_path(),
-            LinkDestination::List(n) => n.path(),
-        }
-    }
 }
 
 pub struct LinkWithContent {

@@ -19,6 +19,7 @@ use crate::{
     forms::links::{CreateLink, PartialCreateLink},
     htmf_response::HtmfResponse,
     response_error::ResponseResult,
+    route_paths,
     server::AppState,
     views::{self, layout},
 };
@@ -91,7 +92,7 @@ async fn post_create(
 
         tx.commit().await?;
 
-        return Ok(Redirect::to(&src.path()).into_response());
+        return Ok(Redirect::to(&route_paths::link_destination(src)).into_response());
     }
 
     Ok(

@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, AppTx},
     response_error::ResponseResult,
+    route_paths,
     views::{
         common::{self, pluralize},
         layout,
@@ -142,7 +143,7 @@ fn list_item(list: &db::ListWithMetadata) -> Element {
                          dark:hover:text-fuchsia-300 hover:text-pink-700 text-ellipsis \
                          whitespace-nowrap",
                     ),
-                    href(list.list.path()),
+                    href(route_paths::list(list.list.id)),
                 ],
                 &list.list.title,
             ),

@@ -34,13 +34,6 @@ pub struct User {
     pub ap_user_id: Uuid,
 }
 
-impl User {
-    pub fn feed_path(&self) -> String {
-        let User { username, .. } = &self;
-        format!("/user/{username}/feed.atom")
-    }
-}
-
 pub async fn by_oidc_id(tx: &mut AppTx, oidc_id: &str) -> ResponseResult<User> {
     let user = query_as!(
         User,

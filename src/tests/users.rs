@@ -9,7 +9,7 @@ use crate::{
         links::CreateLink,
         users::{CreateOidcUser, Credentials, Login},
     },
-    session,
+    route_paths, session,
     tests::util::test_app::TestApp,
 };
 
@@ -231,7 +231,12 @@ async fn user_feed_only_contains_publicly_linked_bookmarks() -> anyhow::Result<(
     app.create_bookmark(&user, "https://example.com/unsorted", "Unsorted bookmark")
         .await;
 
-    let body = app.req().get(&user.feed_path()).await.body_string().await;
+    let body = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await
+        .body_string()
+        .await;
 
     assert!(body.contains("<title>Public bookmark</title>"));
     assert!(!body.contains("<title>Private bookmark</title>"));
@@ -254,7 +259,10 @@ async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::
     app.create_link(&user, list.id, bookmark.id).await;
 
     // Check content type and caching headers in response
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     assert_eq!(
         response.headers().get(header::CONTENT_TYPE).unwrap(),
         "application/atom+xml; charset=utf-8"
@@ -275,7 +283,7 @@ async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::
         .req()
         .header(header::IF_NONE_MATCH, etag.clone())
         .expect_status(StatusCode::NOT_MODIFIED)
-        .get(&user.feed_path())
+        .get(&route_paths::local_user_feed(&user.username))
         .await;
 
     // Check that response is not modified
@@ -288,7 +296,7 @@ async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::
         .req()
         .header(header::IF_MODIFIED_SINCE, last_modified.clone())
         .expect_status(StatusCode::NOT_MODIFIED)
-        .get(&user.feed_path())
+        .get(&route_paths::local_user_feed(&user.username))
         .await;
 
     // Check that response is not modified
@@ -312,7 +320,10 @@ async fn adding_a_bookmark_invalidates_the_cached_feed() -> anyhow::Result<()> {
     app.create_link(&user, list.id, first_bookmark.id).await;
 
     // Check that first bookmark appears, and put feed into cache
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     let first_etag = response.header_string(header::ETAG);
     let first_body = response.body_string().await;
     assert!(first_body.contains("<title>First</title>"));
@@ -324,7 +335,10 @@ async fn adding_a_bookmark_invalidates_the_cached_feed() -> anyhow::Result<()> {
     app.create_link(&user, list.id, second_bookmark.id).await;
 
     // Check that second bookmark appears in the feed
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     let second_etag = response.header_string(header::ETAG);
     let second_body = response.body_string().await;
 
@@ -348,7 +362,10 @@ async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow:
     app.create_link(&user, list.id, bookmark.id).await;
 
     // Put feed into cache
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     let etag = response.header_string(header::ETAG);
     let body = response.body_string().await;
     assert!(body.contains("<title>Original title</title>"));
@@ -367,7 +384,12 @@ async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow:
     tx.commit().await?;
 
     // Check that feed is not updated yet
-    let body = app.req().get(&user.feed_path()).await.body_string().await;
+    let body = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await
+        .body_string()
+        .await;
     assert!(body.contains("<title>Original title</title>"));
     assert!(!body.contains("<title>Updated title</title>"));
 
@@ -379,7 +401,7 @@ async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow:
         .req()
         .header(header::IF_NONE_MATCH, etag)
         .expect_status(StatusCode::OK)
-        .get(&user.feed_path())
+        .get(&route_paths::local_user_feed(&user.username))
         .await
         .body_string()
         .await;
@@ -401,7 +423,10 @@ async fn feed_changes_after_removing_the_newest_link() -> anyhow::Result<()> {
     let link = app.create_link(&user, list.id, bookmark.id).await;
 
     // Put feed into cache
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     let body = response.body_string().await;
     assert!(body.contains("<title>Example</title>"));
 
@@ -411,7 +436,10 @@ async fn feed_changes_after_removing_the_newest_link() -> anyhow::Result<()> {
     tx.commit().await?;
 
     // Check that we get a new feed
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
     let body = response.body_string().await;
     assert!(!body.contains("<title>Example</title>"));
     assert!(!body.is_empty());
@@ -430,7 +458,7 @@ async fn private_lists_are_removed_from_the_cached_feed() -> anyhow::Result<()> 
     app.create_link(&user, list.id, bookmark.id).await;
 
     // Check that list is included in feed
-    let url = user.feed_path();
+    let url = route_paths::local_user_feed(&user.username);
     let body = app.req().get(&url).await.body_string().await;
     assert!(body.contains("<title>Feed list</title>"));
     assert!(body.contains("<title>Example</title>"));
@@ -466,7 +494,12 @@ async fn feed_renders_for_user_with_lists_but_no_bookmarks() -> anyhow::Result<(
     let user = app.create_test_user().await;
     app.create_list(&user, "Public list").await;
 
-    let body = app.req().get(&user.feed_path()).await.body_string().await;
+    let body = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await
+        .body_string()
+        .await;
 
     assert!(body.contains("<title>Public list</title>"));
 
@@ -480,7 +513,10 @@ async fn feed_renders_for_user_with_bookmarks_but_no_lists() -> anyhow::Result<(
     app.create_bookmark(&user, "https://example.com", "Example")
         .await;
 
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
 
     assert_eq!(
         response.headers().get(header::CONTENT_TYPE).unwrap(),
@@ -495,7 +531,10 @@ async fn feed_renders_for_user_without_bookmarks_or_lists() -> anyhow::Result<()
     let mut app = TestApp::new().await;
     let user = app.create_test_user().await;
 
-    let response = app.req().get(&user.feed_path()).await;
+    let response = app
+        .req()
+        .get(&route_paths::local_user_feed(&user.username))
+        .await;
 
     assert_eq!(
         response.headers().get(header::CONTENT_TYPE).unwrap(),

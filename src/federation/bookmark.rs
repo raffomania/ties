@@ -15,6 +15,7 @@ use crate::{
     db::{self, bookmarks::InsertBookmark},
     forms,
     response_error::{ResponseError, into_option},
+    route_paths,
 };
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -139,14 +140,14 @@ impl Object for db::Bookmark {
             };
             fragment([description, a(href(&self.url), &self.url)]).to_html()
         };
-        let web_url = data.base_url.join(&self.show_path())?;
+        let web_url = data.base_url.join(&route_paths::bookmark(self.id))?;
 
         // Pass None as user id to only fetch public lists for hashtags
         let lists = db::lists::pointing_to_bookmark(&mut tx, self.id, None).await?;
         let mut tags = Vec::with_capacity(lists.len());
         for list in lists {
             tags.push(Hashtag {
-                href: data.base_url.join(&list.path())?.to_string(),
+                href: data.base_url.join(&route_paths::list(list.id))?.to_string(),
                 name: format!("#{}", list.title),
                 kind: HashtagType::Hashtag,
             });
