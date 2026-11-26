@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select exists(\n            select 1\n            from public_bookmarks\n            where public_bookmarks.id = $1\n        ) as \"is_public!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_public!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d8fbe8c0e2c3c9c5fc89172ab9c77cebd0488279e59024311f29bec5dd2ff6b6"
+}

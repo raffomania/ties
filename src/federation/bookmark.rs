@@ -113,7 +113,7 @@ impl Object for db::Bookmark {
         data: &Data<Self::DataType>,
     ) -> Result<Option<Self>, Self::Error> {
         let mut tx = data.db_pool.begin().await?;
-        let bookmark = db::bookmarks::by_ap_id(&mut tx, ObjectId::from(url)).await;
+        let bookmark = db::bookmarks::public_by_ap_id(&mut tx, ObjectId::from(url)).await;
         into_option(bookmark)
     }
 

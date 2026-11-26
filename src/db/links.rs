@@ -170,7 +170,11 @@ pub async fn list_by_list(
                     'list', to_jsonb(lists.*),
                     'metadata', jsonb_build_object(
                         'linked_bookmark_count', count(lists_bookmarks.*)
-                            filter (where lists_bookmarks.id is not null),
+                            filter (
+                                where lists_bookmarks.id is not null
+                                    and (lists_bookmarks.ap_user_id = $2
+                                        or lists_public_bookmarks.id is not null)
+                            ),
                         'linked_list_count', count(lists_lists.*)
                             filter (
                                 where lists_lists.id is not null
@@ -188,12 +192,18 @@ pub async fn list_by_list(
         left join lists on lists.id = links.dest_list_id
         left join links as lists_links on lists_links.src_list_id = lists.id
         left join bookmarks as lists_bookmarks on lists_bookmarks.id = lists_links.dest_bookmark_id
+        left join public_bookmarks as lists_public_bookmarks
+            on lists_public_bookmarks.id = lists_bookmarks.id
         left join lists as lists_lists on lists_lists.id = lists_links.dest_list_id
 
         left join bookmarks on bookmarks.id = links.dest_bookmark_id
+        left join public_bookmarks on public_bookmarks.id = bookmarks.id
 
         where links.src_list_id = $1
             and (lists is null or not lists.private or lists.ap_user_id = $2)
+            and (bookmarks.id is null
+                or bookmarks.ap_user_id = $2
+                or public_bookmarks.id is not null)
         group by links.id, lists.id, bookmarks.id
         order by links.created_at desc
         "#,

@@ -109,6 +109,108 @@ async fn is_bookmark_public() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Check that only links by a bookmark's owner will make that bookmark public.
+#[test_log::test(tokio::test)]
+async fn public_list_owned_by_someone_else_does_not_make_bookmark_public() -> anyhow::Result<()> {
+    let app = TestApp::new().await;
+    let owner = app.create_user("owner", "longpassword").await;
+    let other = app.create_user("other", "longpassword").await;
+    let bookmark = app.create_bookmark(&owner, "", "").await;
+
+    let mut tx = app.tx().await;
+
+    // Create public list owned by "other" and link to the bookmark
+    let public_list = db::lists::insert(
+        &mut tx,
+        other.ap_user_id,
+        CreateList {
+            title: String::new(),
+            content: None,
+            private: false,
+        },
+    )
+    .await?;
+    // use inline query since we forbid creating such links normally
+    sqlx::query(
+        r#"
+        insert into links (user_id, src_list_id, dest_bookmark_id)
+        values ($1, $2, $3)
+        "#,
+    )
+    .bind(other.id)
+    .bind(public_list.id)
+    .bind(bookmark.id)
+    .execute(&mut *tx)
+    .await?;
+
+    // Check that bookmark is not public according to our queries
+    assert!(!db::bookmarks::is_public(&mut tx, bookmark.id).await?);
+    assert!(db::bookmarks::is_public_or_owner(&mut tx, owner.ap_user_id, bookmark.id).await?);
+    assert!(!db::bookmarks::is_public_or_owner(&mut tx, other.ap_user_id, bookmark.id).await?);
+
+    Ok(())
+}
+
+/// Check that the edit form accurately displays bookmark visibility.
+#[test_log::test(tokio::test)]
+async fn edit_bookmark_shows_database_visibility() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let user = app.create_test_user().await;
+    app.login_test_user().await;
+
+    let bookmark = app
+        .create_bookmark(&user, "https://example.com", "Test")
+        .await;
+
+    // Check that it's private by default
+    let page = app
+        .req()
+        .get(&format!("/bookmarks/{}/edit", bookmark.id))
+        .await
+        .test_page()
+        .await;
+    let visibility = page
+        .dom
+        .find("dl dd")
+        .into_iter()
+        .last()
+        .unwrap()
+        .text_content();
+    assert_eq!(visibility, "Private");
+
+    // Make it public and check that the form reflects this
+    let public_list = app.create_list(&user, "public").await;
+    let mut tx = app.tx().await;
+    db::links::insert(
+        &mut tx,
+        user.id,
+        user.ap_user_id,
+        CreateLink {
+            src: public_list.id,
+            dest: bookmark.id,
+        },
+    )
+    .await?;
+    tx.commit().await?;
+
+    let page = app
+        .req()
+        .get(&format!("/bookmarks/{}/edit", bookmark.id))
+        .await
+        .test_page()
+        .await;
+    let visibility = page
+        .dom
+        .find("dl dd")
+        .into_iter()
+        .last()
+        .unwrap()
+        .text_content();
+    assert_eq!(visibility, "Public");
+
+    Ok(())
+}
+
 #[test_log::test(tokio::test)]
 async fn delete() -> anyhow::Result<()> {
     let mut app = TestApp::new().await;

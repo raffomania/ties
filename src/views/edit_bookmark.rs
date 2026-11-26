@@ -17,6 +17,7 @@ use crate::{
 pub struct Loaded {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
+    pub bookmark_public: bool,
     pub connected_lists: Vec<LinkWithList>,
     pub title_from_archive: db::archives::TitleFromArchive,
     pub query: forms::bookmarks::EditQuery,
@@ -30,12 +31,14 @@ pub async fn load(
 ) -> ResponseResult<Loaded> {
     let layout = layout::Template::from_db(tx, Some(auth_user)).await?;
     let bookmark = db::bookmarks::by_id(tx, bookmark_id).await?;
+    let bookmark_public = db::bookmarks::is_public(tx, bookmark_id).await?;
     let connected_lists = query_connected_lists(tx, bookmark_id, auth_user.user_id).await?;
     let title_from_archive = db::archives::title(tx, bookmark_id, auth_user.ap_user_id).await?;
 
     Ok(Loaded {
         layout,
         bookmark,
+        bookmark_public,
         connected_lists,
         title_from_archive,
         query,
@@ -52,6 +55,7 @@ pub enum ActionOutcome {
 pub struct ViewData {
     pub layout: layout::Template,
     pub bookmark: db::Bookmark,
+    pub bookmark_public: bool,
     pub connected_lists: Vec<LinkWithList>,
     pub search_list_results: Vec<db::List>,
     pub errors: FormErrors,
@@ -66,6 +70,7 @@ impl From<Loaded> for ViewData {
         Loaded {
             layout,
             bookmark,
+            bookmark_public,
             connected_lists,
             title_from_archive,
             query,
@@ -78,6 +83,7 @@ impl From<Loaded> for ViewData {
         Self {
             layout,
             bookmark,
+            bookmark_public,
             connected_lists,
             errors: FormErrors::default(),
             rename_input,
@@ -119,7 +125,6 @@ impl ViewData {
 pub struct LinkWithList {
     pub link_id: Uuid,
     pub list_title: String,
-    pub list_private: bool,
 }
 
 async fn query_connected_lists(
@@ -130,7 +135,7 @@ async fn query_connected_lists(
     let links = query_as!(
         LinkWithList,
         r#"
-        select links.id as "link_id", lists.title as "list_title", lists.private as "list_private"
+        select links.id as "link_id", lists.title as "list_title"
         from links
         join lists on links.src_list_id = lists.id
         where links.dest_bookmark_id = $1
@@ -190,12 +195,13 @@ pub fn view(
         errors,
         connected_lists: backlinks,
         bookmark,
+        bookmark_public,
         search_list_results,
         search_query,
         ..
     }: &ViewData,
 ) -> Element {
-    let bookmark_private = backlinks.iter().all(|list| list.list_private);
+    let bookmark_private = !bookmark_public;
 
     layout::layout(
         [

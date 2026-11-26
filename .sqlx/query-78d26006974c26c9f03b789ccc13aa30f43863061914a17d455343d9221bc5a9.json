@@ -1,26 +1,26 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        select id, created_at, ap_user_id, url, title, ap_id\n        from bookmarks\n        where ap_id = $1;\n        ",
+  "query": "\n        select\n            id as \"id!\",\n            created_at as \"created_at!\",\n            ap_user_id as \"ap_user_id!\",\n            url as \"url!\",\n            title,\n            ap_id as \"ap_id!\"\n        from public_bookmarks\n        where id = $1;\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "id",
+        "name": "id!",
         "type_info": "Uuid"
       },
       {
         "ordinal": 1,
-        "name": "created_at",
+        "name": "created_at!",
         "type_info": "Timestamptz"
       },
       {
         "ordinal": 2,
-        "name": "ap_user_id",
+        "name": "ap_user_id!",
         "type_info": "Uuid"
       },
       {
         "ordinal": 3,
-        "name": "url",
+        "name": "url!",
         "type_info": "Text"
       },
       {
@@ -30,23 +30,23 @@
       },
       {
         "ordinal": 5,
-        "name": "ap_id",
+        "name": "ap_id!",
         "type_info": "Varchar"
       }
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
-      false,
-      false,
-      false,
-      false,
       true,
-      false
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
-  "hash": "8d809638df21da87934b05e4eaab08e9fc745bdcf698b649ad4bc1e8a867dda5"
+  "hash": "78d26006974c26c9f03b789ccc13aa30f43863061914a17d455343d9221bc5a9"
 }

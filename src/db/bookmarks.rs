@@ -1,6 +1,6 @@
 use activitypub_federation::fetch::object_id::ObjectId;
 use serde::Deserialize;
-use sqlx::{FromRow, query, query_as};
+use sqlx::{FromRow, query, query_as, query_scalar};
 use time::OffsetDateTime;
 use url::Url;
 use uuid::Uuid;
@@ -143,12 +143,43 @@ pub async fn by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Bookmark> {
     Bookmark::try_from(row)
 }
 
-pub async fn by_ap_id(tx: &mut AppTx, ap_id: ObjectId<db::Bookmark>) -> ResponseResult<Bookmark> {
+pub async fn public_by_id(tx: &mut AppTx, id: Uuid) -> ResponseResult<Bookmark> {
     let row = query_as!(
         BookmarkRow,
         r#"
-        select id, created_at, ap_user_id, url, title, ap_id
-        from bookmarks
+        select
+            id as "id!",
+            created_at as "created_at!",
+            ap_user_id as "ap_user_id!",
+            url as "url!",
+            title,
+            ap_id as "ap_id!"
+        from public_bookmarks
+        where id = $1;
+        "#,
+        id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+
+    Bookmark::try_from(row)
+}
+
+pub async fn public_by_ap_id(
+    tx: &mut AppTx,
+    ap_id: ObjectId<db::Bookmark>,
+) -> ResponseResult<Bookmark> {
+    let row = query_as!(
+        BookmarkRow,
+        r#"
+        select
+            id as "id!",
+            created_at as "created_at!",
+            ap_user_id as "ap_user_id!",
+            url as "url!",
+            title,
+            ap_id as "ap_id!"
+        from public_bookmarks
         where ap_id = $1;
         "#,
         ap_id.inner().as_str(),
@@ -245,22 +276,23 @@ pub async fn upsert_remote(
     Ok(user)
 }
 
-/// Return true if at least one public list points to the given bookmark.
+/// Return true if at least one public list owned by the bookmark's creator
+/// points to the given bookmark.
 pub async fn is_public(tx: &mut AppTx, bookmark_id: Uuid) -> ResponseResult<bool> {
-    let public_destination_count = query!(
+    let is_public = query_scalar!(
         r#"
-        select count(lists.id) as "count!"
-        from links
-        inner join lists on links.src_list_id = lists.id
-        where not lists.private
-            and links.dest_bookmark_id = $1
+        select exists(
+            select 1
+            from public_bookmarks
+            where public_bookmarks.id = $1
+        ) as "is_public!"
         "#,
         bookmark_id
     )
     .fetch_one(&mut **tx)
     .await?;
 
-    Ok(public_destination_count.count > 0)
+    Ok(is_public)
 }
 
 /// Return true if the bookmark is public or the given AP user is its owner.
@@ -275,10 +307,8 @@ pub async fn is_public_or_owner(
             (bookmarks.ap_user_id = $2) as "owner!",
             exists(
                 select 1
-                from links
-                inner join lists on links.src_list_id = lists.id
-                where not lists.private
-                    and links.dest_bookmark_id = $1
+                from public_bookmarks
+                where public_bookmarks.id = $1
             ) as "is_public!"
         from bookmarks
         where bookmarks.id = $1

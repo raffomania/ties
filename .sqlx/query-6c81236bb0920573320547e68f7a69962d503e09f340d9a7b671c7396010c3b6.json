@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        select lists.* as l,\n            ap_users.username,\n            count(links.dest_bookmark_id) as \"linked_bookmark_count!\",\n            count(links.dest_list_id) as \"linked_list_count!\"\n        from lists\n\n        join ap_users on lists.ap_user_id = ap_users.id\n        left join links\n            on lists.id = links.src_list_id\n        where (lists.ap_user_id = $1 or not private)\n            and lists.id = $2\n        group by lists.id, ap_users.username\n        ",
+  "query": "\n        select lists.* as l,\n            ap_users.username,\n            count(links.dest_bookmark_id) filter (\n                where dest_bookmarks.ap_user_id = $1\n                    or dest_public_bookmarks.id is not null\n            ) as \"linked_bookmark_count!\",\n            count(links.dest_list_id) as \"linked_list_count!\"\n        from lists\n\n        join ap_users on lists.ap_user_id = ap_users.id\n        left join links\n            on lists.id = links.src_list_id\n        left join bookmarks as dest_bookmarks\n            on dest_bookmarks.id = links.dest_bookmark_id\n        left join public_bookmarks as dest_public_bookmarks\n            on dest_public_bookmarks.id = dest_bookmarks.id\n        where (lists.ap_user_id = $1 or not private)\n            and lists.id = $2\n        group by lists.id, ap_users.username\n        ",
   "describe": {
     "columns": [
       {
@@ -73,5 +73,5 @@
       null
     ]
   },
-  "hash": "1297817ce9ec3c6963c02a967a0bb0f516e478557d87c30f050a3d828c37ec94"
+  "hash": "6c81236bb0920573320547e68f7a69962d503e09f340d9a7b671c7396010c3b6"
 }

@@ -7,6 +7,7 @@ use crate::{
     federation::{self, webfinger},
     forms::{
         bookmarks::CreateBookmark,
+        links::CreateLink,
         users::{Credentials, Login},
     },
     tests::util::test_app::TestApp,
@@ -86,6 +87,19 @@ async fn can_resolve_bookmark() -> Result<()> {
     let bookmark = app_a
         .create_bookmark(&user, "https://rafa.ee", "test")
         .await;
+    let public_list = app_a.create_list(&user, "public").await;
+    let mut tx = app_a.tx().await;
+    db::links::insert(
+        &mut tx,
+        user.id,
+        user.ap_user_id,
+        CreateLink {
+            src: public_list.id,
+            dest: bookmark.id,
+        },
+    )
+    .await?;
+    tx.commit().await?;
 
     app_a.serve();
     let ap_cx_b = app_b.state.federation_config.to_request_data();
@@ -93,12 +107,28 @@ async fn can_resolve_bookmark() -> Result<()> {
     let app_b_bookmark = bookmark.ap_id.dereference(&ap_cx_b).await?;
     // Check that bookmark is now in the DB of app b
     let mut tx = app_b.pool.begin().await?;
-    db::bookmarks::by_ap_id(&mut tx, bookmark.ap_id.clone()).await?;
+    db::bookmarks::by_id(&mut tx, app_b_bookmark.id).await?;
 
     assert_ne!(app_b_bookmark.id, bookmark.id);
     assert_eq!(app_b_bookmark.ap_id, bookmark.ap_id);
     assert_eq!(app_b_bookmark.url, bookmark.url);
     assert_eq!(app_b_bookmark.title, bookmark.title);
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn private_bookmark_is_not_available_over_activitypub() -> Result<()> {
+    let mut app = TestApp::new().await;
+    let user = app.create_test_user().await;
+    let bookmark = app
+        .create_bookmark(&user, "https://rafa.ee", "private")
+        .await;
+
+    app.req()
+        .expect_status(StatusCode::NOT_FOUND)
+        .get(&format!("/ap/bookmark/{}", bookmark.id))
+        .await;
 
     Ok(())
 }

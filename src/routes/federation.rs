@@ -80,7 +80,7 @@ async fn get_bookmark(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
 ) -> ResponseResult<FederationJson<WithContext<federation::bookmark::Json>>> {
-    let bookmark = db::bookmarks::by_id(&mut tx, id).await?;
+    let bookmark = db::bookmarks::public_by_id(&mut tx, id).await?;
     let json_bookmark = bookmark
         .into_json(&state.federation_config.to_request_data())
         .await?;

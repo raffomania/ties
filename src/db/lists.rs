@@ -193,29 +193,6 @@ pub async fn pointing_to_bookmark(
     Ok(list)
 }
 
-pub async fn metadata_by_id(tx: &mut AppTx, list_id: Uuid) -> ResponseResult<Metadata> {
-    let list = query_as!(
-        Metadata,
-        r#"
-            select
-                users.username,
-                count(links.dest_bookmark_id) as "linked_bookmark_count!",
-                count(links.dest_list_id) as "linked_list_count!"
-            from lists
-            join users on lists.ap_user_id = users.ap_user_id
-            left join links
-                on lists.id = links.src_list_id
-            where lists.id = $1
-            group by users.username, users.email
-        "#,
-        list_id,
-    )
-    .fetch_one(&mut **tx)
-    .await?;
-
-    Ok(list)
-}
-
 pub async fn list_pinned_by_user(tx: &mut AppTx, ap_user_id: Uuid) -> ResponseResult<Vec<List>> {
     let lists = query_as!(
         List,
@@ -239,13 +216,17 @@ pub async fn list_public_by_user(
         r#"
         select lists.* as l,
             ap_users.username,
-            count(links.dest_bookmark_id) as "linked_bookmark_count!",
+            count(links.dest_bookmark_id) filter (
+                where public_bookmarks.id is not null
+            ) as "linked_bookmark_count!",
             count(links.dest_list_id) as "linked_list_count!"
         from lists
 
         join ap_users on lists.ap_user_id = ap_users.id
         left join links
             on lists.id = links.src_list_id
+        left join public_bookmarks
+            on public_bookmarks.id = links.dest_bookmark_id
         where lists.ap_user_id = $1 and not private
         group by lists.id, ap_users.username
         "#,
@@ -284,13 +265,20 @@ pub async fn by_id_with_metadata(
         r#"
         select lists.* as l,
             ap_users.username,
-            count(links.dest_bookmark_id) as "linked_bookmark_count!",
+            count(links.dest_bookmark_id) filter (
+                where dest_bookmarks.ap_user_id = $1
+                    or dest_public_bookmarks.id is not null
+            ) as "linked_bookmark_count!",
             count(links.dest_list_id) as "linked_list_count!"
         from lists
 
         join ap_users on lists.ap_user_id = ap_users.id
         left join links
             on lists.id = links.src_list_id
+        left join bookmarks as dest_bookmarks
+            on dest_bookmarks.id = links.dest_bookmark_id
+        left join public_bookmarks as dest_public_bookmarks
+            on dest_public_bookmarks.id = dest_bookmarks.id
         where (lists.ap_user_id = $1 or not private)
             and lists.id = $2
         group by lists.id, ap_users.username

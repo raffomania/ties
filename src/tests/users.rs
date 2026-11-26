@@ -4,7 +4,10 @@ use serde::Serialize;
 use crate::{
     db::{self, ap_users},
     federation::webfinger,
-    forms::users::{CreateOidcUser, Credentials, Login},
+    forms::{
+        links::CreateLink,
+        users::{CreateOidcUser, Credentials, Login},
+    },
     session,
     tests::util::test_app::TestApp,
 };
@@ -135,6 +138,68 @@ async fn profile() -> anyhow::Result<()> {
         .len();
 
     assert_eq!(lists_header, format!("{public_lists} public lists"));
+
+    Ok(())
+}
+
+#[test_log::test(tokio::test)]
+async fn profile_counts_only_public_bookmarks_in_public_lists() -> anyhow::Result<()> {
+    let mut app = TestApp::new().await;
+    let profile_owner = app.create_user("profile_owner", "longpassword").await;
+    let bookmark_owner = app.create_user("bookmark_owner", "longpassword").await;
+
+    let public_list = app.create_list(&profile_owner, "public").await;
+    let private_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/private", "")
+        .await;
+    let public_bookmark = app
+        .create_bookmark(&bookmark_owner, "https://example.com/public", "")
+        .await;
+    let bookmark_owner_list = app.create_list(&bookmark_owner, "public").await;
+
+    let mut tx = app.tx().await;
+    db::links::insert(
+        &mut tx,
+        bookmark_owner.id,
+        bookmark_owner.ap_user_id,
+        CreateLink {
+            src: bookmark_owner_list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+    db::links::insert(
+        &mut tx,
+        profile_owner.id,
+        profile_owner.ap_user_id,
+        CreateLink {
+            src: public_list.id,
+            dest: public_bookmark.id,
+        },
+    )
+    .await?;
+    sqlx::query(r"insert into links (user_id, src_list_id, dest_bookmark_id) values ($1, $2, $3)")
+        .bind(profile_owner.id)
+        .bind(public_list.id)
+        .bind(private_bookmark.id)
+        .execute(&mut *tx)
+        .await?;
+    tx.commit().await?;
+
+    let page = app
+        .req()
+        .get(&format!("/user/{}", profile_owner.username))
+        .await
+        .test_page()
+        .await;
+    let summary = page
+        .dom
+        .find("section > p")
+        .into_iter()
+        .find(|p| p.text_content().contains("containing"))
+        .unwrap()
+        .text_content();
+    assert_eq!(summary, "1 public list containing 1 bookmark");
 
     Ok(())
 }
