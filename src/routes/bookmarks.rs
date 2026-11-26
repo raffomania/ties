@@ -19,6 +19,7 @@ use crate::{
     forms::{self, bookmarks::CreateBookmark},
     htmf_response::HtmfResponse,
     response_error::{ResponseError, ResponseResult},
+    route_paths,
     server::AppState,
     views::{self, layout, unsorted_bookmarks},
 };
@@ -76,7 +77,7 @@ async fn post_create(
 
     state.archive_queue.archive_in_background(archive.id);
 
-    Ok(Redirect::to(&bookmark.edit_path()).into_response())
+    Ok(Redirect::to(&route_paths::edit_bookmark(bookmark.id)).into_response())
 }
 
 #[derive(Deserialize)]
@@ -374,7 +375,7 @@ async fn post_archive(
 
     state.archive_queue.archive_in_background(archive.id);
 
-    Ok(Redirect::to(&format!("/bookmarks/{id}")))
+    Ok(Redirect::to(&route_paths::bookmark(id)))
 }
 
 async fn get_archive_title(

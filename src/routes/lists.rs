@@ -23,6 +23,7 @@ use crate::{
     },
     htmf_response::HtmfResponse,
     response_error::{ResponseError, ResponseResult},
+    route_paths,
     server::AppState,
     views::{self, layout},
 };
@@ -57,7 +58,7 @@ async fn get_show(
     let mut layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
 
     if !list.private {
-        layout = layout.with_feed_link(state.base_url.join(&list.feed_path())?);
+        layout = layout.with_feed_link(state.base_url.join(&route_paths::list_feed(list.id))?);
     }
 
     Ok(HtmfResponse(views::list::view(&views::list::Data {
@@ -129,7 +130,7 @@ async fn post_create(
 
     tx.commit().await?;
 
-    Ok(Redirect::to(&list.path()).into_response())
+    Ok(Redirect::to(&route_paths::list(list.id)).into_response())
 }
 
 async fn get_create(
@@ -198,7 +199,7 @@ async fn post_edit_title(
 
     tx.commit().await?;
 
-    Ok(Redirect::to(&list.path()).into_response())
+    Ok(Redirect::to(&route_paths::list(list.id)).into_response())
 }
 
 async fn edit_private(
@@ -217,7 +218,7 @@ async fn edit_private(
 
     tx.commit().await?;
 
-    Ok(Redirect::to(&list.path()).into_response())
+    Ok(Redirect::to(&route_paths::list(list.id)).into_response())
 }
 
 async fn edit_pinned(
@@ -236,7 +237,7 @@ async fn edit_pinned(
 
     tx.commit().await?;
 
-    Ok(Redirect::to(&list.path()).into_response())
+    Ok(Redirect::to(&route_paths::list(list.id)).into_response())
 }
 
 // TODO colocate this with view and db code

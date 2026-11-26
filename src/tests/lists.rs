@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::{
     atom::cache,
     db::{self, bookmarks::UpdateBookmark},
+    route_paths,
     tests::util::test_app::TestApp,
 };
 
@@ -102,7 +103,7 @@ async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::
     let list = app.create_list(&user, "Feed list").await;
     app.create_link(&user, list.id, bookmark.id).await;
 
-    let url = list.feed_path();
+    let url = route_paths::list_feed(list.id);
     let response = app.req().get(&url).await;
 
     assert_eq!(
@@ -146,7 +147,7 @@ async fn adding_a_link_invalidates_the_cached_feed() -> anyhow::Result<()> {
     let list = app.create_list(&user, "Feed list").await;
     app.create_link(&user, list.id, first_bookmark.id).await;
 
-    let url = list.feed_path();
+    let url = route_paths::list_feed(list.id);
     let response = app.req().get(&url).await;
     let first_etag = response.header_string(header::ETAG);
     let first_body = response.body_string().await;
@@ -178,7 +179,7 @@ async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow:
     let list = app.create_list(&user, "Feed list").await;
     app.create_link(&user, list.id, bookmark.id).await;
 
-    let url = list.feed_path();
+    let url = route_paths::list_feed(list.id);
     let response = app.req().get(&url).await;
     let etag = response.header_string(header::ETAG);
     let body = response.body_string().await;
@@ -233,7 +234,7 @@ async fn feed_revalidates_after_removing_the_newest_link() -> anyhow::Result<()>
         .await;
     let link = app.create_link(&user, list.id, bookmark.id).await;
 
-    let url = list.feed_path();
+    let url = route_paths::list_feed(list.id);
     let response = app.req().get(&url).await;
     let last_modified = response.header_string(header::LAST_MODIFIED);
     let body = response.body_string().await;
@@ -270,7 +271,7 @@ async fn private_lists_are_not_served_from_cache() -> anyhow::Result<()> {
     let user = app.create_test_user().await;
     let list = app.create_list(&user, "Feed list").await;
 
-    app.req().get(&list.feed_path()).await;
+    app.req().get(&route_paths::list_feed(list.id)).await;
 
     let mut tx = app.tx().await;
     db::lists::set_private(&mut tx, list.id, true).await?;
@@ -278,7 +279,7 @@ async fn private_lists_are_not_served_from_cache() -> anyhow::Result<()> {
 
     app.req()
         .expect_status(StatusCode::NOT_FOUND)
-        .get(&list.feed_path())
+        .get(&route_paths::list_feed(list.id))
         .await;
 
     Ok(())
@@ -292,7 +293,7 @@ async fn private_linked_lists_are_removed_from_the_cached_feed() -> anyhow::Resu
     let inner_list = app.create_list(&user, "Inner list").await;
     app.create_link(&user, outer_list.id, inner_list.id).await;
 
-    let url = outer_list.feed_path();
+    let url = route_paths::list_feed(outer_list.id);
     let body = app.req().get(&url).await.body_string().await;
     assert!(body.contains("<title>Inner list</title>"));
 

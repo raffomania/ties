@@ -21,6 +21,7 @@ use crate::{
     htmf_response::HtmfResponse,
     oidc,
     response_error::{ResponseError, ResponseResult},
+    route_paths,
     server::AppState,
     session,
     views::{self, layout, login, oidc_select_username},
@@ -297,7 +298,11 @@ async fn get_profile(
 
     let mut layout = layout::Template::from_db(&mut tx, auth_user.as_ref()).await?;
     if let Some(user) = &maybe_local_user {
-        layout = layout.with_feed_link(state.base_url.join(&user.feed_path())?);
+        layout = layout.with_feed_link(
+            state
+                .base_url
+                .join(&route_paths::local_user_feed(&user.username))?,
+        );
     }
 
     let elem = views::profile::view(

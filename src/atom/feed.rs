@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, Bookmark},
-    reverse_routes,
+    route_paths,
     views::common::bookmark_title,
 };
 
@@ -146,11 +146,11 @@ impl Feed {
             },
             links: vec![
                 Link {
-                    href: base_url.join(&list.feed_path())?,
+                    href: base_url.join(&route_paths::list_feed(list.id))?,
                     rel: "self",
                 },
                 Link {
-                    href: base_url.join(&list.path())?,
+                    href: base_url.join(&route_paths::list(list.id))?,
                     rel: "alternate",
                 },
             ],
@@ -188,12 +188,11 @@ impl Feed {
             },
             links: vec![
                 Link {
-                    href: base_url
-                        .join(&reverse_routes::local_user_feed_path(&ap_user.username))?,
+                    href: base_url.join(&route_paths::local_user_feed(&ap_user.username))?,
                     rel: "self",
                 },
                 Link {
-                    href: base_url.join(&reverse_routes::local_user_path(&ap_user.username))?,
+                    href: base_url.join(&route_paths::local_user(&ap_user.username))?,
                     rel: "alternate",
                 },
             ],
@@ -247,7 +246,7 @@ impl Entry {
                 // Secondary "external link", shown only by some feed readers
                 Link {
                     rel: "via",
-                    href: base_url.join(&bookmark.show_path())?,
+                    href: base_url.join(&route_paths::bookmark(bookmark.id))?,
                 },
             ],
             content: None,
@@ -261,7 +260,7 @@ impl Entry {
             updated: list.created_at,
             links: vec![Link {
                 rel: "alternate",
-                href: base_url.join(&list.path())?,
+                href: base_url.join(&route_paths::list(list.id))?,
             }],
             content: None,
         })

@@ -56,18 +56,6 @@ impl FeedCacheSignal {
     }
 }
 
-impl List {
-    pub fn path(&self) -> String {
-        let id = self.id;
-        format!("/lists/{id}")
-    }
-
-    pub fn feed_path(&self) -> String {
-        let id = self.id;
-        format!("/lists/{id}/feed.atom")
-    }
-}
-
 #[derive(Deserialize)]
 pub struct ListWithMetadata {
     pub list: List,

@@ -49,18 +49,6 @@ impl TryFrom<BookmarkRow> for Bookmark {
     }
 }
 
-impl Bookmark {
-    pub fn show_path(&self) -> String {
-        let id = self.id;
-        format!("/bookmarks/{id}")
-    }
-
-    pub fn edit_path(&self) -> String {
-        let id = self.id;
-        format!("/bookmarks/{id}/edit")
-    }
-}
-
 pub struct InsertBookmark {
     pub url: String,
     pub title: Option<String>,
