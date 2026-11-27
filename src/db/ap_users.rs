@@ -230,9 +230,9 @@ pub async fn read_by_user_id(tx: &mut AppTx, invited_by_id: Uuid) -> ResponseRes
 
 /// Since usernames are not unique, always pass in a domain as well.
 /// for local users, pass in the configured `base_url`.
-pub async fn read_by_username(
+pub async fn read_by_webfinger(
     tx: &mut AppTx,
-    resource: webfinger::Resource,
+    resource: &webfinger::Resource,
 ) -> ResponseResult<ApUser> {
     let domain_pattern = format!("%://{}/%", resource.domain);
     let user = query_as!(

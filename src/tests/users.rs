@@ -350,9 +350,9 @@ async fn profile_remote_user() -> anyhow::Result<()> {
 
     let app_b = TestApp::new().await;
     let user_to_show = app_b.create_user("testb", "testpassword").await;
-    let user_to_show_ap_user = db::ap_users::read_by_username(
+    let user_to_show_ap_user = db::ap_users::read_by_webfinger(
         &mut app_b.pool.begin().await?,
-        webfinger::Resource::from_name_and_url(user_to_show.username.clone(), &app_b.base_url)?,
+        &webfinger::Resource::from_name_and_url(user_to_show.username.clone(), &app_b.base_url)?,
     )
     .await?;
 
@@ -385,9 +385,9 @@ async fn feed_of_remote_user_returns_not_found() -> anyhow::Result<()> {
 
     let app_b = TestApp::new().await;
     let remote_user = app_b.create_user("testb", "testpassword").await;
-    let remote_ap_user = db::ap_users::read_by_username(
+    let remote_ap_user = db::ap_users::read_by_webfinger(
         &mut app_b.pool.begin().await?,
-        webfinger::Resource::from_name_and_url(remote_user.username.clone(), &app_b.base_url)?,
+        &webfinger::Resource::from_name_and_url(remote_user.username.clone(), &app_b.base_url)?,
     )
     .await?;
 
