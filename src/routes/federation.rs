@@ -103,9 +103,9 @@ async fn webfinger(
 ) -> ResponseResult<Json<Webfinger>> {
     // This also verifies that the domain is correct
     let username = extract_webfinger_name(&query.resource, &data)?;
-    let ap_id = db::ap_users::read_by_username(
+    let ap_id = db::ap_users::read_by_webfinger(
         &mut tx,
-        federation::webfinger::Resource::from_name_and_url(username.to_string(), &state.base_url)?,
+        &federation::webfinger::Resource::from_name_and_url(username.to_string(), &state.base_url)?,
     )
     .await?
     .ap_id;

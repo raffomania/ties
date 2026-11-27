@@ -57,9 +57,9 @@ async fn spin_up_two_instances() -> anyhow::Result<()> {
 async fn can_resolve_user() -> Result<()> {
     let app_a = TestApp::new().await;
     let user = app_a.create_user("testa", "testpassword").await;
-    let a_ap_user = db::ap_users::read_by_username(
+    let a_ap_user = db::ap_users::read_by_webfinger(
         &mut app_a.pool.begin().await?,
-        webfinger::Resource::from_name_and_url(user.username, &app_a.base_url)?,
+        &webfinger::Resource::from_name_and_url(user.username, &app_a.base_url)?,
     )
     .await?;
     app_a.serve();
@@ -149,9 +149,9 @@ async fn invalid_bookmark_url_returns_error() -> Result<()> {
 async fn can_resolve_webfinger() -> Result<()> {
     let app = TestApp::new().await;
     let user = app.create_user("testa", "testpassword").await;
-    let local_ap_user = db::ap_users::read_by_username(
+    let local_ap_user = db::ap_users::read_by_webfinger(
         &mut app.pool.begin().await?,
-        webfinger::Resource::from_name_and_url(user.username, &app.base_url)?,
+        &webfinger::Resource::from_name_and_url(user.username, &app.base_url)?,
     )
     .await?;
     app.serve();

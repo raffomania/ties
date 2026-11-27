@@ -276,9 +276,9 @@ async fn get_profile(
     State(state): State<AppState>,
     auth_user: Option<AuthUser>,
 ) -> ResponseResult<HtmfResponse> {
-    let ap_user = db::ap_users::read_by_username(
+    let ap_user = db::ap_users::read_by_webfinger(
         &mut tx,
-        crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
+        &crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
     )
     .await?;
     let maybe_local_user = db::users::by_ap_user_id(&mut tx, ap_user.id).await?;
@@ -326,9 +326,9 @@ async fn get_feed(
     Path(handle): Path<String>,
     State(state): State<AppState>,
 ) -> ResponseResult<Response> {
-    let ap_user = db::ap_users::read_by_username(
+    let ap_user = db::ap_users::read_by_webfinger(
         &mut tx,
-        crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
+        &crate::federation::webfinger::Resource::parse_handle(&handle, &state.base_url)?,
     )
     .await?;
 
