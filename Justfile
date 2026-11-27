@@ -251,7 +251,7 @@ clippy-lint *args:
     cargo clippy --all-targets {{ args }} -- -D warnings
 
 [group('Code Quality')]
-fix-lints *args:
+fix-lints *args: generate-sbom generate-database-info
     cargo clippy --allow-no-vcs --all-targets --fix {{ args }}
     cargo fix --allow-no-vcs --allow-staged --allow-dirty --all-targets
 
