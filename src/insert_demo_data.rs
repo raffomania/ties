@@ -26,6 +26,7 @@ use crate::{
         lists::CreateList,
         users::{CreateOidcUser, CreateUser},
     },
+    route_paths,
 };
 
 #[expect(
@@ -55,7 +56,7 @@ pub async fn insert_demo_data(
 
     tracing::debug!("Creating bookmarks and lists...");
     for user in &users {
-        let bookmarks = create_bookmarks(&mut tx, user, base_url).await?;
+        let bookmarks = create_bookmarks(&mut tx, user, &users, base_url).await?;
         all_private_bookmarks
             .entry(UserRef {
                 user_id: user.id,
@@ -196,6 +197,7 @@ pub async fn insert_demo_data(
 async fn create_bookmarks(
     tx: &mut AppTx,
     user: &db::User,
+    all_users: &[db::User],
     base_url: &Url,
 ) -> Result<Vec<db::Bookmark>> {
     let mut bookmarks = Vec::new();
@@ -207,7 +209,7 @@ async fn create_bookmarks(
                 .join(" ")
         });
         let insert_bookmark = InsertBookmark {
-            url: random_url()?,
+            url: random_url(base_url, all_users)?,
             title,
         };
 
@@ -220,9 +222,19 @@ async fn create_bookmarks(
     Ok(bookmarks)
 }
 
-fn random_url() -> Result<String> {
+fn random_url(base_url: &Url, users: &[db::User]) -> Result<String> {
+    let generate_profile_url = rand::random_bool(0.1);
+    if generate_profile_url {
+        let user = users
+            .choose(&mut rand::rng())
+            .context("Found no random user")?;
+        return Ok(base_url
+            .join(&route_paths::local_user(&user.username))?
+            .to_string());
+    }
     [
         "https://www.rafa.ee",
+        "https://ties.pub",
         "https://github.com",
         "https://wikipedia.org",
         "https://duckduckgo.com",
