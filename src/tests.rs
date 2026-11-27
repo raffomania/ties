@@ -3,6 +3,7 @@
 mod archive;
 mod bookmarks;
 mod federation;
+mod feeds;
 mod index;
 mod invites;
 mod links;
