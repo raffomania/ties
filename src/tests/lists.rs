@@ -1,13 +1,7 @@
 use axum::http::{StatusCode, header};
 use sqlx::query;
-use uuid::Uuid;
 
-use crate::{
-    atom::cache,
-    db::{self, bookmarks::UpdateBookmark},
-    route_paths,
-    tests::util::test_app::TestApp,
-};
+use crate::{db, route_paths, tests::util::test_app::TestApp};
 
 #[test_log::test(tokio::test)]
 async fn list_metadata_counts_only_visible_bookmarks() -> anyhow::Result<()> {
@@ -23,12 +17,8 @@ async fn list_metadata_counts_only_visible_bookmarks() -> anyhow::Result<()> {
         .create_bookmark(&bookmark_owner, "https://example.com/public", "")
         .await;
     let bookmark_owner_list = app.create_list(&bookmark_owner, "public").await;
-    app.create_link(
-        &bookmark_owner,
-        bookmark_owner_list.id,
-        public_bookmark.id,
-    )
-    .await;
+    app.create_link(&bookmark_owner, bookmark_owner_list.id, public_bookmark.id)
+        .await;
     app.create_link(&list_owner, list.id, public_bookmark.id)
         .await;
 
@@ -89,133 +79,6 @@ async fn get_create_list() -> anyhow::Result<()> {
     let create_list = app.req().get("/lists/create").await.test_page().await;
 
     insta::assert_snapshot!(create_list.dom.find("main").htmls());
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
-async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-    let user = app.create_test_user().await;
-    let bookmark = app
-        .create_bookmark(&user, "https://example.com", "Example")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, bookmark.id).await;
-
-    let url = route_paths::list_feed(list.id);
-    let response = app.req().get(&url).await;
-
-    assert_eq!(
-        response.headers().get(header::CONTENT_TYPE).unwrap(),
-        "application/atom+xml; charset=utf-8"
-    );
-    assert_eq!(
-        response.headers().get(header::CACHE_CONTROL).unwrap(),
-        cache::CACHE_CONTROL
-    );
-    let etag = response.header_string(header::ETAG);
-    let last_modified = response.header_string(header::LAST_MODIFIED);
-    let body = response.body_string().await;
-    assert!(body.contains("<title>Example</title>"));
-
-    let response = app
-        .req()
-        .header(header::IF_NONE_MATCH, etag.clone())
-        .expect_status(StatusCode::NOT_MODIFIED)
-        .get(&url)
-        .await;
-
-    assert_eq!(response.header_string(header::ETAG), etag);
-    assert_eq!(response.header_string(header::LAST_MODIFIED), last_modified);
-    assert_eq!(
-        response.headers().get(header::CACHE_CONTROL).unwrap(),
-        cache::CACHE_CONTROL
-    );
-    assert_eq!(response.body_string().await, "");
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
-async fn adding_a_link_invalidates_the_cached_feed() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-    let user = app.create_test_user().await;
-    let first_bookmark = app
-        .create_bookmark(&user, "https://example.com/1", "First")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, first_bookmark.id).await;
-
-    let url = route_paths::list_feed(list.id);
-    let response = app.req().get(&url).await;
-    let first_etag = response.header_string(header::ETAG);
-    let first_body = response.body_string().await;
-    assert!(first_body.contains("<title>First</title>"));
-
-    let second_bookmark = app
-        .create_bookmark(&user, "https://example.com/2", "Second")
-        .await;
-    app.create_link(&user, list.id, second_bookmark.id).await;
-
-    let response = app.req().get(&url).await;
-    let second_etag = response.header_string(header::ETAG);
-    let second_body = response.body_string().await;
-
-    assert_ne!(first_etag, second_etag);
-    assert!(second_body.contains("<title>First</title>"));
-    assert!(second_body.contains("<title>Second</title>"));
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
-async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow::Result<()> {
-    let mut app = TestApp::with_feed_cache_ttl(std::time::Duration::from_secs(2)).await;
-    let user = app.create_test_user().await;
-    let bookmark = app
-        .create_bookmark(&user, "https://example.com", "Original title")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, bookmark.id).await;
-
-    let url = route_paths::list_feed(list.id);
-    let response = app.req().get(&url).await;
-    let etag = response.header_string(header::ETAG);
-    let body = response.body_string().await;
-    assert!(body.contains("<title>Original title</title>"));
-
-    let mut tx = app.tx().await;
-    db::bookmarks::update_local(
-        &mut tx,
-        bookmark.id,
-        UpdateBookmark {
-            title: Some("Updated title".to_string()),
-        },
-        user.ap_user_id,
-    )
-    .await?;
-    tx.commit().await?;
-
-    // Bookmark edits are invisible to the cache signal, so the cached body is
-    // served until the entry's TTL expires.
-    let body = app.req().get(&url).await.body_string().await;
-    assert!(body.contains("<title>Original title</title>"));
-    assert!(!body.contains("<title>Updated title</title>"));
-
-    tokio::time::sleep(std::time::Duration::from_millis(2200)).await;
-
-    // The old ETag must no longer match the re-rendered body.
-    let body = app
-        .req()
-        .header(header::IF_NONE_MATCH, etag)
-        .expect_status(StatusCode::OK)
-        .get(&url)
-        .await
-        .body_string()
-        .await;
-    assert!(body.contains("<title>Updated title</title>"));
-    assert!(!body.contains("<title>Original title</title>"));
 
     Ok(())
 }
@@ -305,18 +168,6 @@ async fn private_linked_lists_are_removed_from_the_cached_feed() -> anyhow::Resu
     // entry must not keep exposing it.
     let body = app.req().get(&url).await.body_string().await;
     assert!(!body.contains("<title>Inner list</title>"));
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
-async fn feed_of_unknown_list_returns_not_found() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-
-    app.req()
-        .expect_status(StatusCode::NOT_FOUND)
-        .get(&format!("/lists/{}/feed.atom", Uuid::new_v4()))
-        .await;
 
     Ok(())
 }

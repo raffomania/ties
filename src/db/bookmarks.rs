@@ -210,6 +210,7 @@ pub async fn list_public_by_user(
         r#"
         select
             id as "id!",
+
             created_at as "created_at!",
             ap_user_id as "ap_user_id!",
             url as "url!",

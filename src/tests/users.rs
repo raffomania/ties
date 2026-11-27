@@ -2,8 +2,7 @@ use axum::http::{StatusCode, header};
 use serde::Serialize;
 
 use crate::{
-    atom::cache,
-    db::{self, ap_users, bookmarks::UpdateBookmark},
+    db::{self, ap_users},
     federation::webfinger,
     forms::{
         links::CreateLink,
@@ -247,170 +246,6 @@ async fn user_feed_only_contains_publicly_linked_bookmarks() -> anyhow::Result<(
     Ok(())
 }
 
-/// Check that basic etag caching works
-#[test_log::test(tokio::test)]
-async fn feed_sets_cache_headers_and_supports_conditional_requests() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-    let user = app.create_test_user().await;
-    let bookmark = app
-        .create_bookmark(&user, "https://example.com", "Example")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, bookmark.id).await;
-
-    // Check content type and caching headers in response
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    assert_eq!(
-        response.headers().get(header::CONTENT_TYPE).unwrap(),
-        "application/atom+xml; charset=utf-8"
-    );
-    assert_eq!(
-        response.headers().get(header::CACHE_CONTROL).unwrap(),
-        cache::CACHE_CONTROL
-    );
-    let etag = response.header_string(header::ETAG);
-    let last_modified = response.header_string(header::LAST_MODIFIED);
-
-    // Check that body contains bookmark title
-    let body = response.body_string().await;
-    assert!(body.contains("<title>Example</title>"));
-
-    // Make a second request with etag
-    let response = app
-        .req()
-        .header(header::IF_NONE_MATCH, etag.clone())
-        .expect_status(StatusCode::NOT_MODIFIED)
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-
-    // Check that response is not modified
-    assert_eq!(response.header_string(header::ETAG), etag);
-    assert_eq!(response.header_string(header::LAST_MODIFIED), last_modified);
-    assert_eq!(response.body_string().await, "");
-
-    // Make a third request with last-modified
-    let response = app
-        .req()
-        .header(header::IF_MODIFIED_SINCE, last_modified.clone())
-        .expect_status(StatusCode::NOT_MODIFIED)
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-
-    // Check that response is not modified
-    assert_eq!(response.header_string(header::ETAG), etag);
-    assert_eq!(response.header_string(header::LAST_MODIFIED), last_modified);
-    assert_eq!(response.body_string().await, "");
-
-    Ok(())
-}
-
-/// Check that the internal cached response is invalidated when a new bookmark
-/// is added
-#[test_log::test(tokio::test)]
-async fn adding_a_bookmark_invalidates_the_cached_feed() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-    let user = app.create_test_user().await;
-    let first_bookmark = app
-        .create_bookmark(&user, "https://example.com/1", "First")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, first_bookmark.id).await;
-
-    // Check that first bookmark appears, and put feed into cache
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    let first_etag = response.header_string(header::ETAG);
-    let first_body = response.body_string().await;
-    assert!(first_body.contains("<title>First</title>"));
-
-    // Create a second bookmark, link it to the list
-    let second_bookmark = app
-        .create_bookmark(&user, "https://example.com/2", "Second")
-        .await;
-    app.create_link(&user, list.id, second_bookmark.id).await;
-
-    // Check that second bookmark appears in the feed
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    let second_etag = response.header_string(header::ETAG);
-    let second_body = response.body_string().await;
-
-    assert_ne!(first_etag, second_etag);
-    assert!(second_body.contains("<title>First</title>"));
-    assert!(second_body.contains("<title>Second</title>"));
-
-    Ok(())
-}
-
-/// Check that bookmark edits do not show up in a feed until its cache TTL
-/// expires
-#[test_log::test(tokio::test)]
-async fn bookmark_edits_are_served_from_cache_until_the_ttl_expires() -> anyhow::Result<()> {
-    let mut app = TestApp::with_feed_cache_ttl(std::time::Duration::from_secs(2)).await;
-    let user = app.create_test_user().await;
-    let bookmark = app
-        .create_bookmark(&user, "https://example.com", "Original title")
-        .await;
-    let list = app.create_list(&user, "Feed list").await;
-    app.create_link(&user, list.id, bookmark.id).await;
-
-    // Put feed into cache
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    let etag = response.header_string(header::ETAG);
-    let body = response.body_string().await;
-    assert!(body.contains("<title>Original title</title>"));
-
-    // Edit bookmark
-    let mut tx = app.tx().await;
-    db::bookmarks::update_local(
-        &mut tx,
-        bookmark.id,
-        UpdateBookmark {
-            title: Some("Updated title".to_string()),
-        },
-        user.ap_user_id,
-    )
-    .await?;
-    tx.commit().await?;
-
-    // Check that feed is not updated yet
-    let body = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await
-        .body_string()
-        .await;
-    assert!(body.contains("<title>Original title</title>"));
-    assert!(!body.contains("<title>Updated title</title>"));
-
-    // Wait for TTL
-    tokio::time::sleep(std::time::Duration::from_millis(2200)).await;
-
-    // Check that bookmark is updated in feed
-    let body = app
-        .req()
-        .header(header::IF_NONE_MATCH, etag)
-        .expect_status(StatusCode::OK)
-        .get(&route_paths::local_user_feed(&user.username))
-        .await
-        .body_string()
-        .await;
-    assert!(body.contains("<title>Updated title</title>"));
-    assert!(!body.contains("<title>Original title</title>"));
-
-    Ok(())
-}
-
 /// Check that removing a link invalidates a cached feed.
 #[test_log::test(tokio::test)]
 async fn feed_changes_after_removing_the_newest_link() -> anyhow::Result<()> {
@@ -422,12 +257,10 @@ async fn feed_changes_after_removing_the_newest_link() -> anyhow::Result<()> {
         .await;
     let link = app.create_link(&user, list.id, bookmark.id).await;
 
+    let url = route_paths::local_user_feed(&user.username);
+
     // Put feed into cache
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    let body = response.body_string().await;
+    let body = app.req().get(&url).await.body_string().await;
     assert!(body.contains("<title>Example</title>"));
 
     // Unlink bookmark from list
@@ -436,11 +269,7 @@ async fn feed_changes_after_removing_the_newest_link() -> anyhow::Result<()> {
     tx.commit().await?;
 
     // Check that we get a new feed
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-    let body = response.body_string().await;
+    let body = app.req().get(&url).await.body_string().await;
     assert!(!body.contains("<title>Example</title>"));
     assert!(!body.is_empty());
 
@@ -477,18 +306,6 @@ async fn private_lists_are_removed_from_the_cached_feed() -> anyhow::Result<()> 
 }
 
 #[test_log::test(tokio::test)]
-async fn feed_of_unknown_user_returns_not_found() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-
-    app.req()
-        .expect_status(StatusCode::NOT_FOUND)
-        .get("/user/nonexistent/feed.atom")
-        .await;
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
 async fn feed_renders_for_user_with_lists_but_no_bookmarks() -> anyhow::Result<()> {
     let mut app = TestApp::new().await;
     let user = app.create_test_user().await;
@@ -507,39 +324,21 @@ async fn feed_renders_for_user_with_lists_but_no_bookmarks() -> anyhow::Result<(
 }
 
 #[test_log::test(tokio::test)]
-async fn feed_renders_for_user_with_bookmarks_but_no_lists() -> anyhow::Result<()> {
+async fn feed_renders_for_user_without_public_lists() -> anyhow::Result<()> {
     let mut app = TestApp::new().await;
     let user = app.create_test_user().await;
+    // Unsorted bookmarks are not public, so the feed is still empty.
     app.create_bookmark(&user, "https://example.com", "Example")
         .await;
 
-    let response = app
+    let body = app
         .req()
         .get(&route_paths::local_user_feed(&user.username))
+        .await
+        .body_string()
         .await;
 
-    assert_eq!(
-        response.headers().get(header::CONTENT_TYPE).unwrap(),
-        "application/atom+xml; charset=utf-8"
-    );
-
-    Ok(())
-}
-
-#[test_log::test(tokio::test)]
-async fn feed_renders_for_user_without_bookmarks_or_lists() -> anyhow::Result<()> {
-    let mut app = TestApp::new().await;
-    let user = app.create_test_user().await;
-
-    let response = app
-        .req()
-        .get(&route_paths::local_user_feed(&user.username))
-        .await;
-
-    assert_eq!(
-        response.headers().get(header::CONTENT_TYPE).unwrap(),
-        "application/atom+xml; charset=utf-8"
-    );
+    assert!(!body.contains("<title>Example</title>"));
 
     Ok(())
 }

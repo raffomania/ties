@@ -175,6 +175,7 @@ test-log = { version = "0.2.19", features = [
 ], default-features = false }
 insta = "1.46.3"
 pretty_assertions = "1.4.1"
+rstest = "0.29.0"
 
 [package.metadata.bin]
 just = { version = "1.49.0", locked = true }

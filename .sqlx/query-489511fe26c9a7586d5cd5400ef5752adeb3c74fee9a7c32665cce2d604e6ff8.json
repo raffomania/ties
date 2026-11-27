@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        select\n            id as \"id!\",\n            created_at as \"created_at!\",\n            ap_user_id as \"ap_user_id!\",\n            url as \"url!\",\n            title,\n            ap_id as \"ap_id!\"\n        from public_bookmarks\n        where ap_user_id = $1;\n        ",
+  "query": "\n        select\n            id as \"id!\",\n\n            created_at as \"created_at!\",\n            ap_user_id as \"ap_user_id!\",\n            url as \"url!\",\n            title,\n            ap_id as \"ap_id!\"\n        from public_bookmarks\n        where ap_user_id = $1;\n        ",
   "describe": {
     "columns": [
       {
@@ -48,5 +48,5 @@
       true
     ]
   },
-  "hash": "58ca49048e9a209cbf01386ba27366e526612b190f2d4c7c882785c3c92e43c7"
+  "hash": "489511fe26c9a7586d5cd5400ef5752adeb3c74fee9a7c32665cce2d604e6ff8"
 }
