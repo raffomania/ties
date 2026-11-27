@@ -252,8 +252,8 @@ clippy-lint *args:
 
 [group('Code Quality')]
 fix-lints *args:
-    cargo clippy --all-targets --fix {{ args }}
-    cargo fix --allow-staged --allow-dirty --all-targets
+    cargo clippy --allow-no-vcs --all-targets --fix {{ args }}
+    cargo fix --allow-no-vcs --allow-staged --allow-dirty --all-targets
 
 [group('Code Quality')]
 reuse-lint *args: (ensure-command "reuse")
