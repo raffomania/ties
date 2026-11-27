@@ -97,7 +97,24 @@ pub async fn insert(
     base_url: &Url,
 ) -> ResponseResult<User> {
     let hashed_password = hash_password(&create_user.password)?;
-    let create_ap_user = CreateApUser::new_local(base_url, create_user.username.clone())?;
+    insert_with_password_hash(
+        tx,
+        create_user.username,
+        hashed_password,
+        invited_by_user_id,
+        base_url,
+    )
+    .await
+}
+
+pub async fn insert_with_password_hash(
+    tx: &mut AppTx,
+    username: String,
+    hashed_password: String,
+    invited_by_user_id: Option<Uuid>,
+    base_url: &Url,
+) -> ResponseResult<User> {
+    let create_ap_user = CreateApUser::new_local(base_url, username.clone())?;
     let ap_user = super::ap_users::insert(tx, create_ap_user).await?;
 
     let user = query_as!(
@@ -108,7 +125,7 @@ pub async fn insert(
         values ($1, $2, $3, $4)
         returning *
         "#,
-        create_user.username,
+        username,
         hashed_password,
         ap_user.id,
         invited_by_user_id

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow};
 use fake::Fake;
@@ -8,6 +8,7 @@ use rand::{
     seq::{IndexedRandom, IteratorRandom},
 };
 use sqlx::PgPool;
+use tokio::task::JoinSet;
 use url::Url;
 use uuid::Uuid;
 
@@ -19,6 +20,7 @@ struct UserRef {
 
 use crate::{
     archive,
+    authentication::hash_password,
     db::{self, AppTx, bookmarks::InsertBookmark},
     forms::{
         ap_users::UpdateApUser,
@@ -28,10 +30,15 @@ use crate::{
     },
 };
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "It's annoying to disentangle and not that big of a problem at the moment."
-)]
+struct UserData {
+    user_ref: UserRef,
+    bookmarks: Vec<db::Bookmark>,
+    private_lists: Vec<db::List>,
+    public_lists: Vec<db::List>,
+}
+
+const DEMO_USER_PASSWORD: &str = "demo-password";
+
 pub async fn insert_demo_data(
     pool: &PgPool,
     dev_user_credentials: Option<CreateUser>,
@@ -47,145 +54,198 @@ pub async fn insert_demo_data(
             db::users::create_root_admin_if_not_exists(&mut tx, create_dev_user, base_url).await?,
         );
     }
-
-    let mut all_public_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
-    let mut all_private_bookmarks: HashMap<UserRef, Vec<_>> = HashMap::new();
-    let mut all_public_bookmarks = Vec::new();
-    let mut all_private_lists: HashMap<UserRef, Vec<_>> = HashMap::new();
+    tx.commit().await?;
 
     tracing::debug!("Creating bookmarks and lists...");
-    for user in &users {
-        let bookmarks = create_bookmarks(&mut tx, user, base_url).await?;
-        all_private_bookmarks
-            .entry(UserRef {
-                user_id: user.id,
-                ap_user_id: user.ap_user_id,
-            })
-            .or_default()
-            .append(&mut bookmarks.clone());
-        let mut lists = Vec::new();
+    let mut tasks = JoinSet::new();
+    for user in users {
+        let pool = pool.clone();
+        let base_url = base_url.clone();
+        tasks.spawn(async move { create_user_data(&pool, &user, &base_url).await });
+    }
+    let user_data = join_tasks(tasks).await?;
 
-        for _ in 0..100 {
-            let content: Option<Vec<_>> = fake::faker::lorem::en::Paragraphs(1..3).fake();
-            let title = random_list_name()?;
-            let create_list = CreateList {
-                title,
-                content: content.map(|c| c.join("\n\n")),
-                private: fake::Faker.fake(),
-            };
-            let list = db::lists::insert(&mut tx, user.ap_user_id, create_list).await?;
+    let all_public_lists = user_data
+        .iter()
+        .flat_map(|data| data.public_lists.iter().cloned())
+        .collect::<Arc<[_]>>();
 
-            if fake::faker::boolean::en::Boolean(10).fake() {
-                db::lists::set_pinned(&mut tx, list.id, false).await?;
-            }
+    tracing::debug!("Creating public links...");
+    let mut tasks = JoinSet::new();
+    for data in user_data {
+        let pool = pool.clone();
+        let all_public_lists = Arc::clone(&all_public_lists);
+        tasks.spawn(async move { create_public_links(&pool, data, all_public_lists).await });
+    }
+    let user_data = join_tasks(tasks).await?;
 
-            if list.private {
-                lists.push(list);
-            } else {
-                all_public_lists
-                    .entry(UserRef {
-                        user_id: user.id,
-                        ap_user_id: user.ap_user_id,
-                    })
-                    .or_default()
-                    .push(list);
-            }
+    let all_public_bookmarks = user_data
+        .iter()
+        .flat_map(|(_, bookmarks)| bookmarks.iter().copied())
+        .collect::<Arc<[_]>>();
+    let all_public_lists = user_data
+        .iter()
+        .map(|(data, _)| data.public_lists.clone())
+        .collect::<Arc<[_]>>();
+
+    tracing::debug!("Creating private-to-public links...");
+    let mut tasks = JoinSet::new();
+    for (data, _) in user_data {
+        let pool = pool.clone();
+        let all_public_bookmarks = Arc::clone(&all_public_bookmarks);
+        let all_public_lists = Arc::clone(&all_public_lists);
+        tasks.spawn(async move {
+            create_private_links(&pool, data, all_public_bookmarks, all_public_lists).await
+        });
+    }
+    join_tasks(tasks).await?;
+
+    Ok(())
+}
+
+async fn join_tasks<T: Send + 'static>(mut tasks: JoinSet<Result<T>>) -> Result<Vec<T>> {
+    let mut results = Vec::new();
+    while let Some(result) = tasks.join_next().await {
+        results.push(result.context("Demo data task failed")??);
+    }
+    Ok(results)
+}
+
+async fn create_user_data(pool: &PgPool, user: &db::User, base_url: &Url) -> Result<UserData> {
+    let mut tx = pool.begin().await?;
+    let bookmarks = create_bookmarks(&mut tx, user, base_url).await?;
+    let mut private_lists = Vec::new();
+    let mut public_lists = Vec::new();
+
+    for _ in 0..100 {
+        let content: Option<Vec<_>> = fake::faker::lorem::en::Paragraphs(1..3).fake();
+        let title = random_list_name()?;
+        let create_list = CreateList {
+            title,
+            content: content.map(|c| c.join("\n\n")),
+            private: fake::Faker.fake(),
+        };
+        let list = db::lists::insert(&mut tx, user.ap_user_id, create_list).await?;
+
+        if fake::faker::boolean::en::Boolean(10).fake() {
+            db::lists::set_pinned(&mut tx, list.id, false).await?;
         }
 
-        // Private-to-private links
-        for _ in 0..100 {
-            let src = lists
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random list to link from"))?
-                .id;
-            let dest = random_link_reference(&bookmarks, &lists)?;
-
-            let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user.id, user.ap_user_id, create_link).await?;
+        if list.private {
+            private_lists.push(list);
+        } else {
+            public_lists.push(list);
         }
-
-        all_private_lists
-            .entry(UserRef {
-                user_id: user.id,
-                ap_user_id: user.ap_user_id,
-            })
-            .or_default()
-            .append(&mut lists);
-
-        tx.commit().await?;
-        tx = pool.begin().await?;
     }
 
-    tracing::debug!("Creating links...");
-    let all_public_lists_flat: Vec<_> = all_public_lists.values().flatten().cloned().collect();
-    for (user_ref, lists) in &all_public_lists {
-        // Public-to-public links
-        // Here, we make bookmarks public by linking to them from public lists.
-        for _ in 0..1000 {
-            let src = lists
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random list to put into a link"))?
-                .id;
-            let dest = random_link_reference(
-                all_private_bookmarks
-                    .get(user_ref)
-                    .ok_or(anyhow!("Missing private bookmarks for user"))?,
-                &all_public_lists_flat,
-            )?;
+    // Private-to-private links
+    for _ in 0..100 {
+        let src = private_lists
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no random list to link from"))?
+            .id;
+        let dest = random_link_reference(&bookmarks, &private_lists)?;
 
-            let create_link = CreateLink { src, dest };
-            let link =
-                db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link)
-                    .await
-                    .context("Failed to insert link")?;
-
-            if let Some(id) = link.dest_bookmark_id {
-                all_public_bookmarks.push(id);
-            }
-        }
-
-        tx.commit().await?;
-        tx = pool.begin().await?;
+        let create_link = CreateLink { src, dest };
+        db::links::insert(&mut tx, user.id, user.ap_user_id, create_link).await?;
     }
+
+    tx.commit().await?;
+
+    Ok(UserData {
+        user_ref: UserRef {
+            user_id: user.id,
+            ap_user_id: user.ap_user_id,
+        },
+        bookmarks,
+        private_lists,
+        public_lists,
+    })
+}
+
+async fn create_public_links(
+    pool: &PgPool,
+    data: UserData,
+    all_public_lists: Arc<[db::List]>,
+) -> Result<(UserData, Vec<Uuid>)> {
+    let mut tx = pool.begin().await?;
+    let mut public_bookmarks = Vec::new();
+
+    // Public-to-public links
+    // Here, we make bookmarks public by linking to them from public lists.
+    for _ in 0..1000 {
+        let src = data
+            .public_lists
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no random list to put into a link"))?
+            .id;
+        let dest = random_link_reference(&data.bookmarks, &all_public_lists)?;
+
+        let create_link = CreateLink { src, dest };
+        let link = db::links::insert(
+            &mut tx,
+            data.user_ref.user_id,
+            data.user_ref.ap_user_id,
+            create_link,
+        )
+        .await
+        .context("Failed to insert link")?;
+
+        if let Some(id) = link.dest_bookmark_id {
+            public_bookmarks.push(id);
+        }
+    }
+
+    tx.commit().await?;
+
+    Ok((data, public_bookmarks))
+}
+
+async fn create_private_links(
+    pool: &PgPool,
+    data: UserData,
+    all_public_bookmarks: Arc<[Uuid]>,
+    all_public_lists: Arc<[Vec<db::List>]>,
+) -> Result<()> {
+    let mut tx = pool.begin().await?;
+    let UserData {
+        user_ref,
+        private_lists: lists,
+        ..
+    } = data;
 
     // Private-to-public links
     // Here, we can only link to public bookmarks, and private bookmarks from
     // the same user.
-    for (user_ref, lists) in all_private_lists {
-        // list to public bookmark
-        for _ in 0..100 {
-            let src = lists
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random list to link from"))?
-                .id;
-            let dest = *all_public_bookmarks
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random bookmark"))?;
+    // list to public bookmark
+    for _ in 0..100 {
+        let src = lists
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no random list to link from"))?
+            .id;
+        let dest = *all_public_bookmarks
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no random bookmark"))?;
 
-            let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
-        }
+        let create_link = CreateLink { src, dest };
+        db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
+    }
 
-        // list to public list
-        for _ in 0..100 {
-            let src = lists
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no random list to link from"))?
-                .id;
-            let dest = all_public_lists
-                .values()
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no public list"))?
-                .choose(&mut rand::rng())
-                .ok_or(anyhow!("Found no public list"))?
-                .id;
+    // list to public list
+    for _ in 0..100 {
+        let src = lists
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no random list to link from"))?
+            .id;
+        let dest = all_public_lists
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no public list"))?
+            .choose(&mut rand::rng())
+            .ok_or(anyhow!("Found no public list"))?
+            .id;
 
-            let create_link = CreateLink { src, dest };
-            db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
-        }
-
-        tx.commit().await?;
-        tx = pool.begin().await?;
+        let create_link = CreateLink { src, dest };
+        db::links::insert(&mut tx, user_ref.user_id, user_ref.ap_user_id, create_link).await?;
     }
 
     tx.commit().await?;
@@ -280,6 +340,7 @@ fn random_article(title: Option<String>, url: String) -> Result<legible::Article
 
 async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {
     tracing::debug!("Creating users...");
+    let mut password_hash: Option<String> = None;
     let mut users: Vec<db::User> = Vec::new();
     for _ in 0..5 {
         let email: Option<String> = fake::faker::internet::en::SafeEmail().fake();
@@ -295,13 +356,16 @@ async fn create_users(tx: &mut AppTx, base_url: &Url) -> Result<Vec<db::User>> {
             db::users::insert_oidc(tx, create_oidc_user, base_url).await?
         } else {
             let invited_by = users.choose(&mut rand::rng()).map(|u| u.id);
-            let create_user = CreateUser {
-                username,
-                // random string with 20 chars
-                password: 20.fake(),
+            let password_hash = if let Some(hash) = &password_hash {
+                hash.clone()
+            } else {
+                let hash = hash_password(DEMO_USER_PASSWORD)?;
+                password_hash = Some(hash.clone());
+                hash
             };
 
-            db::users::insert(tx, create_user, invited_by, base_url).await?
+            db::users::insert_with_password_hash(tx, username, password_hash, invited_by, base_url)
+                .await?
         };
         let ap_user = db::ap_users::read_by_id(tx, user.ap_user_id).await?;
         users.push(user);
